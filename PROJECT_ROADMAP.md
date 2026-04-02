@@ -2,11 +2,11 @@
 
 ## 🎯 Project Goal
 
-Create a **Task Management System** that demonstrates senior full-stack developer skills and can be rebuilt from memory in 1-2 days after practice.
+Create a **Multi-tenant Booking System** that demonstrates senior full-stack developer skills and can be rebuilt from memory in 1.5-2 days after practice.
 
 **Timeline**: 2 weeks of focused development  
-**Domain**: Task/Project Management (like simplified Jira/Trello)  
-**End Goal**: Pass senior fullstack developer interviews
+**Domain**: Multi-tenant Resource Booking (Meeting rooms, Equipment, Appointments)  
+**End Goal**: Pass senior fullstack developer interviews with enterprise-level architecture
 
 ---
 
@@ -14,20 +14,27 @@ Create a **Task Management System** that demonstrates senior full-stack develope
 
 ### Core Entities
 
-1. **Users** - Authentication, roles (Admin, User)
-2. **Projects** - Containers for tasks
-3. **Tasks** - Work items with status, priority, assignment
-4. **Comments** (optional if time permits)
+1. **Tenants** - Organizations owning the booking system (subdomain, plan)
+2. **Users** - Tenant-scoped authentication, roles (TenantAdmin, Manager, User)
+3. **Roles** - Permission levels
+4. **UserRoles** - Many-to-many relationship
+5. **Resources** - Bookable items (meeting rooms, equipment, doctors, etc.)
+6. **Bookings** - Reservations with time slots and status
+7. **AvailabilityRules** - Resource availability schedules
+8. **AuditLogs** - Track all changes for compliance
+9. **RefreshTokens** - Secure token management
 
 ### Must-Have Features
 
-- ✅ User registration and JWT authentication
-- ✅ CRUD operations for Projects and Tasks
-- ✅ Task assignment to users
-- ✅ Status workflow (Todo → In Progress → Done)
-- ✅ Priority levels (Low, Medium, High)
+- ✅ Multi-tenant data isolation (all queries filtered by TenantId)
+- ✅ User registration and JWT authentication (tenant-scoped)
+- ✅ CRUD operations for Resources and Bookings
+- ✅ Booking conflict prevention (no double-booking)
+- ✅ Status workflow (Pending → Confirmed → Completed/Cancelled)
+- ✅ Availability rules (working hours per resource)
 - ✅ Pagination and filtering
-- ✅ Role-based authorization
+- ✅ Tenant-level and role-based authorization
+- ✅ Audit logging for all changes
 - ✅ Global error handling
 - ✅ API versioning (v1)
 - ✅ Swagger with JWT auth
@@ -72,75 +79,80 @@ Create a **Task Management System** that demonstrates senior full-stack develope
 
 ---
 
-#### **Day 2: Core Infrastructure**
+#### **Day 2: Core Infrastructure & Multi-tenancy**
 
 - [ ] Implement global error handling middleware
 - [ ] Set up API versioning (v1)
 - [ ] Configure Swagger/OpenAPI
 - [ ] Implement `PagedResult<T>` pattern
 - [ ] Set up database migrations (DbUp or FluentMigrator)
-- [ ] Create database schema (Users, Projects, Tasks tables)
+- [ ] Create database schema (Tenants, Users, Roles, UserRoles tables)
 - [ ] Implement base repository pattern with Dapper
+- [ ] Create TenantContext service for tenant resolution
+- [ ] Implement multi-tenant query filter middleware
 
-**Learning Focus**: Middleware pipeline, Dapper queries, pagination
+**Learning Focus**: Middleware pipeline, multi-tenancy patterns, Dapper queries
 
 ---
 
 #### **Day 3: Authentication & Authorization**
 
-- [ ] Implement User entity and value objects
-- [ ] Create authentication commands (Register, Login)
-- [ ] JWT token generation and validation
+- [ ] Implement Tenant and User entities with tenant isolation
+- [ ] Create authentication commands (RegisterTenant, RegisterUser, Login)
+- [ ] JWT token generation with TenantId claim
 - [ ] Password hashing (BCrypt)
 - [ ] Configure JWT authentication in pipeline
-- [ ] Implement role-based authorization
+- [ ] Implement tenant-level + role-based authorization
+- [ ] Create authorization policies (RequireTenantAdmin, RequireManager)
 - [ ] Add JWT auth to Swagger
 
-**Learning Focus**: JWT flow, authentication middleware, security
+**Learning Focus**: JWT flow, multi-tenant auth, claims-based authorization
 
 ---
 
-#### **Day 4: Projects CRUD**
+#### **Day 4: Resources CRUD**
 
-- [ ] Implement Project entity
-- [ ] Create Project commands (Create, Update, Delete)
-- [ ] Create Project queries (GetById, GetAll with pagination)
-- [ ] Implement Project validation rules
-- [ ] Add Dapper repositories for Projects
-- [ ] Create Project DTOs
-- [ ] Implement Project API endpoints
-- [ ] Add authorization (only owner can modify)
+- [ ] Implement Resource entity (tenant-scoped)
+- [ ] Create Resource commands (Create, Update, Delete)
+- [ ] Create Resource queries (GetById, GetAll with pagination, filtering by type)
+- [ ] Implement Resource validation rules
+- [ ] Add Dapper repositories for Resources with tenant filtering
+- [ ] Create Resource DTOs
+- [ ] Implement Resource API endpoints
+- [ ] Add authorization (TenantAdmin/Manager can manage resources)
 
-**Learning Focus**: CQRS pattern, command/query separation
-
----
-
-#### **Day 5: Tasks CRUD**
-
-- [ ] Implement Task entity with status enum
-- [ ] Create Task commands (Create, Update, Delete, ChangeStatus)
-- [ ] Create Task queries (GetById, GetByProject, GetAll with filtering)
-- [ ] Implement Task validation rules
-- [ ] Add Dapper repositories for Tasks
-- [ ] Create Task DTOs
-- [ ] Implement Task API endpoints
-- [ ] Task assignment logic
-
-**Learning Focus**: Complex queries with Dapper, business logic
+**Learning Focus**: CQRS pattern, tenant-scoped queries
 
 ---
 
-#### **Day 6: Advanced Backend Features**
+#### **Day 5: Bookings CRUD & Business Logic**
 
-- [ ] Implement rate limiting middleware
-- [ ] Add filtering and sorting to task queries
+- [ ] Implement Booking entity with status enum (tenant-scoped)
+- [ ] Create Booking commands (Create, Update, Cancel, Confirm)
+- [ ] Create Booking queries (GetById, GetByResource, GetByUser, GetAll with filtering)
+- [ ] Implement booking conflict detection logic
+- [ ] Implement availability rules validation
+- [ ] Add Dapper repositories for Bookings with tenant filtering
+- [ ] Create Booking DTOs
+- [ ] Implement Booking API endpoints
+
+**Learning Focus**: Complex business logic, time-based validation, conflict resolution
+
+---
+
+#### **Day 6: Advanced Features & Audit Logging**
+
+- [ ] Implement AvailabilityRules entity and CRUD
+- [ ] Create AuditLog entity and repository
+- [ ] Implement audit logging middleware (track all CUD operations)
+- [ ] Add rate limiting middleware
 - [ ] Implement soft delete for entities
-- [ ] Add audit fields (CreatedAt, UpdatedAt, CreatedBy)
-- [ ] Create statistics endpoints (task counts, project summaries)
+- [ ] Create statistics endpoints (booking counts, resource utilization)
+- [ ] Add filtering and sorting to booking queries (date range, status)
 - [ ] Add input sanitization
-- [ ] Implement domain events (optional)
+- [ ] Implement RefreshToken mechanism
 
-**Learning Focus**: Production patterns, security hardening
+**Learning Focus**: Audit patterns, enterprise security, token refresh flow
 
 ---
 
@@ -179,50 +191,52 @@ Create a **Task Management System** that demonstrates senior full-stack develope
 
 ---
 
-#### **Day 9: Authentication Flow**
+#### **Day 9: Authentication Flow & Tenant Setup**
 
 - [ ] Create auth Redux slice with async thunks
-- [ ] Implement token storage (localStorage/sessionStorage)
-- [ ] Add axios interceptors (token injection, refresh logic)
+- [ ] Implement token storage with tenant context
+- [ ] Add axios interceptors (token injection, tenant header, refresh logic)
 - [ ] Create protected route wrapper
+- [ ] Implement tenant registration form (first user becomes TenantAdmin)
 - [ ] Implement login form with React Hook Form + Zod
-- [ ] Implement register form
+- [ ] Implement user registration form (within tenant)
 - [ ] Add form validation and error display
-- [ ] Create navigation with user menu
+- [ ] Create navigation with user menu (show tenant name)
 - [ ] Add logout functionality
 
-**Learning Focus**: React Hook Form, Zod validation, auth flow
+**Learning Focus**: Multi-tenant frontend architecture, React Hook Form, auth flow
 
 ---
 
-#### **Day 10: Projects Feature**
+#### **Day 10: Resources Feature**
 
-- [ ] Create projects Redux slice with async thunks
-- [ ] Implement projects list page with pagination
-- [ ] Create project card components
-- [ ] Implement create project form (modal/page)
-- [ ] Implement edit project functionality
-- [ ] Implement delete project (with confirmation)
+- [ ] Create resources Redux slice with async thunks
+- [ ] Implement resources list page with pagination
+- [ ] Create resource card components (show type, capacity, availability)
+- [ ] Implement create resource form (modal/page)
+- [ ] Implement edit resource functionality
+- [ ] Implement delete resource (with confirmation)
 - [ ] Add loading states and error handling
-- [ ] Implement search/filter for projects
+- [ ] Implement search/filter for resources (by type, availability)
 
-**Learning Focus**: Redux Toolkit Query patterns, CRUD operations
+**Learning Focus**: Redux Toolkit patterns, CRUD operations, tenant-scoped data
 
 ---
 
-#### **Day 11: Tasks Feature**
+#### **Day 11: Bookings Feature**
 
-- [ ] Create tasks Redux slice with async thunks
-- [ ] Implement task board view (columns by status)
-- [ ] Create task card components
-- [ ] Implement create task form
-- [ ] Implement edit task (inline or modal)
-- [ ] Implement drag-and-drop status change (optional)
-- [ ] Add task filtering (priority, assignee, status)
-- [ ] Implement task assignment dropdown
-- [ ] Add task details view
+- [ ] Create bookings Redux slice with async thunks
+- [ ] Implement bookings calendar view (day/week/month)
+- [ ] Create booking card components
+- [ ] Implement create booking form with date/time pickers
+- [ ] Implement conflict detection UI feedback
+- [ ] Implement edit/cancel booking functionality
+- [ ] Add booking filtering (date range, resource, status, user)
+- [ ] Implement booking status management (Confirm, Cancel)
+- [ ] Add booking details view
+- [ ] Show resource availability in real-time
 
-**Learning Focus**: Complex UI state, real-time updates pattern
+**Learning Focus**: Calendar UI, complex date/time handling, conflict visualization
 
 ---
 
@@ -234,7 +248,8 @@ Create a **Task Management System** that demonstrates senior full-stack develope
 - [ ] Test Redux slices and thunks with MSW
 - [ ] Set up Playwright or Cypress
 - [ ] Write E2E test for authentication flow
-- [ ] Write E2E test for creating project and task
+- [ ] Write E2E test for creating resource and booking
+- [ ] Write E2E test for booking conflict prevention
 - [ ] Add loading skeletons
 - [ ] Improve error messages and toast notifications
 - [ ] Responsive design check (mobile, tablet, desktop)
