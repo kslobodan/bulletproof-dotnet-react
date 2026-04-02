@@ -1,7 +1,9 @@
 # Bulletproof .NET React - Technology Stack
 
 ## Project Overview
+
 **Purpose**: Portfolio/presentation project demonstrating full-stack development expertise  
+**Philosophy**: Open-source and license-free technologies wherever possible  
 **Last Updated**: April 2, 2026
 
 ---
@@ -9,10 +11,12 @@
 ## Backend Stack (.NET Core)
 
 ### Core Framework
+
 - **.NET 8** (LTS) - Latest long-term support version
 - **ASP.NET Core Web API** - RESTful API
 
 ### Architecture & Patterns
+
 - **Clean Architecture** - Domain-centric layered architecture
   - API Layer (Controllers, Middleware)
   - Application Layer (CQRS, DTOs, Interfaces)
@@ -22,40 +26,98 @@
 - **MediatR** - In-process messaging for CQRS implementation
 - **Repository Pattern** - Data access abstraction
 - **Unit of Work** - Transaction management
+- **SOLID Principles** - Applied throughout the codebase
+  - Single Responsibility
+  - Open/Closed
+  - Liskov Substitution
+  - Interface Segregation
+  - Dependency Inversion
 
-### Database & ORM
-- **Database**: [TO BE DECIDED - PostgreSQL or SQL Server]
-- **Entity Framework Core 8** - ORM with Code-First approach
-- **EF Core Migrations** - Database versioning
+### Database & Data Access
+
+- **PostgreSQL 16** - Open-source relational database
+  - Cross-platform, enterprise-grade
+  - Advanced JSON support (JSONB)
+  - Excellent performance and scalability
+  - `postgres:16-alpine` Docker image
+- **Dapper** - Lightweight micro-ORM for high-performance data access
+- **DbUp** or **FluentMigrator** - Database versioning and migrations
+- **Npgsql** - PostgreSQL data provider for .NET
 
 ### Authentication & Security
+
 - **JWT (JSON Web Tokens)** - Stateless authentication
 - **ASP.NET Core Identity** - User management
 - **Role-based Authorization** - Access control
 - **HTTPS Enforcement** - Secure communication
 - **CORS Policy** - Cross-origin configuration
+- **Rate Limiting** - Throttling and DDoS protection
+  - IP-based rate limiting
+  - User-based rate limiting
+  - Endpoint-specific limits
 
 ### Validation & Mapping
+
 - **FluentValidation** - Request/command validation
 - **AutoMapper** - Object-to-object mapping (DTOs ↔ Entities)
 
 ### Logging & Monitoring
+
 - **Serilog** - Structured logging
   - Console sink
   - File sink
   - [Optional: Seq/ELK for production]
 
+### API Features
+
+- **API Versioning** - URL-based versioning (v1, v2)
+  - Microsoft.AspNetCore.Mvc.Versioning
+  - Version-specific controllers and endpoints
+- **Pagination Pattern** - `PagedResult<T>` wrapper
+  - Consistent pagination across endpoints
+  - Page number and page size parameters
+  - Total count and metadata
+- **Global Error Handling** - Centralized exception handling
+  - Custom exception middleware
+  - Consistent error response format
+  - Detailed logging for debugging
+  - User-friendly error messages
+
 ### API Documentation
+
 - **Swagger/OpenAPI** - Interactive API documentation
 - **Swashbuckle** - Swagger implementation for .NET
+- **Swagger with Authentication** - JWT bearer token support in Swagger UI
+  - Authorize button for token input
+  - Test authenticated endpoints directly in Swagger
 
 ### Testing
+
 - **xUnit** - Unit testing framework
 - **Moq** - Mocking framework
 - **FluentAssertions** - Assertion library
-- **Integration Tests** - API endpoint testing
+- **WebApplicationFactory** - Integration testing for API endpoints
+- **Testcontainers** - Containerized test dependencies (database)
+
+**Testing Strategy:**
+
+- **Unit Tests** - Test business logic in isolation
+  - Domain entities and value objects
+  - Application layer (CQRS handlers, validators)
+  - Service classes
+  - Target: 80%+ code coverage
+- **Integration Tests** - Test API endpoints end-to-end
+  - WebApplicationFactory with test database
+  - Full request/response pipeline
+  - Authentication and authorization flows
+  - Database interactions
+- **Architecture Tests** - Enforce architectural rules
+  - Layer dependency validation
+  - Naming conventions
+  - Ensure Clean Architecture boundaries
 
 ### Additional Libraries
+
 - **Polly** - Resilience and transient fault handling
 - **MediatR.Extensions** - Pipeline behaviors (validation, logging)
 
@@ -64,42 +126,70 @@
 ## Frontend Stack (React)
 
 ### Core Framework
+
 - **React 18** - Latest React with concurrent features
 - **TypeScript** - Type-safe JavaScript
 - **Vite** - Fast build tool and dev server
 
 ### Routing
+
 - **React Router v6** - Client-side routing
 
 ### State Management
+
 - **TanStack Query (React Query)** - Server state management (caching, synchronization)
-- **[TO BE DECIDED]**: 
-  - Zustand (lightweight, minimal boilerplate) OR
-  - Redux Toolkit (enterprise standard, more boilerplate)
+- **Redux Toolkit** - Client state management
+  - RTK Async Thunks - Asynchronous actions
+  - RTK Slices - State management patterns
+  - Redux DevTools - Time-travel debugging
 
 ### HTTP Client
+
 - **Axios** - HTTP requests with interceptors
   - Request/Response interceptors
   - JWT token management
   - Error handling
 
 ### Forms & Validation
+
 - **React Hook Form** - Performant form handling
 - **Zod** - TypeScript-first schema validation
 - **React Hook Form + Zod integration**
 
 ### UI Framework
-- **[TO BE DECIDED]**:
-  - TailwindCSS (utility-first, highly customizable) OR
-  - Material-UI (component library, faster development)
-- **Headless UI** or **Radix UI** - Unstyled accessible components (if using Tailwind)
+
+- **TailwindCSS** - Utility-first CSS framework
+- **shadcn/ui** - Re-usable component library built with Radix UI and Tailwind
+  - Copy-paste components (not an npm dependency)
+  - Fully customizable and accessible
+  - Built on Radix UI primitives
 
 ### Testing
+
 - **Vitest** - Fast unit test runner (Vite-native)
 - **React Testing Library** - Component testing
 - **MSW (Mock Service Worker)** - API mocking for tests
+- **Playwright** or **Cypress** - End-to-end testing
+
+**Testing Strategy:**
+
+- **Unit Tests** - Test components and utilities in isolation
+  - React components (user interactions, rendering)
+  - Custom hooks
+  - Utility functions
+  - Redux slices and thunks
+  - Target: 80%+ code coverage
+- **Integration Tests** - Test feature flows
+  - Multi-component interactions
+  - API integration with MSW
+  - Redux store integration
+- **E2E Tests** - Critical user journeys
+  - Authentication flow
+  - Core business workflows
+  - Cross-browser testing
 
 ### Development Tools
+
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
 - **Husky** - Git hooks
@@ -109,69 +199,88 @@
 
 ## Database
 
-**Options under consideration:**
-1. **PostgreSQL** 
-   - ✅ Cross-platform, open-source
-   - ✅ Advanced features, JSON support
-   - ✅ Popular in modern web development
-   
-2. **SQL Server** 
-   - ✅ Deep .NET ecosystem integration
-   - ✅ Excellent tooling (SSMS)
-   - ✅ Enterprise standard
+**Database**: PostgreSQL 16
 
-**Decision**: [TO BE DECIDED]
+**Why PostgreSQL:**
+
+- ✅ Open-source, no licensing costs
+- ✅ Cross-platform (Windows, Linux, macOS)
+- ✅ Enterprise-grade performance and reliability
+- ✅ Advanced features: JSONB, full-text search, CTEs
+- ✅ Excellent Docker support (`postgres:16-alpine`)
+- ✅ Widely used in modern tech companies
+- ✅ Cloud-native (AWS RDS, Azure Database, Google Cloud SQL)
+
+**Development Tools:**
+
+- pgAdmin (open-source GUI)
+- DBeaver (cross-platform, free)
+- Azure Data Studio with PostgreSQL extension
 
 ---
 
 ## DevOps & Infrastructure
 
 ### Containerization
+
 - **Docker** - Application containerization
+  - `Dockerfile` (Backend) - Multi-stage build for .NET API
+  - `Dockerfile` (Frontend) - Multi-stage build for React app
 - **Docker Compose** - Multi-container orchestration
   - API container
+  - Frontend container
   - Database container
   - [Optional: Redis container]
+  - [Optional: NGINX reverse proxy]
 
 ### CI/CD
-- **GitHub Actions** - Automated build, test, deploy pipeline
-  - Build and test on PR
-  - Docker image creation
-  - [Optional: Deployment to Azure/AWS]
+
+- **GitHub Actions** / **Azure DevOps** - Automated pipeline
+  - **Build** - Compile backend and frontend
+  - **Test** - Run unit and integration tests
+  - **Lint** - Code quality checks (ESLint, Prettier, .NET analyzers)
+  - **Publish Docker Images** - Push to Docker Hub or GitHub Container Registry
+  - **Deploy** - Automated deployment to staging/production
+
+### Deployment Strategy
+
+- **NGINX** - Reverse proxy
+  - Route requests to backend API
+  - Serve frontend static files
+  - SSL/TLS termination
+  - Load balancing (if scaled)
+- **Environment Configs** - Environment-specific settings
+  - Development (`appsettings.Development.json`, `.env.development`)
+  - Staging (`appsettings.Staging.json`, `.env.staging`)
+  - Production (`appsettings.Production.json`, `.env.production`)
+- **Secrets Management**
+  - Azure Key Vault / AWS Secrets Manager / HashiCorp Vault
+  - Docker secrets for sensitive data
+  - Environment variables for non-sensitive configs
 
 ### Caching (Optional but Impressive)
+
 - **Redis** - Distributed caching
   - Response caching
   - Session storage
   - Rate limiting
 
 ### Cloud Platform (Future)
+
 - **[Optional]**: Azure App Service, AWS ECS, or other cloud hosting
-
----
-
-## Project Domain
-
-**Application Type**: [TO BE DECIDED]
-
-**Suggested Options:**
-1. **Task/Project Management** (like Jira/Trello)
-2. **E-commerce Platform** (products, cart, orders)
-3. **Blog/CMS** (articles, comments, categories)
-4. **Social Media Clone** (posts, likes, follows)
-5. **Other**: _______________________
 
 ---
 
 ## Architecture Decisions
 
 ### Backend Structure
+
 ```
 src/
 ├── API/                    # ASP.NET Core Web API
 ├── Application/           # Business logic, CQRS handlers
 ├── Domain/                # Entities, Value Objects, Interfaces
-└── Infrastructure/        # EF Core, External Services
+└── Infrastructure/        # Dapper, SQL, External Services
 tests/
 ├── UnitTests/
 ├── IntegrationTests/
@@ -179,6 +288,7 @@ tests/
 ```
 
 ### Frontend Structure
+
 ```
 src/
 ├── assets/               # Images, fonts, static files
@@ -201,16 +311,63 @@ src/
 
 ---
 
+## Documentation & Code Quality
+
+### Documentation
+
+- **README.md** - Comprehensive project documentation
+  - Project overview and features
+  - Technology stack
+  - Setup instructions
+  - API documentation links
+  - Architecture overview
+  - Contributing guidelines
+- **Architecture Diagram** - Visual representation
+  - C4 model or similar
+  - Component relationships
+  - Data flow diagrams
+  - Deployment architecture
+
+### Git & Code Quality
+
+- **Clean Commit History** - Well-structured Git practices
+  - Conventional Commits (feat:, fix:, chore:, docs:)
+  - Atomic commits
+  - Meaningful commit messages
+  - Feature branches and PR workflow
+- **Code Quality Standards**
+  - Consistent code formatting
+  - Code reviews
+  - Pre-commit hooks (Husky)
+  - No merge commits (squash or rebase)
+
+---
+
 ## Next Steps
 
-- [ ] Decide on database (PostgreSQL vs SQL Server)
-- [ ] Choose UI framework (TailwindCSS vs Material-UI)
-- [ ] Select state management (Zustand vs Redux Toolkit)
-- [ ] Define project domain/application type
-- [ ] Set up project structure
-- [ ] Initialize Git repository
-- [ ] Create Docker configurations
-- [ ] Set up CI/CD pipeline
+- [x] ✅ Decide on database (PostgreSQL 16 chosen)
+- [ ] Set up PostgreSQL with Docker (postgres:16-alpine)
+- [ ] Set up backend project structure with Clean Architecture
+- [ ] Configure Npgsql and Dapper for PostgreSQL
+- [ ] Implement global error handling middleware
+- [ ] Set up API versioning
+- [ ] Configure Swagger with JWT authentication
+- [ ] Implement pagination pattern (PagedResult<T>)
+- [ ] Add rate limiting middleware
+- [ ] Set up backend unit tests (xUnit, Moq, FluentAssertions)
+- [ ] Set up backend integration tests (WebApplicationFactory, Testcontainers)
+- [ ] Set up architecture tests
+- [ ] Set up frontend project with Vite + React + TypeScript
+- [ ] Configure shadcn/ui components
+- [ ] Set up Redux Toolkit store with async thunks
+- [ ] Set up frontend unit tests (Vitest, React Testing Library)
+- [ ] Set up frontend E2E tests (Playwright/Cypress)
+- [ ] Configure test coverage reporting (80%+ target)
+- [ ] Create Dockerfiles for backend and frontend
+- [ ] Create docker-compose.yml with NGINX
+- [ ] Set up CI/CD pipeline (GitHub Actions) with test execution
+- [ ] Create comprehensive README.md
+- [ ] Design and document architecture diagram
 
 ---
 
