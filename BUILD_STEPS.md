@@ -59,3 +59,4 @@
 ### Configuration
 
 16. Configured Serilog in `Program.cs`
+17. Configured MediatR in `Program.cs` (registered handlers from Application assembly)

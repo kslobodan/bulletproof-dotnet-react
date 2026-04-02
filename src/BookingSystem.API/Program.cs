@@ -16,6 +16,9 @@ try
     builder.Host.UseSerilog();
 
     // Add services to the container.
+    builder.Services.AddMediatR(cfg => 
+        cfg.RegisterServicesFromAssembly(typeof(BookingSystem.Application.AssemblyReference).Assembly));
+    
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
 
