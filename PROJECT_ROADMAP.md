@@ -69,11 +69,11 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
   - `Infrastructure` project (Dapper, PostgreSQL)
   - Test projects (Unit, Integration, Architecture)
 - [x] Set up PostgreSQL with Docker
-- [ ] Configure Dapper and Npgsql
-- [ ] Set up MediatR for CQRS
-- [ ] Configure Serilog for logging
-- [ ] Add FluentValidation
-- [ ] Set up AutoMapper
+- [x] Configure Dapper and Npgsql
+- [x] Set up MediatR for CQRS
+- [x] Configure Serilog for logging
+- [x] Add FluentValidation
+- [x] Set up AutoMapper
 
 **Learning Focus**: Clean Architecture layers, project dependencies
 

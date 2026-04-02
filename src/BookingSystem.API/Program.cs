@@ -1,4 +1,5 @@
 using Serilog;
+using FluentValidation;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -18,6 +19,10 @@ try
     // Add services to the container.
     builder.Services.AddMediatR(cfg => 
         cfg.RegisterServicesFromAssembly(typeof(BookingSystem.Application.AssemblyReference).Assembly));
+    
+    builder.Services.AddValidatorsFromAssembly(typeof(BookingSystem.Application.AssemblyReference).Assembly);
+    
+    builder.Services.AddAutoMapper(typeof(BookingSystem.Application.AssemblyReference).Assembly);
     
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();

@@ -60,3 +60,6 @@
 
 16. Configured Serilog in `Program.cs`
 17. Configured MediatR in `Program.cs` (registered handlers from Application assembly)
+18. Added PostgreSQL connection string to `appsettings.Development.json`
+19. Configured FluentValidation in `Program.cs`
+20. Configured AutoMapper in `Program.cs`
