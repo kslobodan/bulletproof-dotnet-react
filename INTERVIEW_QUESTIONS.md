@@ -54,6 +54,146 @@ In Clean Architecture, only the API layer is executable; the others are librarie
 
 ---
 
+### Q: "Why did you choose Dapper over Entity Framework?"
+
+**A:** "I chose **Dapper** for several reasons:
+
+1. **Performance** - Dapper is much faster than EF Core because it's a micro-ORM with minimal overhead
+2. **Control** - I write SQL directly, so I understand exactly what queries hit the database. No hidden SQL generation or N+1 query surprises
+3. **Learning** - It keeps my SQL skills sharp, which is valuable for database optimization and troubleshooting
+4. **Simplicity** - For this project's size, Dapper's lightweight approach is perfect. No complex migrations or DbContext configuration
+
+However, I acknowledge EF Core's advantages for rapid prototyping and change tracking. For enterprise apps with complex domain models, EF Core might be better. Dapper is ideal when you need performance and control."
+
+---
+
+### Q: "What is CQRS and why use MediatR?"
+
+**A:** "**CQRS** (Command Query Responsibility Segregation) separates read operations (Queries) from write operations (Commands).
+
+**Benefits:**
+
+- **Clarity** - Clear separation between 'what changes data' and 'what reads data'
+- **Scalability** - Can optimize read and write paths separately
+- **Single Responsibility** - Each handler does one thing
+
+**MediatR** implements the mediator pattern for CQRS:
+
+- Controllers send commands/queries to MediatR: `await mediator.Send(new CreateBookingCommand(...))`
+- MediatR finds the appropriate handler and executes it
+- This decouples controllers from business logic—controllers become thin orchestrators
+
+Example flow: **Controller → MediatR → UserCommandHandler → Repository → Database**"
+
+---
+
+### Q: "Explain your logging strategy with Serilog."
+
+**A:** "I use **Serilog** for structured logging with multiple sinks:
+
+1. **Console sink** - For development, see logs in real-time while running `dotnet run`
+2. **File sink** - For persistence, daily rolling logs (`logs/log-20260403.txt`)
+
+**Why structured logging?** Instead of string concatenation like `$"User {userId} failed"`, I use:
+
+```csharp
+Log.Information("User {UserId} login failed", userId);
+```
+
+This logs as JSON with properties, making it queryable in production logging systems like Elasticsearch or Seq. I can search 'all failures for UserId=123' instantly.
+
+I also wrap startup in try-catch-finally to log fatal errors: `Log.Fatal(ex, "Application terminated")`"
+
+---
+
+### Q: "What is FluentValidation and why use it?"
+
+**A:** "**FluentValidation** is a validation library that separates validation rules from models.
+
+**Instead of attributes:**
+
+```csharp
+public class CreateBookingCommand {
+    [Required] public int ResourceId { get; set; }
+}
+```
+
+**I write validator classes:**
+
+```csharp
+public class CreateBookingCommandValidator : AbstractValidator<CreateBookingCommand> {
+    public CreateBookingCommandValidator() {
+        RuleFor(x => x.ResourceId).GreaterThan(0);
+    }
+}
+```
+
+**Benefits:**
+
+- **Reusable** - Validators can be tested independently
+- **Complex rules** - Can validate against database, check business rules, call services
+- **Better errors** - Custom error messages per language/context
+- **SOLID** - Separates validation concerns from commands
+
+MediatR + FluentValidation work together: validate before the handler executes."
+
+---
+
+### Q: "Why use AutoMapper?"
+
+**A:** "**AutoMapper** eliminates repetitive DTO-to-Entity mapping code.
+
+**Without AutoMapper:**
+
+```csharp
+var entity = new Booking {
+    Id = dto.Id,
+    ResourceId = dto.ResourceId,
+    StartTime = dto.StartTime,
+    // ... 15 more lines
+};
+```
+
+**With AutoMapper:**
+
+```csharp
+var entity = _mapper.Map<Booking>(dto);
+```
+
+**Benefits:**
+
+- **DRY principle** - Define mappings once, use everywhere
+- **Less boilerplate** - Reduces error-prone manual mapping
+- **Convention-based** - Auto-maps properties with same names
+- **Testable** - Can verify mapping configurations
+
+**Trade-off:** Adds magic/indirection. I use it for simple mappings, but write manual mapping for complex transformations."
+
+---
+
+### Q: "How do you manage database connection strings securely?"
+
+**A:** "I use ASP.NET Core's configuration system with multiple layers:
+
+1. **Development**: `appsettings.Development.json` (gitignored) contains local credentials
+2. **Production**: Environment variables or Azure Key Vault for secrets
+3. **Connection string** retrieved via `Configuration.GetConnectionString("DefaultConnection")`
+
+**Security:**
+
+- Never commit production credentials to git
+- Use Azure Managed Identity or AWS IAM roles in production
+- appsettings.Development.json is in .gitignore
+- Rotate credentials regularly
+
+For this project, `postgres/postgres` is fine locally, but in production I'd use:
+
+- Separate database user per service
+- Least privilege permissions
+- Connection string from environment variables"
+
+---
+
 ## Day 2: Core Infrastructure & Multi-tenancy
 
 (To be filled as we progress)
