@@ -35,3 +35,23 @@
    - Port: 5432
    - Credentials: postgres/postgres (development only)
 10. Started PostgreSQL container: `docker-compose up -d`
+
+### NuGet Packages Installation
+
+11. Installed Dapper and Npgsql in Infrastructure project:
+    - `cd src/BookingSystem.Infrastructure`
+    - `dotnet add package Dapper`
+    - `dotnet add package Npgsql`
+12. Installed MediatR in Application project:
+    - `cd ../BookingSystem.Application`
+    - `dotnet add package MediatR`
+13. Installed Serilog in API project:
+    - `cd ../BookingSystem.API`
+    - `dotnet add package Serilog.AspNetCore`
+    - `dotnet add package Serilog.Sinks.Console`
+    - `dotnet add package Serilog.Sinks.File`
+14. Installed FluentValidation in Application project:
+    - `cd ../BookingSystem.Application`
+    - `dotnet add package FluentValidation.DependencyInjectionExtensions`
+15. Installed AutoMapper in Application project:
+    - `dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection`
