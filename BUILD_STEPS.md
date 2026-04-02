@@ -55,3 +55,7 @@
     - `dotnet add package FluentValidation.DependencyInjectionExtensions`
 15. Installed AutoMapper in Application project:
     - `dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection`
+
+### Configuration
+
+16. Configured Serilog in `Program.cs`
