@@ -6,7 +6,9 @@
 
 ---
 
-## Day 1: Project Setup & Architecture
+## Day 1:
+
+### Project Setup & Architecture
 
 1. Created src folder and navigated into it: `mkdir src; cd src`
 2. Created .NET solution file: `dotnet new sln -n BookingSystem`
@@ -24,3 +26,12 @@
    - `dotnet add BookingSystem.API/BookingSystem.API.csproj reference BookingSystem.Infrastructure/BookingSystem.Infrastructure.csproj`
    - `dotnet add BookingSystem.Infrastructure/BookingSystem.Infrastructure.csproj reference BookingSystem.Application/BookingSystem.Application.csproj`
    - `dotnet add BookingSystem.Application/BookingSystem.Application.csproj reference BookingSystem.Domain/BookingSystem.Domain.csproj`
+
+### Docker & PostgreSQL Setup
+
+9. Created `docker-compose.yml` with PostgreSQL 16 service configuration
+   - Image: postgres:16-alpine
+   - Database: BookingSystemDB
+   - Port: 5432
+   - Credentials: postgres/postgres (development only)
+10. Started PostgreSQL container: `docker-compose up -d`

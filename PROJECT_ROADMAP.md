@@ -62,13 +62,13 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 #### **Day 1: Project Setup & Architecture**
 
-- [ ] Initialize .NET solution with Clean Architecture structure
+- [x] Initialize .NET solution with Clean Architecture structure
   - `API` project (ASP.NET Core Web API)
   - `Application` project (business logic, CQRS)
   - `Domain` project (entities, interfaces)
   - `Infrastructure` project (Dapper, PostgreSQL)
   - Test projects (Unit, Integration, Architecture)
-- [ ] Set up PostgreSQL with Docker
+- [x] Set up PostgreSQL with Docker
 - [ ] Configure Dapper and Npgsql
 - [ ] Set up MediatR for CQRS
 - [ ] Configure Serilog for logging
