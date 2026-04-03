@@ -223,3 +223,7 @@
 94. Created `LoginCommand` in `Application/Features/Authentication/Commands/Login/`
 95. Created `LoginCommandHandler`
 96. Created `LoginCommandValidator` (FluentValidation)
+
+### Authentication Controller (API Endpoints)
+
+97. Created `AuthController` in `API/Controllers/v1/AuthController.cs`
