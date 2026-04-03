@@ -72,3 +72,11 @@
 
 21. Created `GlobalExceptionHandlerMiddleware.cs` in API/Middleware
 22. Registered middleware in `Program.cs`
+
+### API Versioning
+
+23. Installed API versioning packages:
+    - `dotnet add package Asp.Versioning.Http`
+    - `dotnet add package Asp.Versioning.Mvc.ApiExplorer`
+24. Configured API versioning in `Program.cs` (default v1.0)
+25. Added Controllers support with `AddControllers()` and `MapControllers()`
