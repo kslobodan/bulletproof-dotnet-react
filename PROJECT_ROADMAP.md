@@ -27,18 +27,18 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 ### Must-Have Features
 
 - ✅ Multi-tenant data isolation (all queries filtered by TenantId)
-- ✅ User registration and JWT authentication (tenant-scoped)
-- ✅ CRUD operations for Resources and Bookings
-- ✅ Booking conflict prevention (no double-booking)
-- ✅ Status workflow (Pending → Confirmed → Completed/Cancelled)
-- ✅ Availability rules (working hours per resource)
-- ✅ Pagination and filtering
-- ✅ Tenant-level and role-based authorization
-- ✅ Audit logging for all changes
+- [ ] User registration and JWT authentication (tenant-scoped)
+- [ ] CRUD operations for Resources and Bookings
+- [ ] Booking conflict prevention (no double-booking)
+- [ ] Status workflow (Pending → Confirmed → Completed/Cancelled)
+- [ ] Availability rules (working hours per resource)
+- ✅ Pagination and filtering (PagedResult<T> pattern)
+- [ ] Tenant-level and role-based authorization
+- [ ] Audit logging for all changes
 - ✅ Global error handling
 - ✅ API versioning (v1)
-- ✅ Swagger with JWT auth
-- ✅ Rate limiting
+- [ ] Swagger with JWT auth (Swagger configured, JWT pending Day 3)
+- [ ] Rate limiting
 
 ### Testing
 
@@ -79,17 +79,17 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 ---
 
-#### **Day 2: Core Infrastructure & Multi-tenancy**
+#### **Day 2: Core Infrastructure & Multi-tenancy** ✅ COMPLETE
 
-- [ ] Implement global error handling middleware
-- [ ] Set up API versioning (v1)
-- [ ] Configure Swagger/OpenAPI
-- [ ] Implement `PagedResult<T>` pattern
-- [ ] Set up database migrations (DbUp or FluentMigrator)
-- [ ] Create database schema (Tenants, Users, Roles, UserRoles tables)
-- [ ] Implement base repository pattern with Dapper
-- [ ] Create TenantContext service for tenant resolution
-- [ ] Implement multi-tenant query filter middleware
+- [x] Implement global error handling middleware
+- [x] Set up API versioning (v1)
+- [x] Configure Swagger/OpenAPI
+- [x] Implement `PagedResult<T>` pattern
+- [x] Set up database migrations (DbUp)
+- [x] Create database schema (Tenants, Users, Roles, UserRoles tables with UUID)
+- [x] Implement base repository pattern with Dapper
+- [x] Create TenantContext service for tenant resolution
+- [x] Implement multi-tenant query filter middleware
 
 **Learning Focus**: Middleware pipeline, multi-tenancy patterns, Dapper queries
 
