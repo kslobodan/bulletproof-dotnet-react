@@ -195,3 +195,13 @@
 78. Created `ITenantRepository` interface in `Application/Common/Interfaces/ITenantRepository.cs`
 79. Implemented `TenantRepository` in `Infrastructure/Repositories/TenantRepository.cs`:
 80. Registered `ITenantRepository` in DI container (`Program.cs`)
+
+### Authentication DTOs (Data Transfer Objects)
+
+81. Created `AuthResult` DTO in `Application/Features/Authentication/DTOs/AuthResult.cs`:
+82. Created `RegisterTenantRequest` DTO
+83. Created `RegisterTenantResponse` DTO
+84. Created `RegisterUserRequest` DTO
+85. Created `RegisterUserResponse` DTO
+86. Created `LoginRequest` DTO
+87. Created `LoginResponse` DTO
