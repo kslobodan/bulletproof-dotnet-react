@@ -63,3 +63,12 @@
 18. Added PostgreSQL connection string to `appsettings.Development.json`
 19. Configured FluentValidation in `Program.cs`
 20. Configured AutoMapper in `Program.cs`
+
+---
+
+## Day 2: Core Infrastructure & Multi-tenancy
+
+### Middleware
+
+21. Created `GlobalExceptionHandlerMiddleware.cs` in API/Middleware
+22. Registered middleware in `Program.cs`

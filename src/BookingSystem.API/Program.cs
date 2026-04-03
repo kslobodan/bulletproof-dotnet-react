@@ -1,5 +1,6 @@
 using Serilog;
 using FluentValidation;
+using BookingSystem.API.Middleware;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -28,6 +29,9 @@ try
     builder.Services.AddOpenApi();
 
     var app = builder.Build();
+
+    // Global exception handling
+    app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
