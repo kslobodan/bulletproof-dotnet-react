@@ -293,3 +293,7 @@
 
 
     - `builder.Services.AddScoped<IResourceRepository, ResourceRepository>();`
+
+### Resources Controller (API Endpoints)
+
+131. Created `ResourcesController` in `API/Controllers/v1/ResourcesController.cs`
