@@ -205,3 +205,9 @@
 85. Created `RegisterUserResponse` DTO
 86. Created `LoginRequest` DTO
 87. Created `LoginResponse` DTO
+
+### RegisterTenant Command (CQRS)
+
+88. Created `RegisterTenantCommand` in `Application/Features/Authentication/Commands/RegisterTenant/`
+89. Created `RegisterTenantCommandHandler`
+90. Created `RegisterTenantCommandValidator` (FluentValidation)
