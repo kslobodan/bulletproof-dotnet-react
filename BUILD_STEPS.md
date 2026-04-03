@@ -243,3 +243,11 @@
 
     - Allows unauthenticated access to register-tenant, register-user, login endpoints
     - Required because FallbackPolicy would otherwise block these endpoints
+
+---
+
+## Day 4: Resources CRUD
+
+### Resource Entity (Domain Layer)
+
+103. Created `Resource` entity in `Domain/Entities/Resource.cs`
