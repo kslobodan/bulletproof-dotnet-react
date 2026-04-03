@@ -251,3 +251,12 @@
 ### Resource Entity (Domain Layer)
 
 103. Created `Resource` entity in `Domain/Entities/Resource.cs`
+
+### Resource DTOs (Application Layer)
+
+104. Created `ResourceDto` in `Application/Features/Resources/DTOs/ResourceDto.cs`
+105. Created `CreateResourceRequest` DTO
+106. Created `CreateResourceResponse` DTO
+107. Created `UpdateResourceRequest` DTO
+108. Created `UpdateResourceResponse` DTO
+109. Created `DeleteResourceResponse` DTO
