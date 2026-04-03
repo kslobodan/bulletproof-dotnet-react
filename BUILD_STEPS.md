@@ -211,3 +211,10 @@
 88. Created `RegisterTenantCommand` in `Application/Features/Authentication/Commands/RegisterTenant/`
 89. Created `RegisterTenantCommandHandler`
 90. Created `RegisterTenantCommandValidator` (FluentValidation)
+91. Build verification: `dotnet build` - successful (3.0s)
+
+### RegisterUser Command (CQRS)
+
+92. Created `RegisterUserCommand` in `Application/Features/Authentication/Commands/RegisterUser/`
+93. Created `RegisterUserCommandHandler`
+94. Created `RegisterUserCommandValidator` (FluentValidation)
