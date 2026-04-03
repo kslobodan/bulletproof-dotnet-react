@@ -273,3 +273,15 @@
 117. Created `DeleteResourceCommand` in `Application/Features/Resources/Commands/DeleteResource/`
 118. Created `DeleteResourceCommandHandler`
 119. Created `DeleteResourceCommandValidator`
+
+### Resource Queries (CQRS)
+
+120. Created `GetResourceByIdQuery` in `Application/Features/Resources/Queries/GetResourceById/`
+121. Created `GetResourceByIdQueryHandler`
+122. Created `GetResourceByIdQueryValidator`
+123. Created `GetAllResourcesQuery` in `Application/Features/Resources/Queries/GetAllResources/`
+124. Created `GetAllResourcesQueryHandler`
+125. Created `GetAllResourcesQueryValidator`
+126. Added `GetPagedAsync` method to `IRepository<T>` interface
+127. Implemented `GetPagedAsync` in `BaseRepository<T>`
+128. Implemented `GetPagedAsync` in `TenantRepository`

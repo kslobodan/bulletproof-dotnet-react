@@ -2,6 +2,7 @@ using System.Data;
 using Dapper;
 using BookingSystem.Application.Common.Interfaces;
 using BookingSystem.Application.Common.Extensions;
+using BookingSystem.Application.Common.Models;
 
 namespace BookingSystem.Infrastructure.Repositories;
 
@@ -50,6 +51,40 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
             ORDER BY CreatedAt DESC";
         
         return await connection.QueryWithTenantAsync<T>(_tenantContext, sql);
+    }
+
+    public virtual async Task<PagedResult<T>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        
+        // Get total count
+        var countSql = $@"
+            SELECT COUNT(*)::int FROM {TableName} 
+            WHERE TenantId = @TenantId";
+        
+        var totalCount = await connection.ExecuteScalarAsync<int>(countSql, new { TenantId = TenantId });
+        
+        // Get paginated data
+        var offset = (pageNumber - 1) * pageSize;
+        var dataSql = $@"
+            SELECT * FROM {TableName} 
+            WHERE TenantId = @TenantId 
+            ORDER BY CreatedAt DESC
+            LIMIT @PageSize OFFSET @Offset";
+        
+        var items = await connection.QueryAsync<T>(dataSql, new 
+        { 
+            TenantId = TenantId,
+            PageSize = pageSize,
+            Offset = offset
+        });
+        
+        return new PagedResult<T>(
+            items.ToList(),
+            totalCount,
+            pageNumber,
+            pageSize
+        );
     }
 
     public abstract Task<Guid> AddAsync(T entity, CancellationToken cancellationToken = default);

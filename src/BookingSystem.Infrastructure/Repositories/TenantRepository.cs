@@ -1,5 +1,6 @@
 using Dapper;
 using BookingSystem.Application.Common.Interfaces;
+using BookingSystem.Application.Common.Models;
 using BookingSystem.Domain.Entities;
 
 namespace BookingSystem.Infrastructure.Repositories;
@@ -91,6 +92,35 @@ public class TenantRepository : ITenantRepository
         var count = await connection.ExecuteScalarAsync<int>(sql, new { Id = id });
 
         return count > 0;
+    }
+
+    public async Task<PagedResult<Tenant>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        // Get total count
+        var countSql = "SELECT COUNT(*)::int FROM Tenants";
+        var totalCount = await connection.ExecuteScalarAsync<int>(countSql);
+
+        // Get paginated data
+        var offset = (pageNumber - 1) * pageSize;
+        var dataSql = @"
+            SELECT * FROM Tenants 
+            ORDER BY CreatedAt DESC
+            LIMIT @PageSize OFFSET @Offset";
+
+        var items = await connection.QueryAsync<Tenant>(dataSql, new
+        {
+            PageSize = pageSize,
+            Offset = offset
+        });
+
+        return new PagedResult<Tenant>(
+            items.ToList(),
+            totalCount,
+            pageNumber,
+            pageSize
+        );
     }
 
     public async Task<Tenant?> GetByEmailAsync(string email)

@@ -1,3 +1,5 @@
+using BookingSystem.Application.Common.Models;
+
 namespace BookingSystem.Application.Common.Interfaces;
 
 /// <summary>
@@ -16,6 +18,11 @@ public interface IRepository<T> where T : class
     /// Gets all entities for the current tenant
     /// </summary>
     Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Gets a paginated list of entities for the current tenant
+    /// </summary>
+    Task<PagedResult<T>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Adds a new entity for the current tenant
