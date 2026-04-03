@@ -38,6 +38,7 @@ try
     
     // Repositories
     builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<ITenantRepository, TenantRepository>();
     
     // Services
     builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();

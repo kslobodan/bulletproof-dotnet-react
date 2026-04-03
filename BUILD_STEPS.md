@@ -187,3 +187,11 @@
     - Token expiration based on configuration (default 60 minutes)
 74. Registered `IJwtTokenService` in DI container (`Program.cs`)
 75. Build verification: `dotnet build` - successful (6.0s)
+
+### Tenant & User Entities for Authentication
+
+76. Created `Tenant` entity in `Domain/Entities/Tenant.cs`
+77. Verified `User` entity already has authentication fields
+78. Created `ITenantRepository` interface in `Application/Common/Interfaces/ITenantRepository.cs`
+79. Implemented `TenantRepository` in `Infrastructure/Repositories/TenantRepository.cs`:
+80. Registered `ITenantRepository` in DI container (`Program.cs`)

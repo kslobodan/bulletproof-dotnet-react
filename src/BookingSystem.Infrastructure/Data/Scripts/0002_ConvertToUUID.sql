@@ -8,14 +8,14 @@ DROP TABLE IF EXISTS Tenants CASCADE;
 CREATE TABLE Tenants (
     Id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     Name VARCHAR(200) NOT NULL,
-    Subdomain VARCHAR(100) NOT NULL UNIQUE,
+    Email VARCHAR(255) NOT NULL UNIQUE,
     Plan VARCHAR(50) NOT NULL DEFAULT 'Free',
     IsActive BOOLEAN NOT NULL DEFAULT TRUE,
     CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UpdatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    UpdatedAt TIMESTAMP NULL
 );
 
-CREATE INDEX idx_tenants_subdomain ON Tenants(Subdomain);
+CREATE INDEX idx_tenants_email ON Tenants(Email);
 CREATE INDEX idx_tenants_isactive ON Tenants(IsActive);
 
 -- Roles table (NOT tenant-scoped - global roles)
