@@ -285,3 +285,11 @@
 126. Added `GetPagedAsync` method to `IRepository<T>` interface
 127. Implemented `GetPagedAsync` in `BaseRepository<T>`
 128. Implemented `GetPagedAsync` in `TenantRepository`
+
+### Resource Repository Implementation
+
+129. Created `ResourceRepository` in `Infrastructure/Repositories/ResourceRepository.cs`
+130. Registered `IResourceRepository` in DI container (`Program.cs`):
+
+
+    - `builder.Services.AddScoped<IResourceRepository, ResourceRepository>();`
