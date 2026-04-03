@@ -3,8 +3,7 @@
 ## Project Overview
 
 **Purpose**: Portfolio/presentation project demonstrating full-stack development expertise  
-**Philosophy**: Open-source and license-free technologies wherever possible  
-**Last Updated**: April 2, 2026
+**Philosophy**: Open-source and license-free technologies wherever possible
 
 ---
 
@@ -12,7 +11,7 @@
 
 ### Core Framework
 
-- **.NET 8** (LTS) - Latest long-term support version
+- **.NET 9.0** - Latest .NET version
 - **ASP.NET Core Web API** - RESTful API
 
 ### Architecture & Patterns
@@ -47,8 +46,25 @@
 ### Authentication & Security
 
 - **JWT (JSON Web Tokens)** - Stateless authentication
-- **ASP.NET Core Identity** - User management
+  - Microsoft.AspNetCore.Authentication.JwtBearer
+  - System.IdentityModel.Tokens.Jwt
+  - Custom token generation service
+  - 60-minute token expiration
+  - ClockSkew = TimeSpan.Zero (strict expiration)
+- **BCrypt Password Hashing** - Secure password storage
+  - BCrypt.Net-Next package
+  - Adaptive hashing algorithm
+  - Built-in salt generation
+  - Protection against rainbow tables and brute-force attacks
+- **Custom Authentication** - Manual user management (no ASP.NET Core Identity)
+  - Custom User and Tenant entities
+  - Repository-based user management
+  - Multi-tenant authentication flow
 - **Role-based Authorization** - Access control
+  - Custom roles: TenantAdmin, Manager, User
+  - Authorization policies (AdminOnly, ManagerOrAdmin, AllUsers)
+  - FallbackPolicy (requires authentication by default)
+  - [Authorize] and [AllowAnonymous] attributes
 - **HTTPS Enforcement** - Secure communication
 - **CORS Policy** - Cross-origin configuration
 - **Rate Limiting** - Throttling and DDoS protection

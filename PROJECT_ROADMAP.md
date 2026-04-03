@@ -27,17 +27,17 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 ### Must-Have Features
 
 - ✅ Multi-tenant data isolation (all queries filtered by TenantId)
-- [ ] User registration and JWT authentication (tenant-scoped)
+- ✅ User registration and JWT authentication (tenant-scoped)
 - [ ] CRUD operations for Resources and Bookings
 - [ ] Booking conflict prevention (no double-booking)
 - [ ] Status workflow (Pending → Confirmed → Completed/Cancelled)
 - [ ] Availability rules (working hours per resource)
 - ✅ Pagination and filtering (PagedResult<T> pattern)
-- [ ] Tenant-level and role-based authorization
+- ✅ Tenant-level and role-based authorization
 - [ ] Audit logging for all changes
 - ✅ Global error handling
 - ✅ API versioning (v1)
-- [ ] Swagger with JWT auth (Swagger configured, JWT pending Day 3)
+- ✅ Swagger with JWT auth
 - [ ] Rate limiting
 
 ### Testing
@@ -95,16 +95,16 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 ---
 
-#### **Day 3: Authentication & Authorization**
+#### **Day 3: Authentication & Authorization** ✅ COMPLETE
 
-- [ ] Implement Tenant and User entities with tenant isolation
-- [ ] Create authentication commands (RegisterTenant, RegisterUser, Login)
-- [ ] JWT token generation with TenantId claim
-- [ ] Password hashing (BCrypt)
-- [ ] Configure JWT authentication in pipeline
-- [ ] Implement tenant-level + role-based authorization
-- [ ] Create authorization policies (RequireTenantAdmin, RequireManager)
-- [ ] Add JWT auth to Swagger
+- [x] Implement Tenant and User entities with tenant isolation
+- [x] Create authentication commands (RegisterTenant, RegisterUser, Login)
+- [x] JWT token generation with TenantId claim
+- [x] Password hashing (BCrypt)
+- [x] Configure JWT authentication in pipeline
+- [x] Implement tenant-level + role-based authorization
+- [x] Create authorization policies (RequireTenantAdmin, RequireManager)
+- [x] Add JWT auth to Swagger
 
 **Learning Focus**: JWT flow, multi-tenant auth, claims-based authorization
 
