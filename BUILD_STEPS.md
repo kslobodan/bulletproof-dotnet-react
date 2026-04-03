@@ -109,5 +109,19 @@
 40. Verified database schema with `docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "\dt"`
 41. Verified seed data: 3 roles (TenantAdmin, Manager, User) inserted successfully
 42. Updated INSTALLATION_GUIDE.md to reflect working package configuration
-43. Fixed package conflict: Removed `Microsoft.AspNetCore.OpenApi` (conflicted with Swashbuckle)
-44. Verified application startup and database connection successful
+
+### Multi-Tenancy (TenantContext Service)
+
+43. Created `ITenantContext` interface in Application/Common/Interfaces
+44. Implemented `TenantContext` service in Infrastructure/Services with SetTenantId() and Clear() methods
+45. Created `TenantResolutionMiddleware` in API/Middleware to extract tenant from X-Tenant-Id header
+46. Registered TenantContext as scoped service in DI container
+47. Added TenantResolutionMiddleware to pipeline (after global error handling, before controllers)
+48. Middleware skips Swagger and health check endpoints
+49. Middleware validates X-Tenant-Id header format (GUID) and returns 400 if invalid or missing
+50. Created test controller `TenantController` (v1) to verify tenant resolution
+51. Tested middleware:
+    - ✅ Request without header: 400 "X-Tenant-Id header is required"
+    - ✅ Request with invalid GUID: 400 "Invalid X-Tenant-Id header format"
+    - ✅ Request with valid GUID: 200 with tenantId and isResolved=true
+    - ✅ Swagger endpoint bypasses tenant check

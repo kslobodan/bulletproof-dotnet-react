@@ -1,0 +1,21 @@
+### Test Tenant Resolution Middleware
+
+# Test 1: Request WITHOUT X-Tenant-Id header (should return 400)
+GET http://localhost:5036/api/v1/tenant/info
+
+###
+
+# Test 2: Request with INVALID X-Tenant-Id header (should return 400)
+GET http://localhost:5036/api/v1/tenant/info
+X-Tenant-Id: invalid-guid
+
+###
+
+# Test 3: Request with VALID X-Tenant-Id header (should return 200)
+GET http://localhost:5036/api/v1/tenant/info
+X-Tenant-Id: 123e4567-e89b-12d3-a456-426614174000
+
+###
+
+# Test 4: Swagger endpoint (should bypass tenant check)
+GET http://localhost:5036/swagger/index.html

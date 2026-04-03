@@ -2,6 +2,7 @@ using Serilog;
 using FluentValidation;
 using BookingSystem.API.Middleware;
 using BookingSystem.Infrastructure.Data;
+using BookingSystem.Infrastructure.Services;
 using BookingSystem.Application.Common.Interfaces;
 
 // Configure Serilog
@@ -29,6 +30,10 @@ try
     
     // Database
     builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
+    
+    // Multi-tenancy
+    builder.Services.AddScoped<TenantContext>();
+    builder.Services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<TenantContext>());
     
     // API Versioning
     builder.Services.AddApiVersioning(options =>
@@ -61,6 +66,9 @@ try
 
     // Global exception handling
     app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+    // Tenant resolution (must be before controllers)
+    app.UseMiddleware<TenantResolutionMiddleware>();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
