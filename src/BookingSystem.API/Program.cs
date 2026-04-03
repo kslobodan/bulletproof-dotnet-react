@@ -73,7 +73,18 @@ try
         };
     });
 
-    builder.Services.AddAuthorization();
+    builder.Services.AddAuthorization(options =>
+    {
+        // Require authenticated user by default for all endpoints
+        options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+
+        // Role-based policies
+        options.AddPolicy("AdminOnly", policy => policy.RequireRole("TenantAdmin"));
+        options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole("TenantAdmin", "Manager"));
+        options.AddPolicy("AllUsers", policy => policy.RequireRole("TenantAdmin", "Manager", "User"));
+    });
     
     // API Versioning
     builder.Services.AddApiVersioning(options =>

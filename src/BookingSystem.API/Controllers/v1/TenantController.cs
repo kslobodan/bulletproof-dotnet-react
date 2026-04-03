@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using BookingSystem.Application.Common.Interfaces;
 using Asp.Versioning;
 
@@ -7,6 +8,7 @@ namespace BookingSystem.API.Controllers.v1;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Authorize]
 public class TenantController : ControllerBase
 {
     private readonly ITenantContext _tenantContext;

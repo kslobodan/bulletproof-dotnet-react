@@ -231,4 +231,15 @@
 ### JWT Authentication Middleware
 
 98. Configured JWT authentication in `Program.cs`
-99. Added authentication middleware to pipeline
+99. Added authentication middleware to pipeline:
+    - `app.UseAuthentication()` before `app.UseAuthorization()`
+
+### Authorization Policies & Protected Endpoints
+
+100. Configured authorization policies in `Program.cs`
+101. Added `[Authorize]` attribute to protected controllers
+102. Added `[AllowAnonymous]` attribute to `AuthController`:
+
+
+    - Allows unauthenticated access to register-tenant, register-user, login endpoints
+    - Required because FallbackPolicy would otherwise block these endpoints
