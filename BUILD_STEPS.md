@@ -125,3 +125,32 @@
     - ✅ Request with invalid GUID: 400 "Invalid X-Tenant-Id header format"
     - ✅ Request with valid GUID: 200 with tenantId and isResolved=true
     - ✅ Swagger endpoint bypasses tenant check
+
+### Multi-Tenant Query Filter (Repository Pattern with Dapper)
+
+52. Installed Dapper in Application project for extension methods
+53. Created `DapperExtensions.cs` with tenant-aware query methods:
+    - `QueryWithTenantAsync<T>()` - SELECT with automatic TenantId filtering
+    - `QuerySingleOrDefaultWithTenantAsync<T>()` - Single result with tenant filter
+    - `ExecuteWithTenantAsync()` - INSERT/UPDATE/DELETE with tenant filter
+54. Created `IRepository<T>` base interface in Application/Common/Interfaces
+55. Created `BaseRepository<T>` abstract class in Infrastructure/Repositories with:
+    - Automatic TenantId injection in all queries
+    - GetByIdAsync, GetAllAsync, DeleteAsync, ExistsAsync with tenant filtering
+    - Abstract AddAsync and UpdateAsync for entity-specific implementation
+56. Created `User` entity in Domain/Entities with UUID Id and TenantId
+57. Created `IUserRepository` interface extending IRepository<User>
+58. Implemented `UserRepository` with tenant-aware CRUD operations
+59. Registered `IUserRepository` in DI container as scoped service
+60. Created migration `0002_ConvertToUUID.sql` to convert all ID columns from SERIAL to UUID
+61. Migration drops and recreates tables with `gen_random_uuid()` for PostgreSQL UUID support
+62. Created `UsersController` (v1) to demonstrate multi-tenant filtering
+63. Created test tenants in database (aaaaa... and bbbbb...)
+64. Tested multi-tenant data isolation:
+    - ✅ Created user for Tenant 1 (john@tenant1.com)
+    - ✅ Created user for Tenant 2 (jane@tenant2.com)
+    - ✅ Tenant 1 query returns only Tenant 1 users
+    - ✅ Tenant 2 query returns only Tenant 2 users
+    - ✅ Cross-tenant access blocked (Tenant 2 cannot access Tenant 1's user - returns 404)
+    - ✅ Same email allowed in different tenants (john@tenant1.com exists in both tenants)
+    - ✅ Multi-tenant data isolation fully functional

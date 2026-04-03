@@ -1,0 +1,76 @@
+### Test Multi-Tenant Data Isolation
+
+@tenant1Id = aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+@tenant2Id = bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
+
+### Test 1a: Create user for Tenant 1
+POST http://localhost:5036/api/v1/users
+Content-Type: application/json
+X-Tenant-Id: {{tenant1Id}}
+
+{
+  "email": "john@tenant1.com",
+  "password": "password123",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+
+###
+
+### Test 1b: Get all users for Tenant 1 (should see John)
+GET http://localhost:5036/api/v1/users
+X-Tenant-Id: {{tenant1Id}}
+
+###
+
+### Test 2a: Create user for Tenant 2
+POST http://localhost:5036/api/v1/users
+Content-Type: application/json
+X-Tenant-Id: {{tenant2Id}}
+
+{
+  "email": "jane@tenant2.com",
+  "password": "password456",
+  "firstName": "Jane",
+  "lastName": "Smith"
+}
+
+###
+
+### Test 2b: Get all users for Tenant 2 (should see Jane only, NOT John)
+GET http://localhost:5036/api/v1/users
+X-Tenant-Id: {{tenant2Id}}
+
+###
+
+### Test 3: Tenant 1 tries to access their users again (should still only see John)
+GET http://localhost:5036/api/v1/users
+X-Tenant-Id: {{tenant1Id}}
+
+###
+
+### Test 4: Try to create duplicate email within same tenant (should fail)
+POST http://localhost:5036/api/v1/users
+Content-Type: application/json
+X-Tenant-Id: {{tenant1Id}}
+
+{
+  "email": "john@tenant1.com",
+  "password": "differentpassword",
+  "firstName": "John",
+  "lastName": "Another"
+}
+
+###
+
+### Test 5: Create same email in different tenant (should succeed - multi-tenant isolation)
+POST http://localhost:5036/api/v1/users
+Content-Type: application/json
+X-Tenant-Id: {{tenant2Id}}
+
+{
+  "email": "john@tenant1.com",
+  "password": "password789",
+  "firstName": "John",
+  "lastName": "TwoTenant"
+}

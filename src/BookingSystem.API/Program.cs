@@ -3,6 +3,7 @@ using FluentValidation;
 using BookingSystem.API.Middleware;
 using BookingSystem.Infrastructure.Data;
 using BookingSystem.Infrastructure.Services;
+using BookingSystem.Infrastructure.Repositories;
 using BookingSystem.Application.Common.Interfaces;
 
 // Configure Serilog
@@ -34,6 +35,9 @@ try
     // Multi-tenancy
     builder.Services.AddScoped<TenantContext>();
     builder.Services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<TenantContext>());
+    
+    // Repositories
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
     
     // API Versioning
     builder.Services.AddApiVersioning(options =>
