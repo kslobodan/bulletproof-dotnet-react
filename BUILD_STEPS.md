@@ -80,3 +80,8 @@
     - `dotnet add package Asp.Versioning.Mvc.ApiExplorer`
 24. Configured API versioning in `Program.cs` (default v1.0)
 25. Added Controllers support with `AddControllers()` and `MapControllers()`
+
+### Swagger/OpenAPI
+
+26. Installed Swashbuckle: `dotnet add package Swashbuckle.AspNetCore`
+27. Configured Swagger in `Program.cs` with API documentation
