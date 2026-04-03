@@ -85,3 +85,7 @@
 
 26. Installed Swashbuckle: `dotnet add package Swashbuckle.AspNetCore`
 27. Configured Swagger in `Program.cs` with API documentation
+
+### Common Patterns
+
+28. Created `PagedResult<T>` class in Application/Common/Models for pagination
