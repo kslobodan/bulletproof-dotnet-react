@@ -260,3 +260,16 @@
 107. Created `UpdateResourceRequest` DTO
 108. Created `UpdateResourceResponse` DTO
 109. Created `DeleteResourceResponse` DTO
+
+### Resource Commands (CQRS)
+
+110. Created `IResourceRepository` interface in `Application/Common/Interfaces/IResourceRepository.cs`
+111. Created `CreateResourceCommand` in `Application/Features/Resources/Commands/CreateResource/`
+112. Created `CreateResourceCommandHandler`
+113. Created `CreateResourceCommandValidator`
+114. Created `UpdateResourceCommand` in `Application/Features/Resources/Commands/UpdateResource/`
+115. Created `UpdateResourceCommandHandler`
+116. Created `UpdateResourceCommandValidator`
+117. Created `DeleteResourceCommand` in `Application/Features/Resources/Commands/DeleteResource/`
+118. Created `DeleteResourceCommandHandler`
+119. Created `DeleteResourceCommandValidator`
