@@ -171,3 +171,19 @@
 68. Registered `IPasswordHasher` service in DI container (`Program.cs`):
     - `builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();`
     - Scoped lifetime: new instance per HTTP request
+
+### JWT Token Generation
+
+69. Installed JWT packages:
+    - API project: `dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer --version 9.0.1`
+    - Infrastructure project: `dotnet add package System.IdentityModel.Tokens.Jwt` (version 8.17.0 installed)
+70. Added JWT configuration to `appsettings.json`:
+71. Added JWT configuration to `appsettings.Development.json`
+72. Created `IJwtTokenService` interface in `Application/Common/Interfaces/IJwtTokenService.cs`:`
+73. Implemented `JwtTokenService` in `Infrastructure/Services/JwtTokenService.cs`:
+    - Uses `System.IdentityModel.Tokens.Jwt` for token generation
+    - Creates claims: NameIdentifier (userId), Email, Jti (unique token ID), and Role claims
+    - Signs token with HMAC SHA256 using symmetric key from configuration
+    - Token expiration based on configuration (default 60 minutes)
+74. Registered `IJwtTokenService` in DI container (`Program.cs`)
+75. Build verification: `dotnet build` - successful (6.0s)

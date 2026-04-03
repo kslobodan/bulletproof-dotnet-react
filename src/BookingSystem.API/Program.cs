@@ -41,6 +41,7 @@ try
     
     // Services
     builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+    builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
     
     // API Versioning
     builder.Services.AddApiVersioning(options =>
