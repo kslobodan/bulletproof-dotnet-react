@@ -89,3 +89,11 @@
 ### Common Patterns
 
 28. Created `PagedResult<T>` class in Application/Common/Models for pagination
+
+### Database Migrations
+
+29. Installed DbUp: `dotnet add package dbup-postgresql` in Infrastructure project
+30. Created `DatabaseMigration.cs` class with migration runner
+31. Created initial schema SQL script: `0001_InitialSchema.sql` (Tenants, Users, Roles, UserRoles)
+32. Configured .csproj to embed SQL scripts as resources
+33. Integrated migration runner in `Program.cs` to run on startup

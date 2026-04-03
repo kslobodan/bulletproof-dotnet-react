@@ -1,6 +1,7 @@
 using Serilog;
 using FluentValidation;
 using BookingSystem.API.Middleware;
+using BookingSystem.Infrastructure.Data;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -44,6 +45,15 @@ try
     builder.Services.AddSwaggerGen();
 
     var app = builder.Build();
+
+    // Run database migrations
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (!string.IsNullOrEmpty(connectionString))
+    {
+        Log.Information("Running database migrations...");
+        DatabaseMigration.RunMigrations(connectionString);
+        Log.Information("Database migrations completed");
+    }
 
     // Global exception handling
     app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
