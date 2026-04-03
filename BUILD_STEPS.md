@@ -297,3 +297,7 @@
 ### Resources Controller (API Endpoints)
 
 131. Created `ResourcesController` in `API/Controllers/v1/ResourcesController.cs`
+
+### Database Migration for Resources Table
+
+132. Created migration script `0003_CreateResourcesTable.sql`
