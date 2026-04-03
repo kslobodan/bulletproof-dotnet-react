@@ -39,6 +39,9 @@ try
     // Repositories
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     
+    // Services
+    builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+    
     // API Versioning
     builder.Services.AddApiVersioning(options =>
     {

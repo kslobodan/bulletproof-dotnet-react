@@ -154,3 +154,20 @@
     - ✅ Cross-tenant access blocked (Tenant 2 cannot access Tenant 1's user - returns 404)
     - ✅ Same email allowed in different tenants (john@tenant1.com exists in both tenants)
     - ✅ Multi-tenant data isolation fully functional
+
+---
+
+## Day 3: Authentication & Authorization
+
+### Password Hashing Setup
+
+65. Installed BCrypt.Net-Next package in Infrastructure project:
+    - `cd src/BookingSystem.Infrastructure`
+    - `dotnet add package BCrypt.Net-Next --version 4.0.3`
+    - Package added to `BookingSystem.Infrastructure.csproj`
+66. Created `IPasswordHasher` interface in `Application/Common/Interfaces/IPasswordHasher.cs`:
+67. Implemented `PasswordHasher` service in `Infrastructure/Services/PasswordHasher.cs`:
+    - Uses BCrypt.Net.BCrypt for hashing (adaptive algorithm with built-in salt)
+68. Registered `IPasswordHasher` service in DI container (`Program.cs`):
+    - `builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();`
+    - Scoped lifetime: new instance per HTTP request
