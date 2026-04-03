@@ -5,6 +5,9 @@ using BookingSystem.Infrastructure.Data;
 using BookingSystem.Infrastructure.Services;
 using BookingSystem.Infrastructure.Repositories;
 using BookingSystem.Application.Common.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -43,6 +46,34 @@ try
     // Services
     builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
     builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+    
+    // JWT Authentication
+    var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] 
+        ?? throw new InvalidOperationException("JWT SecretKey is not configured");
+    var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+    var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
+            ClockSkew = TimeSpan.Zero // Remove default 5 minute clock skew
+        };
+    });
+
+    builder.Services.AddAuthorization();
     
     // API Versioning
     builder.Services.AddApiVersioning(options =>
@@ -90,6 +121,9 @@ try
     }
 
     app.UseHttpsRedirection();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     app.MapControllers();
 

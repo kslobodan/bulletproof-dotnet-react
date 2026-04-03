@@ -227,3 +227,8 @@
 ### Authentication Controller (API Endpoints)
 
 97. Created `AuthController` in `API/Controllers/v1/AuthController.cs`
+
+### JWT Authentication Middleware
+
+98. Configured JWT authentication in `Program.cs`
+99. Added authentication middleware to pipeline
