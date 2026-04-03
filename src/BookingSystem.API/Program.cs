@@ -2,6 +2,7 @@ using Serilog;
 using FluentValidation;
 using BookingSystem.API.Middleware;
 using BookingSystem.Infrastructure.Data;
+using BookingSystem.Application.Common.Interfaces;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -25,6 +26,9 @@ try
     builder.Services.AddValidatorsFromAssembly(typeof(BookingSystem.Application.AssemblyReference).Assembly);
     
     builder.Services.AddAutoMapper(typeof(BookingSystem.Application.AssemblyReference).Assembly);
+    
+    // Database
+    builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
     
     // API Versioning
     builder.Services.AddApiVersioning(options =>

@@ -97,3 +97,17 @@
 31. Created initial schema SQL script: `0001_InitialSchema.sql` (Tenants, Users, Roles, UserRoles)
 32. Configured .csproj to embed SQL scripts as resources
 33. Integrated migration runner in `Program.cs` to run on startup
+
+### Repository Pattern
+
+34. Created `IDbConnectionFactory` interface in Application layer
+35. Implemented `DbConnectionFactory` in Infrastructure using Npgsql
+36. Registered factory in DI container as singleton
+37. Fixed package conflict: Removed `Microsoft.AspNetCore.OpenApi` (conflicted with Swashbuckle 10.1.7)
+38. Verified application startup: `dotnet run --project D:\Posao\bulletproof-dotnet-react\src\BookingSystem.API\BookingSystem.API.csproj`
+39. Database migrations executed successfully, all tables created
+40. Verified database schema with `docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "\dt"`
+41. Verified seed data: 3 roles (TenantAdmin, Manager, User) inserted successfully
+42. Updated INSTALLATION_GUIDE.md to reflect working package configuration
+43. Fixed package conflict: Removed `Microsoft.AspNetCore.OpenApi` (conflicted with Swashbuckle)
+44. Verified application startup and database connection successful

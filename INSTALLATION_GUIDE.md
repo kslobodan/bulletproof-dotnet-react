@@ -77,9 +77,8 @@ tests/
 
 ```bash
 # Core Framework
-Microsoft.AspNetCore.OpenApi
-Swashbuckle.AspNetCore                      # Swagger/OpenAPI
-Swashbuckle.AspNetCore.Filters              # Swagger auth support
+Swashbuckle.AspNetCore                      # Swagger/OpenAPI (provides complete OpenAPI functionality)
+Swashbuckle.AspNetCore.Filters              # Swagger auth support (optional)
 
 # Authentication
 Microsoft.AspNetCore.Authentication.JwtBearer
@@ -87,8 +86,8 @@ Microsoft.AspNetCore.Identity.EntityFrameworkCore  # User management (optional w
 System.IdentityModel.Tokens.Jwt
 
 # API Features
-Microsoft.AspNetCore.Mvc.Versioning          # API versioning
-Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer
+Asp.Versioning.Http                          # API versioning (v8.1.1)
+Asp.Versioning.Mvc.ApiExplorer               # API Explorer for versioned APIs
 AspNetCoreRateLimit                          # Rate limiting
 
 # Logging
