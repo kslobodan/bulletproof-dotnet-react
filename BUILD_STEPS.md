@@ -483,3 +483,13 @@
 188. Created `DeleteAvailabilityRuleCommandValidator`
 189. Created `IAvailabilityRuleRepository` interface in `Application/Common/Interfaces`
 190. Created `DeleteAvailabilityRuleResponse`
+
+### AvailabilityRules - Step 4: CQRS Queries
+
+191. Created `GetAvailabilityRuleByIdQuery` in `Queries/GetAvailabilityRuleById`
+192. Created `GetAvailabilityRuleByIdQueryHandler`
+193. Created `GetAvailabilityRuleByIdQueryValidator`
+194. Created `GetAllAvailabilityRulesQuery` in `Queries/GetAllAvailabilityRules`
+195. Created `GetAllAvailabilityRulesQueryHandler`
+196. Created `GetAllAvailabilityRulesQueryValidator`
+197. Updated `IAvailabilityRuleRepository`

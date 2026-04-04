@@ -156,17 +156,17 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 - [x] Register audit logging services in DI ✅
 - [x] Test audit logging (verify entries created for Create/Update/Delete/Cancel/Confirm) ✅
 
-**AvailabilityRules** 🔄 IN PROGRESS (33% - Step 3 of 9 complete):
+**AvailabilityRules** 🔄 IN PROGRESS (44% - Step 4 of 9 complete):
 
-- [x] Create AvailabilityRule entity (13 properties) ✅
-- [x] Create DTOs (6 classes with computed fields) ✅
-- [x] Create CQRS Commands (9 files: Create/Update/Delete Command/Handler/Validator + IAvailabilityRuleRepository interface) ✅
-- [ ] Create CQRS Queries (GetById, GetAll with pagination/filtering)
-- [ ] Implement AvailabilityRuleRepository with Dapper
-- [ ] Create AvailabilityRulesController with REST endpoints
-- [ ] Create database migration (0008_CreateAvailabilityRulesTable.sql)
-- [ ] Register repository in DI container
-- [ ] Test AvailabilityRules CRUD operations
+- [x] Step 1: Create AvailabilityRule entity (13 properties) ✅
+- [x] Step 2: Create DTOs (6 classes with computed fields) ✅
+- [x] Step 3: Create CQRS Commands (9 files: Create/Update/Delete Command/Handler/Validator + IAvailabilityRuleRepository interface) ✅
+- [x] Step 4: Create CQRS Queries (6 files: GetById/GetAll Query/Handler/Validator + updated IAvailabilityRuleRepository with GetPagedAsync) ✅
+- [ ] Step 5: Implement AvailabilityRuleRepository with Dapper
+- [ ] Step 6: Create AvailabilityRulesController with REST endpoints
+- [ ] Step 7: Create database migration (0008_CreateAvailabilityRulesTable.sql)
+- [ ] Step 8: Register repository in DI container
+- [ ] Step 9: Test AvailabilityRules CRUD operations
 
 **Other Advanced Features** (after AvailabilityRules):
 
