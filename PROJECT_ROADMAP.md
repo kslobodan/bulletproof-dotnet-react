@@ -148,22 +148,22 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 #### **Day 6: Advanced Features & Audit Logging** 🔄 IN PROGRESS
 
-- [ ] Implement AvailabilityRules entity and CRUD
-- [x] Create AuditLog entity and repository
-- [ ] Implement audit logging behavior (MediatR pipeline to track all CUD operations)
-- [ ] Create database migration for AuditLogs table
-- [ ] Register audit logging services in DI
-- [ ] Test audit logging (verify entries created for Create/Update/Delete/Cancel/Confirm)
-- [ ] Create admin endpoints to view audit logs (optional)
-- [ ] Add rate limiting middleware
-- [ ] Implement soft delete for entities
-- [ ] Create statistics endpoints (booking counts, resource utilization)
-- [ ] Add filtering and sorting to booking queries (date range, status)
-- [ ] Implement RefreshToken mechanism
+- [x] Create AuditLog entity and repository ✅
+- [x] Implement audit logging behavior (MediatR pipeline to track all CUD operations) ✅
+- [x] Create database migration for AuditLogs table ✅
+- [x] Register audit logging services in DI ✅
+- [x] Test audit logging (verify entries created for Create/Update/Delete/Cancel/Confirm) ✅
+- [ ] Create admin endpoints to view audit logs (optional GetAuditLogs query)
+- [ ] Implement AvailabilityRules entity and CRUD (working hours per resource)
+- [ ] Implement soft delete for entities (IsDeleted flag, update queries)
+- [ ] Add filtering and sorting to booking queries (date range, status, resourceId)
+- [ ] Create statistics endpoints (booking counts by status, resource utilization %, popular time slots)
+- [ ] Add rate limiting middleware (AspNetCoreRateLimit for DoS protection)
+- [ ] Implement RefreshToken mechanism (token rotation, expiration handling)
 
-**Learning Focus**: Audit patterns, MediatR pipeline behaviors, enterprise security
+**Learning Focus**: Audit patterns, MediatR pipeline behaviors, enterprise security, advanced queries
 
-**Current Status**: Completed AuditLog entity and AuditLogRepository with Dapper (Steps 1-2). Next: Create AuditLoggingBehavior pipeline.
+**Current Status**: ✅ **Audit logging complete!** AuditLoggingBehavior working. Next: AvailabilityRules entity and CRUD.
 
 ---
 
