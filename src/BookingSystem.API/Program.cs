@@ -43,6 +43,7 @@ try
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<ITenantRepository, TenantRepository>();
     builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
+    builder.Services.AddScoped<IBookingRepository, BookingRepository>();
     
     // Services
     builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();

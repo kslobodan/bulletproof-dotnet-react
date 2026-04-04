@@ -386,4 +386,12 @@
 
 ### Bookings Controller (API Layer)
 
-154. In `API/Controllers/v1` created `BookingsController.cs`
+154. In `API/Controllers/v1` created `BookingsController`
+
+### Database Migration (Infrastructure Layer)
+
+155. In `Infrastructure/Data/Scripts/` created `0006_CreateBookingsTable.sql`
+
+### Dependency Injection Registration (API Layer)
+
+156. In `API/Program.cs` registered `IBookingRepository` → `BookingRepository`
