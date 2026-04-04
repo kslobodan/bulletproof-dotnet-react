@@ -367,3 +367,9 @@
      - `CancelBooking`
      - `ConfirmBooking`
      - `DeleteBooking`
+
+### Booking Queries (Application Layer)
+
+151. In `Application/Features/Bookings/Queries/` created:
+     - `GetBookingById`
+     - `GetAllBookings`
