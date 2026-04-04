@@ -459,3 +459,12 @@
 ### AvailabilityRules - Step 1: Entity & Planning
 
 172. Created `AvailabilityRule` in `Domain/Entities
+
+### AvailabilityRules - Step 2: DTOs (Data Transfer Objects)
+
+173. Created `AvailabilityRuleDto` in `Application/Features/AvailabilityRules/DTOs/AvailabilityRuleDto.cs`
+174. Created `CreateAvailabilityRuleRequest`
+175. Created `CreateAvailabilityRuleResponse`
+176. Created `UpdateAvailabilityRuleRequest`
+177. Created `UpdateAvailabilityRuleResponse`
+178. Created `DeleteAvailabilityRuleResponse`
