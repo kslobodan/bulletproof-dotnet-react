@@ -358,3 +358,12 @@
      - `CancelBookingResponse`
      - `ConfirmBookingResponse`
      - `DeleteBookingResponse`
+
+### Booking Commands (Application Layer)
+
+150. In `Application/Features/Bookings/Commands/` created:
+     - `CreateBooking`
+     - `UpdateBooking`
+     - `CancelBooking`
+     - `ConfirmBooking`
+     - `DeleteBooking`
