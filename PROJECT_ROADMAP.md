@@ -28,9 +28,9 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 - ✅ Multi-tenant data isolation (all queries filtered by TenantId)
 - ✅ User registration and JWT authentication (tenant-scoped)
-- [ ] CRUD operations for Resources and Bookings
-- [ ] Booking conflict prevention (no double-booking)
-- [ ] Status workflow (Pending → Confirmed → Completed/Cancelled)
+- ⏳ CRUD operations for Resources and Bookings (Resources complete, Bookings in progress)
+- ⏳ Booking conflict prevention (interface defined, implementation pending)
+- ⏳ Status workflow (commands created: Pending → Confirmed → Completed/Cancelled)
 - [ ] Availability rules (working hours per resource)
 - ✅ Pagination and filtering (PagedResult<T> pattern)
 - ✅ Tenant-level and role-based authorization
@@ -42,10 +42,10 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 ### Testing
 
-- ✅ Backend unit tests (business logic)
-- ✅ Backend integration tests (API endpoints)
-- ✅ Frontend component tests
-- ✅ E2E tests (critical paths)
+- [ ] Backend unit tests (business logic)
+- [ ] Backend integration tests (API endpoints)
+- [ ] Frontend component tests
+- [ ] E2E tests (critical paths)
 
 ### DevOps
 
@@ -110,31 +110,35 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 ---
 
-#### **Day 4: Resources CRUD**
+#### **Day 4: Resources CRUD** ✅ COMPLETE
 
-- [ ] Implement Resource entity (tenant-scoped)
-- [ ] Create Resource commands (Create, Update, Delete)
-- [ ] Create Resource queries (GetById, GetAll with pagination, filtering by type)
-- [ ] Implement Resource validation rules
-- [ ] Add Dapper repositories for Resources with tenant filtering
-- [ ] Create Resource DTOs
-- [ ] Implement Resource API endpoints
-- [ ] Add authorization (TenantAdmin/Manager can manage resources)
+- [x] Implement Resource entity (tenant-scoped)
+- [x] Create Resource commands (Create, Update, Delete)
+- [x] Create Resource queries (GetById, GetAll with pagination, filtering by type)
+- [x] Implement Resource validation rules
+- [x] Add Dapper repositories for Resources with tenant filtering
+- [x] Create Resource DTOs
+- [x] Implement Resource API endpoints
+- [x] Add authorization (TenantAdmin/Manager can manage resources)
+- [x] Test multi-tenant isolation with 3 tenants
 
 **Learning Focus**: CQRS pattern, tenant-scoped queries
 
 ---
 
-#### **Day 5: Bookings CRUD & Business Logic**
+#### **Day 5: Bookings CRUD & Business Logic** ⏳ IN PROGRESS
 
-- [ ] Implement Booking entity with status enum (tenant-scoped)
-- [ ] Create Booking commands (Create, Update, Cancel, Confirm)
-- [ ] Create Booking queries (GetById, GetByResource, GetByUser, GetAll with filtering)
-- [ ] Implement booking conflict detection logic
-- [ ] Implement availability rules validation
-- [ ] Add Dapper repositories for Bookings with tenant filtering
-- [ ] Create Booking DTOs
-- [ ] Implement Booking API endpoints
+- [x] Implement Booking entity with status enum (tenant-scoped)
+- [x] Create Booking DTOs (8 files: BookingDto, Create/Update/Cancel/Confirm/Delete Request/Response)
+- [x] Create Booking commands (Create, Update, Cancel, Confirm, Delete) with FluentValidation
+- [x] Create Booking queries (GetById, GetAll with filtering by resource/user/status/dates)
+- [x] Create IBookingRepository interface with HasConflictAsync method
+- [ ] Implement BookingRepository with Dapper (conflict detection SQL, CRUD operations)
+- [ ] Create BookingsController with REST endpoints
+- [ ] Create database migration (0004_CreateBookingsTable.sql)
+- [ ] Register IBookingRepository in DI container
+- [ ] Test booking operations and conflict detection
+- [ ] Implement availability rules validation (optional)
 
 **Learning Focus**: Complex business logic, time-based validation, conflict resolution
 

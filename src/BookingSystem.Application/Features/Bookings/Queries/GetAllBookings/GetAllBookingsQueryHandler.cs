@@ -30,55 +30,55 @@ public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, P
             throw new UnauthorizedAccessException("Tenant context is required for this operation");
         }
 
-        // Build filter conditions
-        string whereClause = "1=1"; // Start with always-true condition
-        var parameters = new Dictionary<string, object>();
+        // TODO: Implement filtering in repository for better performance
+        // For now, get all bookings and filter in memory
+        var allBookings = await _bookingRepository.GetAllAsync(cancellationToken);
+
+        // Apply filters
+        var filteredBookings = allBookings.AsQueryable();
 
         if (request.ResourceId.HasValue)
         {
-            whereClause += " AND ResourceId = @ResourceId";
-            parameters.Add("ResourceId", request.ResourceId.Value);
+            filteredBookings = filteredBookings.Where(b => b.ResourceId == request.ResourceId.Value);
         }
 
         if (request.UserId.HasValue)
         {
-            whereClause += " AND UserId = @UserId";
-            parameters.Add("UserId", request.UserId.Value);
+            filteredBookings = filteredBookings.Where(b => b.UserId == request.UserId.Value);
         }
 
         if (request.Status.HasValue)
         {
-            whereClause += " AND Status = @Status";
-            parameters.Add("Status", (int)request.Status.Value);
+            filteredBookings = filteredBookings.Where(b => b.Status == request.Status.Value);
         }
 
         if (request.StartDate.HasValue)
         {
-            whereClause += " AND StartTime >= @StartDate";
-            parameters.Add("StartDate", request.StartDate.Value);
+            filteredBookings = filteredBookings.Where(b => b.StartTime >= request.StartDate.Value);
         }
 
         if (request.EndDate.HasValue)
         {
-            whereClause += " AND EndTime <= @EndDate";
-            parameters.Add("EndDate", request.EndDate.Value);
+            filteredBookings = filteredBookings.Where(b => b.EndTime <= request.EndDate.Value);
         }
 
-        var pagedBookings = await _bookingRepository.GetPagedAsync(
-            request.PageNumber,
-            request.PageSize,
-            whereClause,
-            parameters,
-            "StartTime DESC"
-        );
+        // Order by StartTime descending
+        var orderedBookings = filteredBookings.OrderByDescending(b => b.StartTime).ToList();
 
-        var bookingDtos = _mapper.Map<IEnumerable<BookingDto>>(pagedBookings.Items);
+        // Apply pagination
+        var totalCount = orderedBookings.Count;
+        var pagedBookings = orderedBookings
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToList();
+
+        var bookingDtos = _mapper.Map<List<BookingDto>>(pagedBookings);
 
         return new PagedResult<BookingDto>(
             bookingDtos,
-            pagedBookings.TotalCount,
-            pagedBookings.PageNumber,
-            pagedBookings.PageSize
+            totalCount,
+            request.PageNumber,
+            request.PageSize
         );
     }
 }

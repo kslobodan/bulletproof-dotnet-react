@@ -373,3 +373,9 @@
 151. In `Application/Features/Bookings/Queries/` created:
      - `GetBookingById`
      - `GetAllBookings`
+
+### Booking Repository Interface (Application Layer)
+
+152. In `Application/Common/Interfaces/IBookingRepository.cs`:
+     - created `IBookingRepository`
+     - updated `GetAllBookingsQueryHandler`
