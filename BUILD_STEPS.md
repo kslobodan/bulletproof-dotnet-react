@@ -336,3 +336,25 @@
 146. Created resource for GlobalCorp: "GlobalCorp Boardroom" (ID: `b1846791-47f2-4a27-860f-40977d1feb18`)
 147. **Verified database isolation**: `docker exec bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT id, name, resourcetype, tenantid FROM resources"`
      Result: 3 resources, each with different tenantId
+
+---
+
+## Day 5: Bookings CRUD & Business Logic
+
+### Booking Entity & Enum (Domain Layer)
+
+148. In `Domain/Entities/Booking.cs` creted:
+     - `BookingStatus`
+     - `Booking`
+
+### Booking DTOs (Application Layer)
+
+149. In `Application/Features/Bookings/DTOs/BookingDto.cs` created:
+     - `BookingDto`
+     - `CreateBookingRequest`
+     - `CreateBookingResponse`
+     - `UpdateBookingRequest`
+     - `UpdateBookingResponse`
+     - `CancelBookingResponse`
+     - `ConfirmBookingResponse`
+     - `DeleteBookingResponse`
