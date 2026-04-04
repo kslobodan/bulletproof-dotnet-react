@@ -419,4 +419,12 @@
      - **Delete**: DELETE `/api/v1/bookings/{id}` (admin) → Hard delete from database ✅
      - **Multi-tenant isolation**: All queries tenant-filtered via BaseRepository
      - **HasConflictAsync SQL**: Verified time overlap detection `(StartTime < EndTime) AND (EndTime > StartTime)` working correctly
-     - All authorization policies enforced (ManagerOrAbove for confirm, AdminOnly for delete)
+     - All authorization policies enforced (ManagerOrAbove for confirm, AdminOnly for delete) ✅
+
+---
+
+## Day 6: Advanced Features & Audit Logging
+
+### Audit Logging - Step 1: AuditLog Entity
+
+159. Created `AuditLog` in `Domain/Entities
