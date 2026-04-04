@@ -501,3 +501,7 @@
 ### AvailabilityRules - Step 5: Repository Implementation
 
 201. Created `AvailabilityRuleRepository.cs` in `Infrastructure/Repositories`
+
+### AvailabilityRules - Step 6: Controller
+
+207. Created `AvailabilityRulesController` in `API/Controllers/v1`
