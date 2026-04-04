@@ -428,3 +428,7 @@
 ### Audit Logging - Step 1: AuditLog Entity
 
 159. Created `AuditLog` in `Domain/Entities
+
+### Audit Logging - Step 2: IAuditLogRepository Interface
+
+160. Created `IAuditLogRepository` interface in `Application/Common/Interfaces
