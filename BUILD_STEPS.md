@@ -442,3 +442,8 @@
 ### Audit Logging - Step 4: Database Migration
 
 164. Created migration script `0007_CreateAuditLogsTable.sql` in `Infrastructure/Data/Scripts/`
+
+### Audit Logging - Step 5: DI Registration
+
+165. Registered `AuditLogRepository` in `Program.cs`:
+166. Registered `AuditLoggingBehavior` in MediatR pipeline in `Program.cs`:

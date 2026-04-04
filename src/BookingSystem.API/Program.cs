@@ -25,8 +25,11 @@ try
     builder.Host.UseSerilog();
 
     // Add services to the container.
-    builder.Services.AddMediatR(cfg => 
-        cfg.RegisterServicesFromAssembly(typeof(BookingSystem.Application.AssemblyReference).Assembly));
+    builder.Services.AddMediatR(cfg =>
+    {
+        cfg.RegisterServicesFromAssembly(typeof(BookingSystem.Application.AssemblyReference).Assembly);
+        cfg.AddOpenBehavior(typeof(BookingSystem.Application.Common.Behaviors.AuditLoggingBehavior<,>));
+    });
     
     builder.Services.AddValidatorsFromAssembly(typeof(BookingSystem.Application.AssemblyReference).Assembly);
     
@@ -44,6 +47,7 @@ try
     builder.Services.AddScoped<ITenantRepository, TenantRepository>();
     builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
     builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+    builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
     
     // Services
     builder.Services.AddHttpContextAccessor();
