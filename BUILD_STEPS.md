@@ -379,3 +379,7 @@
 152. In `Application/Common/Interfaces/IBookingRepository.cs`:
      - created `IBookingRepository`
      - updated `GetAllBookingsQueryHandler`
+
+### Booking Repository Implementation (Infrastructure Layer)
+
+153. In `Infrastructure/Repositories/BookingRepository.cs` created `BookingRepository`
