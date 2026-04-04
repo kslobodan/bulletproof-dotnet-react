@@ -19,9 +19,9 @@ public class TenantResolutionMiddleware
 
     public async Task InvokeAsync(HttpContext context, TenantContext tenantContext)
     {
-        // Skip tenant resolution for health checks and Swagger endpoints
+        // Skip tenant resolution for health checks, Swagger, and auth endpoints
         var path = context.Request.Path.Value?.ToLower();
-        if (path != null && (path.Contains("/swagger") || path.Contains("/health")))
+        if (path != null && (path.Contains("/swagger") || path.Contains("/health") || path.Contains("/auth")))
         {
             await _next(context);
             return;

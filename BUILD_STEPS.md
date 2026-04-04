@@ -301,3 +301,38 @@
 ### Database Migration for Resources Table
 
 132. Created migration script `0003_CreateResourcesTable.sql`
+
+133. Executed migration: Rebuild and restart API → DbUp applied 0003_CreateResourcesTable.sql
+134. Verified table creation: `docker exec bookingsystem-db psql -U postgres -d BookingSystemDB -c "\d resources"`
+
+135. **Register Tenant (Acme Corp)**:
+     `Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/register-tenant" -Method POST -Body '{"tenantName":"Acme Corp","email":"admin@acme.com","password":"Admin1234","firstName":"Alice","lastName":"Admin","plan":"Pro"}' -ContentType "application/json"`
+     Result: Got JWT token + tenantId `4b47f363-8f8d-4dce-bcec-4ee66d2a2eb4`
+136. **Create Resource**:
+     `POST /api/v1/resources` with headers (Authorization: Bearer {token}, X-Tenant-Id: {guid})
+     Result: Conference Room A created, ID `3ebb51d2-36af-4a56-89e5-17db7eec34a5`
+137. **List Resources (Paginated)**:
+     `GET /api/v1/resources?pageNumber=1&pageSize=10`
+     Result: PagedResult with 1 item, totalCount=1, totalPages=1
+138. **Get Resource by ID**:
+     `GET /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
+     Result: Single ResourceDto returned
+139. **Update Resource**:
+     `PUT /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
+     Result: Name changed to "Conference Room A (Updated)", capacity 10→12, updatedAt set
+140. **Delete Resource**:
+     `DELETE /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
+     Result: 200 OK "Resource deleted successfully"
+141. **Verify Deletion**:
+     `GET /api/v1/resources`
+     Result: Empty list, totalCount=0
+
+### Multi-Tenant Isolation Testing
+
+142. Created resource for Acme Corp: "Acme Meeting Room 1" (ID: `47fd25cb-ad01-4e64-ba9a-4a4e28582b1c`)
+143. Registered second tenant: TechCo (`email:admin@techco.com`, tenantId: `fa6b63f7-55ae-4660-b1de-13a7d0258902`)
+144. Created resource for TechCo: "TechCo Lab Room" (Laboratory)
+145. Registered third tenant: GlobalCorp (`email:admin@globalcorp.com`, tenantId: `e13ea0c3-b658-424b-91da-d286df05703e`)
+146. Created resource for GlobalCorp: "GlobalCorp Boardroom" (ID: `b1846791-47f2-4a27-860f-40977d1feb18`)
+147. **Verified database isolation**: `docker exec bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT id, name, resourcetype, tenantid FROM resources"`
+     Result: 3 resources, each with different tenantId
