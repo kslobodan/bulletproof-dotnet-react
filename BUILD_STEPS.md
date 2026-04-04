@@ -509,3 +509,7 @@
 ### AvailabilityRules - Step 7: Database Migration
 
 216. Created `0008_CreateAvailabilityRulesTable.sql` in `Infrastructure/Data/Scripts`
+
+### AvailabilityRules - Step 8: DI Registration
+
+224. Registered `AvailabilityRuleRepository` in `Program.cs`
