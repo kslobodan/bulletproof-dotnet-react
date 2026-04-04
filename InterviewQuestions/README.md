@@ -12,7 +12,7 @@
 - [Day 2: Core Infrastructure & Multi-tenancy](./Day2-Infrastructure.md)
 - [Day 3: Authentication & Authorization](./Day3-Authentication.md)
 - [Day 4: Resources CRUD & Multi-Tenant Isolation](./Day4-Resources.md)
-- [Day 5: Bookings CRUD & Business Logic](./Day5-Bookings.md) _(Coming soon)_
+- [Day 5: Bookings CRUD & Business Logic](./Day5-Bookings.md)
 - [Day 6: Advanced Features & Audit Logging](./Day6-Advanced.md) _(Coming soon)_
 - [Day 7: Backend Testing](./Day7-Testing.md) _(Coming soon)_
 
