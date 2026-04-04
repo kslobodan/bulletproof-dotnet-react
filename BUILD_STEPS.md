@@ -455,3 +455,7 @@
 169. Tested audit logging functionality
 170. Verified audit data in database
 171. All Create/Update/Cancel/Confirm/Delete operations are being tracked
+
+### AvailabilityRules - Step 1: Entity & Planning
+
+172. Created `AvailabilityRule` in `Domain/Entities
