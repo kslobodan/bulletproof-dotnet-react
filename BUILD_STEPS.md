@@ -382,4 +382,8 @@
 
 ### Booking Repository Implementation (Infrastructure Layer)
 
-153. In `Infrastructure/Repositories/BookingRepository.cs` created `BookingRepository`
+153. In `Infrastructure/Repositories/BookingRepository.cs` created`BookingRepository`
+
+### Bookings Controller (API Layer)
+
+154. In `API/Controllers/v1` created `BookingsController.cs`
