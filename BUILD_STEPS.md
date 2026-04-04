@@ -505,3 +505,7 @@
 ### AvailabilityRules - Step 6: Controller
 
 207. Created `AvailabilityRulesController` in `API/Controllers/v1`
+
+### AvailabilityRules - Step 7: Database Migration
+
+216. Created `0008_CreateAvailabilityRulesTable.sql` in `Infrastructure/Data/Scripts`
