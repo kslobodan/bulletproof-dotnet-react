@@ -12,13 +12,16 @@ public class UpdateBookingCommandHandler : IRequestHandler<UpdateBookingCommand,
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly ITenantContext _tenantContext;
+    private readonly ICurrentUserService _currentUserService;
 
     public UpdateBookingCommandHandler(
         IBookingRepository bookingRepository,
-        ITenantContext tenantContext)
+        ITenantContext tenantContext,
+        ICurrentUserService currentUserService)
     {
         _bookingRepository = bookingRepository;
         _tenantContext = tenantContext;
+        _currentUserService = currentUserService;
     }
 
     public async Task<UpdateBookingResponse> Handle(UpdateBookingCommand request, CancellationToken cancellationToken)
@@ -67,7 +70,7 @@ public class UpdateBookingCommandHandler : IRequestHandler<UpdateBookingCommand,
             booking.Notes = request.Notes;
 
         booking.UpdatedAt = DateTime.UtcNow;
-        booking.UpdatedBy = _tenantContext.TenantId; // TODO: Get actual UserId
+        booking.UpdatedBy = _currentUserService.UserId;
 
         // Save changes
         await _bookingRepository.UpdateAsync(booking);

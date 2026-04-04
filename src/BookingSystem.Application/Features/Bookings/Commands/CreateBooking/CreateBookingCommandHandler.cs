@@ -14,15 +14,18 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     private readonly IBookingRepository _bookingRepository;
     private readonly IResourceRepository _resourceRepository;
     private readonly ITenantContext _tenantContext;
+    private readonly ICurrentUserService _currentUserService;
 
     public CreateBookingCommandHandler(
         IBookingRepository bookingRepository,
         IResourceRepository resourceRepository,
-        ITenantContext tenantContext)
+        ITenantContext tenantContext,
+        ICurrentUserService currentUserService)
     {
         _bookingRepository = bookingRepository;
         _resourceRepository = resourceRepository;
         _tenantContext = tenantContext;
+        _currentUserService = currentUserService;
     }
 
     public async Task<CreateBookingResponse> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
@@ -52,19 +55,21 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             throw new InvalidOperationException("This time slot is already booked");
 
         // Create booking entity
+        var userId = _currentUserService .UserId;
+        
         var booking = new Booking
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
             ResourceId = request.ResourceId,
-            UserId = tenantId, // TODO: Get actual UserId from authentication context
+            UserId = userId,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             Status = BookingStatus.Pending,
             Title = request.Title,
             Description = request.Description,
             CreatedAt = DateTime.UtcNow,
-            CreatedBy = tenantId // TODO: Get actual UserId
+            CreatedBy = userId
         };
 
         // Save to database

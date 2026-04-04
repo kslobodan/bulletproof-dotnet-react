@@ -46,8 +46,10 @@ try
     builder.Services.AddScoped<IBookingRepository, BookingRepository>();
     
     // Services
+    builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
     builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+    builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
     
     // JWT Authentication
     var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] 
@@ -85,6 +87,7 @@ try
         // Role-based policies
         options.AddPolicy("AdminOnly", policy => policy.RequireRole("TenantAdmin"));
         options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole("TenantAdmin", "Manager"));
+        options.AddPolicy("ManagerOrAbove", policy => policy.RequireRole("TenantAdmin", "Manager"));
         options.AddPolicy("AllUsers", policy => policy.RequireRole("TenantAdmin", "Manager", "User"));
     });
     

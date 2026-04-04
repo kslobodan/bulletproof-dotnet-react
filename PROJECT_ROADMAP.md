@@ -126,19 +126,21 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 ---
 
-#### **Day 5: Bookings CRUD & Business Logic** ⏳ IN PROGRESS
+#### **Day 5: Bookings CRUD & Business Logic** ✅ COMPLETE
 
 - [x] Implement Booking entity with status enum (tenant-scoped)
 - [x] Create Booking DTOs (8 files: BookingDto, Create/Update/Cancel/Confirm/Delete Request/Response)
 - [x] Create Booking commands (Create, Update, Cancel, Confirm, Delete) with FluentValidation
 - [x] Create Booking queries (GetById, GetAll with filtering by resource/user/status/dates)
 - [x] Create IBookingRepository interface with HasConflictAsync method
-- [ ] Implement BookingRepository with Dapper (conflict detection SQL, CRUD operations)
-- [ ] Create BookingsController with REST endpoints
-- [ ] Create database migration (0004_CreateBookingsTable.sql)
-- [ ] Register IBookingRepository in DI container
-- [ ] Test booking operations and conflict detection
-- [ ] Implement availability rules validation (optional)
+- [x] Implement BookingRepository with Dapper (conflict detection SQL, CRUD operations)
+- [x] Create BookingsController with REST endpoints
+- [x] Create database migration (0006_CreateBookingsTable.sql)
+- [x] Register IBookingRepository in DI container
+- [x] Test booking operations and conflict detection
+- [x] Implemented ICurrentUserService for JWT userId extraction
+- [x] Created BookingMappingProfile for AutoMapper
+- [x] Added ManagerOrAbove authorization policy
 
 **Learning Focus**: Complex business logic, time-based validation, conflict resolution
 

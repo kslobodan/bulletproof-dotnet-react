@@ -6,6 +6,20 @@ using MediatR;
 namespace BookingSystem.Application.Features.Authentication.Commands.Login;
 
 /// <summary>
+/// Simple DTO for user login query
+/// </summary>
+internal class UserLoginDto
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+}
+
+/// <summary>
 /// Handler for LoginCommand.
 /// Authenticates user by email/password and generates JWT token.
 /// </summary>
@@ -45,7 +59,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
             FROM Users
             WHERE Email = @Email AND TenantId = @TenantId";
 
-        var user = await connection.QuerySingleOrDefaultAsync<dynamic>(userSql, new
+        var user = await connection.QuerySingleOrDefaultAsync<UserLoginDto>(userSql, new
         {
             Email = request.Email,
             TenantId = tenant.Id
