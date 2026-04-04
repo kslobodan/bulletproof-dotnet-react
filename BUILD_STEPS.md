@@ -463,8 +463,23 @@
 ### AvailabilityRules - Step 2: DTOs (Data Transfer Objects)
 
 173. Created `AvailabilityRuleDto` in `Application/Features/AvailabilityRules/DTOs/AvailabilityRuleDto.cs`
-174. Created `CreateAvailabilityRuleRequest`
+174. Created `CreateAvailabilityRuleRequest` (7 properties: ResourceId, DayOfWeek, StartTime, EndTime, IsActive, EffectiveFrom?, EffectiveTo?)
 175. Created `CreateAvailabilityRuleResponse`
-176. Created `UpdateAvailabilityRuleRequest`
+176. Created `UpdateAvailabilityRuleRequest` (5 properties: StartTime, EndTime, IsActive, EffectiveFrom?, EffectiveTo? - Note: Cannot change ResourceId or DayOfWeek)
 177. Created `UpdateAvailabilityRuleResponse`
 178. Created `DeleteAvailabilityRuleResponse`
+179. Build verification: `dotnet build` - successful (9.8s) ✅
+
+### AvailabilityRules - Step 3: CQRS Commands
+
+180. Created `CreateAvailabilityRuleCommand` in `Commands/CreateAvailabilityRule`
+181. Created `CreateAvailabilityRuleCommandHandler`
+182. Created `CreateAvailabilityRuleCommandValidator`
+183. Created `UpdateAvailabilityRuleCommand` in `Commands/UpdateAvailabilityRule`
+184. Created `UpdateAvailabilityRuleCommandHandler`
+185. Created `UpdateAvailabilityRuleCommandValidator`
+186. Created `DeleteAvailabilityRuleCommand` in `Commands/DeleteAvailabilityRule`
+187. Created `DeleteAvailabilityRuleCommandHandler`
+188. Created `DeleteAvailabilityRuleCommandValidator`
+189. Created `IAvailabilityRuleRepository` interface in `Application/Common/Interfaces`
+190. Created `DeleteAvailabilityRuleResponse`

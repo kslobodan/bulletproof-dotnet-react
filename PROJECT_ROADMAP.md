@@ -148,13 +148,29 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 #### **Day 6: Advanced Features & Audit Logging** 🔄 IN PROGRESS
 
+**Audit Logging** ✅ COMPLETE:
+
 - [x] Create AuditLog entity and repository ✅
 - [x] Implement audit logging behavior (MediatR pipeline to track all CUD operations) ✅
 - [x] Create database migration for AuditLogs table ✅
 - [x] Register audit logging services in DI ✅
 - [x] Test audit logging (verify entries created for Create/Update/Delete/Cancel/Confirm) ✅
+
+**AvailabilityRules** 🔄 IN PROGRESS (33% - Step 3 of 9 complete):
+
+- [x] Create AvailabilityRule entity (13 properties) ✅
+- [x] Create DTOs (6 classes with computed fields) ✅
+- [x] Create CQRS Commands (9 files: Create/Update/Delete Command/Handler/Validator + IAvailabilityRuleRepository interface) ✅
+- [ ] Create CQRS Queries (GetById, GetAll with pagination/filtering)
+- [ ] Implement AvailabilityRuleRepository with Dapper
+- [ ] Create AvailabilityRulesController with REST endpoints
+- [ ] Create database migration (0008_CreateAvailabilityRulesTable.sql)
+- [ ] Register repository in DI container
+- [ ] Test AvailabilityRules CRUD operations
+
+**Other Advanced Features** (after AvailabilityRules):
+
 - [ ] Create admin endpoints to view audit logs (optional GetAuditLogs query)
-- [ ] Implement AvailabilityRules entity and CRUD (working hours per resource)
 - [ ] Implement soft delete for entities (IsDeleted flag, update queries)
 - [ ] Add filtering and sorting to booking queries (date range, status, resourceId)
 - [ ] Create statistics endpoints (booking counts by status, resource utilization %, popular time slots)
@@ -163,7 +179,7 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 **Learning Focus**: Audit patterns, MediatR pipeline behaviors, enterprise security, advanced queries
 
-**Current Status**: ✅ **Audit logging complete!** AuditLoggingBehavior working. Next: AvailabilityRules entity and CRUD.
+**Current Status**: ✅ **Audit logging complete!** 🔄 **AvailabilityRules in progress** - Commands done, now need Queries.
 
 ---
 
