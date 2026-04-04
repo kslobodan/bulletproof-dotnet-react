@@ -146,19 +146,24 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 ---
 
-#### **Day 6: Advanced Features & Audit Logging**
+#### **Day 6: Advanced Features & Audit Logging** 🔄 IN PROGRESS
 
 - [ ] Implement AvailabilityRules entity and CRUD
-- [ ] Create AuditLog entity and repository
-- [ ] Implement audit logging middleware (track all CUD operations)
+- [x] Create AuditLog entity and repository
+- [ ] Implement audit logging behavior (MediatR pipeline to track all CUD operations)
+- [ ] Create database migration for AuditLogs table
+- [ ] Register audit logging services in DI
+- [ ] Test audit logging (verify entries created for Create/Update/Delete/Cancel/Confirm)
+- [ ] Create admin endpoints to view audit logs (optional)
 - [ ] Add rate limiting middleware
 - [ ] Implement soft delete for entities
 - [ ] Create statistics endpoints (booking counts, resource utilization)
 - [ ] Add filtering and sorting to booking queries (date range, status)
-- [ ] Add input sanitization
 - [ ] Implement RefreshToken mechanism
 
-**Learning Focus**: Audit patterns, enterprise security, token refresh flow
+**Learning Focus**: Audit patterns, MediatR pipeline behaviors, enterprise security
+
+**Current Status**: Completed AuditLog entity and AuditLogRepository with Dapper (Steps 1-2). Next: Create AuditLoggingBehavior pipeline.
 
 ---
 
