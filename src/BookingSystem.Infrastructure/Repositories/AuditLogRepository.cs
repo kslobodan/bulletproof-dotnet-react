@@ -55,9 +55,12 @@ public class AuditLogRepository : IAuditLogRepository
         int pageNumber,
         int pageSize,
         string? entityName = null,
+        Guid? entityId = null,
         string? action = null,
-        DateTime? startDate = null,
-        DateTime? endDate = null)
+        Guid? userId = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
 
@@ -71,22 +74,34 @@ public class AuditLogRepository : IAuditLogRepository
             parameters.Add("EntityName", entityName);
         }
 
+        if (entityId.HasValue)
+        {
+            whereConditions.Add("EntityId = @EntityId");
+            parameters.Add("EntityId", entityId.Value);
+        }
+
         if (!string.IsNullOrWhiteSpace(action))
         {
             whereConditions.Add("Action = @Action");
             parameters.Add("Action", action);
         }
 
-        if (startDate.HasValue)
+        if (userId.HasValue)
         {
-            whereConditions.Add("Timestamp >= @StartDate");
-            parameters.Add("StartDate", startDate.Value);
+            whereConditions.Add("UserId = @UserId");
+            parameters.Add("UserId", userId.Value);
         }
 
-        if (endDate.HasValue)
+        if (fromDate.HasValue)
         {
-            whereConditions.Add("Timestamp <= @EndDate");
-            parameters.Add("EndDate", endDate.Value);
+            whereConditions.Add("Timestamp >= @FromDate");
+            parameters.Add("FromDate", fromDate.Value);
+        }
+
+        if (toDate.HasValue)
+        {
+            whereConditions.Add("Timestamp <= @ToDate");
+            parameters.Add("ToDate", toDate.Value);
         }
 
         var whereClause = string.Join(" AND ", whereConditions);

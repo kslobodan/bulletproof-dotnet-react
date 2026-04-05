@@ -11,8 +11,11 @@ public interface IAuditLogRepository
         int pageNumber, 
         int pageSize,
         string? entityName = null,
+        Guid? entityId = null,
         string? action = null,
-        DateTime? startDate = null,
-        DateTime? endDate = null);
+        Guid? userId = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        CancellationToken cancellationToken = default);
     Task<IEnumerable<AuditLog>> GetByUserAsync(Guid userId, int limit = 50);
 }
