@@ -28,17 +28,20 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 - ✅ Multi-tenant data isolation (all queries filtered by TenantId)
 - ✅ User registration and JWT authentication (tenant-scoped)
-- ⏳ CRUD operations for Resources and Bookings (Resources complete, Bookings in progress)
-- ⏳ Booking conflict prevention (interface defined, implementation pending)
-- ⏳ Status workflow (commands created: Pending → Confirmed → Completed/Cancelled)
-- [ ] Availability rules (working hours per resource)
-- ✅ Pagination and filtering (PagedResult<T> pattern)
-- ✅ Tenant-level and role-based authorization
-- [ ] Audit logging for all changes
+- ✅ CRUD operations for Resources and Bookings (full CRUD with validation)
+- ✅ Booking conflict prevention (time overlap detection implemented)
+- ✅ Status workflow (Pending → Confirmed → Completed/Cancelled)
+- ✅ Availability rules (working hours per resource with TIME data type)
+- ✅ Pagination and filtering (PagedResult<T> pattern with dynamic WHERE clauses)
+- ✅ Tenant-level and role-based authorization (AdminOnly, ManagerOrAbove)
+- ✅ Audit logging for all changes (MediatR pipeline behavior)
 - ✅ Global error handling
 - ✅ API versioning (v1)
 - ✅ Swagger with JWT auth
-- [ ] Rate limiting
+- ✅ Rate limiting (AspNetCoreRateLimit - 60 req/min per IP)
+- ✅ RefreshToken mechanism (token rotation, 7-day expiration)
+- ✅ Soft delete pattern (IsDeleted/DeletedAt tracking)
+- ✅ Statistics endpoints (SQL aggregation with GROUP BY, DATE_TRUNC)
 
 ### Testing
 
@@ -146,7 +149,7 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 ---
 
-#### **Day 6: Advanced Features & Audit Logging** 🔄 IN PROGRESS
+#### **Day 6: Advanced Features & Audit Logging** ✅ COMPLETE
 
 **Audit Logging** ✅ COMPLETE:
 
@@ -156,7 +159,7 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 - [x] Register audit logging services in DI ✅
 - [x] Test audit logging (verify entries created for Create/Update/Delete/Cancel/Confirm) ✅
 
-**AvailabilityRules** ✅ COMPLETE :
+**AvailabilityRules** ✅ COMPLETE:
 
 - [x] Create AvailabilityRule entity (13 properties) ✅
 - [x] Create DTOs (6 classes with computed fields) ✅
@@ -168,18 +171,18 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 - [x] Register repository in DI container (Program.cs) ✅
 - [x] Test and verify (migration executed, table created, constraints working, data insertion successful, queries functional) ✅
 
-**Other Advanced Features** (after AvailabilityRules):
+**Other Advanced Features** ✅ COMPLETE:
 
-- [ ] Create admin endpoints to view audit logs (optional GetAuditLogs query)
-- [ ] Implement soft delete for entities (IsDeleted flag, update queries)
-- [ ] Add filtering and sorting to booking queries (date range, status, resourceId)
-- [ ] Create statistics endpoints (booking counts by status, resource utilization %, popular time slots)
-- [ ] Add rate limiting middleware (AspNetCoreRateLimit for DoS protection)
-- [ ] Implement RefreshToken mechanism (token rotation, expiration handling)
+- [x] Create admin endpoints to view audit logs (GetPaginatedAuditLogsQuery, AuditLogsController) ✅
+- [x] Implement soft delete for entities (IsDeleted/DeletedAt for Resources, Bookings, AvailabilityRules + migration 0009) ✅
+- [x] Add filtering and sorting to booking queries (status, resourceId, userId, date range filters) ✅
+- [x] Create statistics endpoints (GetBookingStatistics with SQL aggregation - COUNT FILTER, GROUP BY, DATE_TRUNC) ✅
+- [x] Add rate limiting middleware (AspNetCoreRateLimit: 60 req/min, 1000 req/hour per IP, DoS protection) ✅
+- [x] Implement RefreshToken mechanism (token rotation, 7-day expiration, database storage, migration 0010) ✅
 
-**Learning Focus**: Audit patterns, MediatR pipeline behaviors, enterprise security, advanced queries
+**Learning Focus**: Audit patterns, MediatR pipeline behaviors, enterprise security, advanced queries, token rotation, rate limiting, SQL aggregation
 
-**Current Status**: ✅ **Audit logging complete!** 🔄 **AvailabilityRules in progress** - Commands done, now need Queries.
+**Current Status**: ✅ **Day 6 100% COMPLETE!** All 285 implementation steps finished. Backend features fully implemented. Ready for Day 7 - Testing.
 
 ---
 
