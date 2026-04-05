@@ -13,7 +13,7 @@
 - [Day 3: Authentication & Authorization](./Day3-Authentication.md)
 - [Day 4: Resources CRUD & Multi-Tenant Isolation](./Day4-Resources.md)
 - [Day 5: Bookings CRUD & Business Logic](./Day5-Bookings.md)
-- [Day 6: Advanced Features & Audit Logging](./Day6-Advanced.md) _(Coming soon)_
+- [Day 6: Advanced Features & Audit Logging](./Day6-Advanced.md)
 - [Day 7: Backend Testing](./Day7-Testing.md) _(Coming soon)_
 
 ---
