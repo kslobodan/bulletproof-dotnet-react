@@ -643,3 +643,9 @@
 296. Created `BookingTests` with 7 test methods
 297. Created `AvailabilityRuleTests`
 298. Executed unit tests
+
+### Backend Testing - Step 4: Write unit tests for CQRS Command Handlers
+
+299. Created `CreateResourceCommandHandlerTests`
+300. Created `CreateBookingCommandHandlerTests` w
+301. Executed unit tests:
