@@ -1,5 +1,6 @@
 using Serilog;
 using FluentValidation;
+using AspNetCoreRateLimit;
 using BookingSystem.API.Middleware;
 using BookingSystem.Infrastructure.Data;
 using BookingSystem.Infrastructure.Services;
@@ -108,6 +109,12 @@ try
         options.SubstituteApiVersionInUrl = true;
     });
     
+    // Rate Limiting (DoS protection)
+    builder.Services.AddMemoryCache();
+    builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+    builder.Services.AddInMemoryRateLimiting();
+    builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+    
     builder.Services.AddControllers();
     
     // Swagger/OpenAPI
@@ -127,6 +134,9 @@ try
 
     // Global exception handling
     app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+    // Rate limiting (DoS protection - must be early in pipeline)
+    app.UseIpRateLimiting();
 
     // Tenant resolution (must be before controllers)
     app.UseMiddleware<TenantResolutionMiddleware>();

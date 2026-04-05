@@ -569,3 +569,9 @@
 262. Created `GetBookingStatisticsQueryHandler`
 263. Implemented `GetStatisticsAsync` in `BookingRepository.cs`:
 264. Updated `BookingsController`
+
+### Other features - Step 5: Add Rate Limiting Middleware
+
+265. Installed AspNetCoreRateLimit package in API project
+266. Configured rate limiting in `appsettings.json`
+267. Registered rate limiting services in `Program.cs`
