@@ -625,3 +625,14 @@
 291. Created folder structure in IntegrationTests project:
      - `Controllers`
      - `Infrastructure`
+292. Verified build: Test projects compiled successfully ✅
+
+### Backend Testing - Step 2: Install testing NuGet packages
+
+293. Installed testing packages for UnitTests project:
+     - `dotnet add package Moq` → version 4.20.72
+     - `dotnet add package FluentAssertions` → version 8.9.0
+294. Installed testing packages for IntegrationTests project:
+     - `dotnet add package Microsoft.AspNetCore.Mvc.Testing --version 9.0.*` → version 9.0.14 (WebApplicationFactory for in-memory testing)
+     - `dotnet add package Testcontainers.PostgreSql` → version 4.11.0 (PostgreSQL container for integration tests)
+     - `dotnet add package FluentAssertions` → version 8.9.0 (readable assertions)
