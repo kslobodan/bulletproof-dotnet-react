@@ -572,6 +572,10 @@
 
 ### Other features - Step 5: Add Rate Limiting Middleware
 
-265. Installed AspNetCoreRateLimit package in API project
-266. Configured rate limiting in `appsettings.json`
-267. Registered rate limiting services in `Program.cs`
+265. Installed AspNetCoreRateLimit package in API project:
+     - `cd BookingSystem.API; dotnet add package AspNetCoreRateLimit`
+266. Configured rate limiting in `appsettings.json`:
+267. Updated `Program.cs` imports:
+     - Added `using AspNetCoreRateLimit;`
+268. Registered rate limiting services in `Program.cs`:
+269. Added rate limiting middleware to pipeline:
