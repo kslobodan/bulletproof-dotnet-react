@@ -50,6 +50,7 @@ try
     builder.Services.AddScoped<IBookingRepository, BookingRepository>();
     builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
     builder.Services.AddScoped<IAvailabilityRuleRepository, AvailabilityRuleRepository>();
+    builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     
     // Services
     builder.Services.AddHttpContextAccessor();

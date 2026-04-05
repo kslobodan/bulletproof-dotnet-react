@@ -579,3 +579,26 @@
      - Added `using AspNetCoreRateLimit;`
 268. Registered rate limiting services in `Program.cs`:
 269. Added rate limiting middleware to pipeline:
+
+### Other features - Step 6: Implement RefreshToken Mechanism
+
+270. Created `RefreshToken` entity in `Domain/Entities`:
+271. Updated `AuthResult` DTO to include `RefreshToken`
+272. Created RefreshToken DTOs in `Application/Features/Authentication/DTOs`:
+273. Created `RefreshAccessTokenCommand` in `Application/Features/Authentication/Commands/RefreshToken`:
+274. Created `IRefreshTokenRepository` in `Application/Common/Interfaces`:
+275. Updated `IJwtTokenService` interface:
+276. Updated `JwtTokenService` implementation
+277. Implemented `RefreshTokenRepository` in `Infrastructure/Repositories`:
+278. Updated `LoginCommandHandler` to generate and store refresh token
+279. Added refresh endpoint to `AuthController`
+280. Created database migration `0010_CreateRefreshTokensTable.sql`
+281. Registered `IRefreshTokenRepository` in DI container (`Program.cs`):
+
+282. Migration execution: Started API → DbUp applied migration `0010_CreateRefreshTokensTable.sql` ✅
+
+283. Tested refresh token flow:
+     - Login: Received access token + refresh token ✅
+     - Refresh: Used refresh token → Got new access token + new refresh token ✅
+     - Token rotation: Old refresh token marked as revoked in database, ReplacedByToken set ✅
+     - Security: Old refresh token rejected on reuse attempt ✅

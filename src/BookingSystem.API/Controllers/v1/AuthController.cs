@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using BookingSystem.Application.Features.Authentication.Commands.Login;
+using BookingSystem.Application.Features.Authentication.Commands.RefreshToken;
 using BookingSystem.Application.Features.Authentication.Commands.RegisterTenant;
 using BookingSystem.Application.Features.Authentication.Commands.RegisterUser;
 using BookingSystem.Application.Features.Authentication.DTOs;
@@ -84,6 +85,26 @@ public class AuthController : ControllerBase
         {
             Email = request.Email,
             Password = request.Password
+        };
+
+        var response = await _mediator.Send(command);
+        
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Refresh an access token using a valid refresh token.
+    /// Returns new JWT access token and new refresh token (token rotation).
+    /// </summary>
+    [HttpPost("refresh")]
+    [ProducesResponseType(typeof(RefreshTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        var command = new RefreshAccessTokenCommand
+        {
+            RefreshToken = request.RefreshToken
         };
 
         var response = await _mediator.Send(command);

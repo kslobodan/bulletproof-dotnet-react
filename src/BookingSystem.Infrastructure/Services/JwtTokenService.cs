@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using BookingSystem.Application.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -46,5 +47,16 @@ public class JwtTokenService : IJwtTokenService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateRefreshToken()
+    {
+        // Generate a cryptographically secure random token (256 bits = 32 bytes)
+        var randomBytes = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomBytes);
+        
+        // Convert to Base64 string for easy storage and transmission
+        return Convert.ToBase64String(randomBytes);
     }
 }

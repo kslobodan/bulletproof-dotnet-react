@@ -21,7 +21,7 @@ internal class UserLoginDto
 
 /// <summary>
 /// Handler for LoginCommand.
-/// Authenticates user by email/password and generates JWT token.
+/// Authenticates user by email/password and generates JWT token and refresh token.
 /// </summary>
 public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 {
@@ -29,17 +29,20 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IDbConnectionFactory _connectionFactory;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
     public LoginCommandHandler(
         ITenantRepository tenantRepository,
         IPasswordHasher passwordHasher,
         IJwtTokenService jwtTokenService,
-        IDbConnectionFactory connectionFactory)
+        IDbConnectionFactory connectionFactory,
+        IRefreshTokenRepository refreshTokenRepository)
     {
         _tenantRepository = tenantRepository;
         _passwordHasher = passwordHasher;
         _jwtTokenService = jwtTokenService;
         _connectionFactory = connectionFactory;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -99,12 +102,28 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
         // 6. Generate JWT token
         var token = _jwtTokenService.GenerateToken(user.Id, user.Email, roles);
 
-        // 7. Return response
+        // 7. Generate and store refresh token
+        var refreshToken = _jwtTokenService.GenerateRefreshToken();
+        var refreshTokenEntity = new Domain.Entities.RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            Token = refreshToken,
+            UserId = user.Id,
+            TenantId = tenant.Id,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7), // 7 days refresh token lifetime
+            IsRevoked = false
+        };
+
+        await _refreshTokenRepository.AddAsync(refreshTokenEntity);
+
+        // 8. Return response
         return new LoginResponse
         {
             AuthResult = new AuthResult
             {
                 Token = token,
+                RefreshToken = refreshToken,
                 UserId = user.Id,
                 Email = user.Email,
                 FirstName = user.FirstName,
