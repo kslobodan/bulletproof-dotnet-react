@@ -188,18 +188,20 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 
 #### **Day 7: Backend Testing**
 
-- [ ] Set up xUnit test projects
-- [ ] Write unit tests for domain logic (entities, value objects)
-- [ ] Write unit tests for CQRS handlers
-- [ ] Write unit tests for validators
-- [ ] Set up integration tests with WebApplicationFactory
-- [ ] Configure Testcontainers for PostgreSQL
+- [x] Set up xUnit test projects (UnitTests, IntegrationTests)
+- [x] Write unit tests for domain logic (entities, value objects)
+- [x] Write unit tests for CQRS handlers (Command/Query handlers)
+- [x] Write unit tests for validators (FluentValidation)
+- [x] Set up integration tests with WebApplicationFactory
+- [x] Configure Testcontainers for PostgreSQL (DatabaseFixture, TestWebApplicationFactory)
 - [ ] Write integration tests for auth endpoints
-- [ ] Write integration tests for CRUD operations
+- [ ] Write integration tests for CRUD operations (Resources, Bookings)
 - [ ] Add architecture tests (layer dependencies)
 - [ ] Aim for 80%+ code coverage
 
-**Learning Focus**: Testing strategies, test isolation, mocking
+**Learning Focus**: Testing strategies, test isolation, mocking, Testcontainers
+
+**Current Status**: Steps 1-7 complete (unit tests + Testcontainers infrastructure). 5 integration smoke tests passing ✅
 
 ---
 

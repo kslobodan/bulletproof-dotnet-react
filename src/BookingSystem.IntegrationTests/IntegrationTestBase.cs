@@ -6,18 +6,20 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using BookingSystem.Application.Common.Interfaces;
 using BookingSystem.Infrastructure.Data;
+using BookingSystem.IntegrationTests.Infrastructure;
 using Xunit;
 
 namespace BookingSystem.IntegrationTests;
 
 /// <summary>
-/// Base class for integration tests.
+/// Base class for integration tests with database support.
 /// Provides common setup, HTTP client, and helper methods.
 /// Implements IAsyncLifetime for proper async initialization and cleanup.
 /// </summary>
 public abstract class IntegrationTestBase : IAsyncLifetime, IDisposable
 {
-    protected readonly IntegrationTestWebApplicationFactory Factory;
+    protected readonly DatabaseFixture DatabaseFixture;
+    protected TestWebApplicationFactory Factory { get; private set; } = null!;
     protected HttpClient Client { get; private set; } = null!;
     protected IServiceScope Scope { get; private set; } = null!;
 
@@ -25,9 +27,9 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IDisposable
     protected IDbConnectionFactory DbConnectionFactory => 
         Scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
 
-    protected IntegrationTestBase()
+    protected IntegrationTestBase(DatabaseFixture databaseFixture)
     {
-        Factory = new IntegrationTestWebApplicationFactory();
+        DatabaseFixture = databaseFixture;
     }
 
     /// <summary>
@@ -35,6 +37,8 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IDisposable
     /// </summary>
     public virtual async Task InitializeAsync()
     {
+        Factory = new TestWebApplicationFactory(DatabaseFixture.ConnectionString);
+        
         Client = Factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false

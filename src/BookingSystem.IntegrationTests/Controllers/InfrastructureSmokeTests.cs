@@ -1,14 +1,21 @@
 using System.Net;
 using FluentAssertions;
+using BookingSystem.IntegrationTests.Infrastructure;
 using Xunit;
 
 namespace BookingSystem.IntegrationTests.Controllers;
 
 /// <summary>
 /// Smoke tests to verify the integration test infrastructure is working correctly.
+/// Uses DatabaseFixture to test with a real PostgreSQL database.
 /// </summary>
+[Collection("Database")]
 public class InfrastructureSmokeTests : IntegrationTestBase
 {
+    public InfrastructureSmokeTests(DatabaseFixture databaseFixture) 
+        : base(databaseFixture)
+    {
+    }
     [Fact]
     public async Task API_ShouldStart_Successfully()
     {
@@ -55,5 +62,31 @@ public class InfrastructureSmokeTests : IntegrationTestBase
 
         // Assert - should get Unauthorized (no token)
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Database_ShouldBeAccessible_AndMigrationsApplied()
+    {
+        // Arrange & Act - connect to database and query system table
+        using var connection = DbConnectionFactory.CreateConnection();
+        connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'";
+        var tableCount = Convert.ToInt64(command.ExecuteScalar() ?? 0L);
+
+        // Assert - we should have tables created by migrations
+        tableCount.Should().BeGreaterThan(0, "migrations should have created tables");
+        
+        // Verify specific core tables exist
+        command.CommandText = "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'tenants')";
+        var tenantsTableExists = Convert.ToBoolean(command.ExecuteScalar() ?? false);
+        tenantsTableExists.Should().BeTrue("tenants table should exist");
+
+        command.CommandText = "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users')";
+        var usersTableExists = Convert.ToBoolean(command.ExecuteScalar() ?? false);
+        usersTableExists.Should().BeTrue("users table should exist");
+
+        await Task.CompletedTask;
     }
 }

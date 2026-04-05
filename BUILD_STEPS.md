@@ -660,7 +660,15 @@
 ### Backend Testing - Step 6: Set up Integration test infrastructure (WebApplicationFactory)
 
 306. Made Program class accessible to integration tests
-307. Created `IntegrationTestWebApplicationFactory` in `BookingSystem.IntegrationTests`nvironment to Test
+307. Created `IntegrationTestWebApplicationFactory` in `BookingSystem.IntegrationTests`
 308. Created `IntegrationTestBase`
 309. Created `InfrastructureSmokeTests`
-310. Executed integration smoke tests: `dotnet test BookingSystem.IntegrationTests --filter
+310. Executed integration smoke tests
+
+### Backend Testing - Step 7: Configure Testcontainers for PostgreSQL
+
+311. Created `DatabaseFixture` in `BookingSystem.IntegrationTests/Infrastructure`:
+312. Created `TestWebApplicationFactory` in `BookingSystem.IntegrationTests/Infrastructure`
+313. Updated `IntegrationTestBase`:
+314. Updated `InfrastructureSmokeTests`:
+315. Executed integration tests
