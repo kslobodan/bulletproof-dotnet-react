@@ -21,7 +21,8 @@ public class DeleteAvailabilityRuleCommandHandler : IRequestHandler<DeleteAvaila
             throw new KeyNotFoundException($"Availability rule with ID {request.Id} not found");
         }
 
-        await _availabilityRuleRepository.DeleteAsync(request.Id);
+        // Soft delete (marks as deleted, preserves data)
+        await _availabilityRuleRepository.SoftDeleteAsync(request.Id);
 
         return new DeleteAvailabilityRuleResponse
         {

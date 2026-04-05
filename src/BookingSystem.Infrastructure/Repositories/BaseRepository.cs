@@ -35,7 +35,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         
         var sql = $@"
             SELECT * FROM {TableName} 
-            WHERE {IdColumnName} = @Id AND TenantId = @TenantId";
+            WHERE {IdColumnName} = @Id AND TenantId = @TenantId AND IsDeleted = FALSE";
         
         return await connection.QuerySingleOrDefaultWithTenantAsync<T>(
             _tenantContext, sql, new { Id = id });
@@ -47,7 +47,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         
         var sql = $@"
             SELECT * FROM {TableName} 
-            WHERE TenantId = @TenantId 
+            WHERE TenantId = @TenantId AND IsDeleted = FALSE
             ORDER BY CreatedAt DESC";
         
         return await connection.QueryWithTenantAsync<T>(_tenantContext, sql);
@@ -60,7 +60,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         // Get total count
         var countSql = $@"
             SELECT COUNT(*)::int FROM {TableName} 
-            WHERE TenantId = @TenantId";
+            WHERE TenantId = @TenantId AND IsDeleted = FALSE";
         
         var totalCount = await connection.ExecuteScalarAsync<int>(countSql, new { TenantId = TenantId });
         
@@ -68,7 +68,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         var offset = (pageNumber - 1) * pageSize;
         var dataSql = $@"
             SELECT * FROM {TableName} 
-            WHERE TenantId = @TenantId 
+            WHERE TenantId = @TenantId AND IsDeleted = FALSE
             ORDER BY CreatedAt DESC
             LIMIT @PageSize OFFSET @Offset";
         
@@ -91,6 +91,31 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
 
     public abstract Task<bool> UpdateAsync(T entity, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Soft delete: marks the entity as deleted without removing it from the database
+    /// </summary>
+    public virtual async Task<bool> SoftDeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        
+        var sql = $@"
+            UPDATE {TableName} 
+            SET IsDeleted = TRUE, DeletedAt = @DeletedAt
+            WHERE {IdColumnName} = @Id AND TenantId = @TenantId AND IsDeleted = FALSE";
+        
+        var rowsAffected = await connection.ExecuteAsync(sql, new 
+        { 
+            Id = id, 
+            TenantId = TenantId,
+            DeletedAt = DateTime.UtcNow 
+        });
+        
+        return rowsAffected > 0;
+    }
+
+    /// <summary>
+    /// Hard delete: permanently removes the entity from the database
+    /// </summary>
     public virtual async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
@@ -111,7 +136,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
         
         var sql = $@"
             SELECT COUNT(1)::int FROM {TableName} 
-            WHERE {IdColumnName} = @Id AND TenantId = @TenantId";
+            WHERE {IdColumnName} = @Id AND TenantId = @TenantId AND IsDeleted = FALSE";
         
         var count = await connection.ExecuteScalarAsync<int>(sql, new { Id = id, TenantId = TenantId });
         

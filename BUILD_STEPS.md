@@ -533,3 +533,20 @@
 238: Updated AuditLogRepository Implementation
 240: Create AuditLogsController
 241: Build and Verify
+
+### Other features - Step 2: Implement Soft Delete for Entities
+
+242. Updated domain entities with soft delete properties:
+     - **Resource.cs**: Added `IsDeleted` (default false) and `DeletedAt` properties
+     - **Booking.cs**: Added `IsDeleted` and `DeletedAt` properties
+     - **AvailabilityRule.cs**: Added `IsDeleted` and `DeletedAt` properties
+
+243. Created migration `0009_AddSoftDeleteSupport.sql` in `Infrastructure/Data/Scripts`:
+244. Updated `IRepository<T>` interface in `Application/Common/Interfaces`
+245. Updated `BaseRepository` in `Infrastructure/Repositories/BaseRepository`
+246. Updated `BookingRepository`
+247. Updated `AvailabilityRuleRepository`
+248. Updated Delete command handlers to use SoftDeleteAsync (
+249. Updated `TenantRepository`
+250. Migration execution:
+     - Started API: `cd src/BookingSystem.API; dotnet run`

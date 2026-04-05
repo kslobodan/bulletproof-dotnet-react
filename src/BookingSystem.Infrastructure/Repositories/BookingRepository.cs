@@ -89,6 +89,7 @@ public class BookingRepository : BaseRepository<Booking>, IBookingRepository
     /// Detects booking conflicts using time overlap logic.
     /// Two time ranges overlap if: (StartA < EndB) AND (EndA > StartB)
     /// Only considers Pending (0) and Confirmed (1) bookings as potential conflicts.
+    /// Excludes soft-deleted bookings from conflict detection.
     /// </summary>
     public async Task<bool> HasConflictAsync(
         Guid resourceId, 
@@ -107,6 +108,7 @@ public class BookingRepository : BaseRepository<Booking>, IBookingRepository
                 WHERE TenantId = @TenantId
                   AND ResourceId = @ResourceId
                   AND Status IN (0, 1)  -- Pending or Confirmed only
+                  AND IsDeleted = FALSE
                   AND Id != COALESCE(@ExcludeBookingId, '00000000-0000-0000-0000-000000000000'::uuid)
                   AND StartTime < @EndTime
                   AND EndTime > @StartTime
@@ -132,6 +134,7 @@ public class BookingRepository : BaseRepository<Booking>, IBookingRepository
             SELECT * FROM Bookings 
             WHERE TenantId = @TenantId 
               AND ResourceId = @ResourceId
+              AND IsDeleted = FALSE
             ORDER BY StartTime DESC";
 
         return await connection.QueryAsync<Booking>(sql, new
@@ -149,6 +152,7 @@ public class BookingRepository : BaseRepository<Booking>, IBookingRepository
             SELECT * FROM Bookings 
             WHERE TenantId = @TenantId 
               AND UserId = @UserId
+              AND IsDeleted = FALSE
             ORDER BY StartTime DESC";
 
         return await connection.QueryAsync<Booking>(sql, new
@@ -166,6 +170,7 @@ public class BookingRepository : BaseRepository<Booking>, IBookingRepository
             SELECT * FROM Bookings 
             WHERE TenantId = @TenantId 
               AND Status = @Status
+              AND IsDeleted = FALSE
             ORDER BY StartTime DESC";
 
         return await connection.QueryAsync<Booking>(sql, new

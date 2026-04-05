@@ -83,6 +83,14 @@ public class TenantRepository : ITenantRepository
         return rowsAffected > 0;
     }
 
+    /// <summary>
+    /// Soft delete is not supported for Tenants - they are critical infrastructure entities
+    /// </summary>
+    public Task<bool> SoftDeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException("Soft delete is not supported for Tenant entities. Use hard delete with caution.");
+    }
+
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();

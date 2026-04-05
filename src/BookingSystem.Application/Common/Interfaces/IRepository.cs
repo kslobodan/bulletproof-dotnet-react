@@ -35,7 +35,12 @@ public interface IRepository<T> where T : class
     Task<bool> UpdateAsync(T entity, CancellationToken cancellationToken = default);
     
     /// <summary>
-    /// Deletes an entity by ID within the current tenant
+    /// Soft delete: marks the entity as deleted without removing it from the database
+    /// </summary>
+    Task<bool> SoftDeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Hard delete: permanently removes the entity from the database
     /// </summary>
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     

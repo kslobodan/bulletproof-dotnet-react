@@ -32,8 +32,8 @@ public class DeleteResourceCommandHandler : IRequestHandler<DeleteResourceComman
         var resource = await _resourceRepository.GetByIdAsync(request.Id)
             ?? throw new KeyNotFoundException($"Resource with ID {request.Id} not found");
 
-        // Delete resource
-        await _resourceRepository.DeleteAsync(request.Id);
+        // Soft delete resource (marks as deleted, preserves data)
+        await _resourceRepository.SoftDeleteAsync(request.Id);
 
         return new DeleteResourceResponse
         {

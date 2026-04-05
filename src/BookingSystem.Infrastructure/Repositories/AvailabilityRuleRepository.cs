@@ -96,6 +96,7 @@ public class AvailabilityRuleRepository : BaseRepository<AvailabilityRule>, IAva
             SELECT * FROM AvailabilityRules 
             WHERE TenantId = @TenantId 
               AND ResourceId = @ResourceId
+              AND IsDeleted = FALSE
             ORDER BY DayOfWeek, StartTime";
 
         return await connection.QueryAsync<AvailabilityRule>(sql, new
@@ -115,7 +116,7 @@ public class AvailabilityRuleRepository : BaseRepository<AvailabilityRule>, IAva
         using var connection = _connectionFactory.CreateConnection();
 
         // Build dynamic WHERE clause
-        var whereConditions = new List<string> { "TenantId = @TenantId" };
+        var whereConditions = new List<string> { "TenantId = @TenantId", "IsDeleted = FALSE" };
         var parameters = new DynamicParameters();
         parameters.Add("TenantId", TenantId);
 

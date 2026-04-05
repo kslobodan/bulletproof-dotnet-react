@@ -23,6 +23,10 @@ public class Booking
     public Guid? CreatedBy { get; set; }
     public Guid? UpdatedBy { get; set; }
     
+    // Soft delete
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
+    
     // Navigation properties (not mapped to database with Dapper)
     // public Tenant Tenant { get; set; }
     // public Resource Resource { get; set; }

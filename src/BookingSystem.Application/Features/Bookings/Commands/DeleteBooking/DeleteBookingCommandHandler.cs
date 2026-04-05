@@ -31,8 +31,8 @@ public class DeleteBookingCommandHandler : IRequestHandler<DeleteBookingCommand,
         if (booking == null)
             throw new KeyNotFoundException($"Booking with ID {request.Id} not found");
 
-        // Hard delete from database
-        await _bookingRepository.DeleteAsync(request.Id);
+        // Soft delete (marks as deleted, preserves data for audit trail)
+        await _bookingRepository.SoftDeleteAsync(request.Id);
 
         return new DeleteBookingResponse
         {
