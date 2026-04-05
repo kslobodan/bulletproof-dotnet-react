@@ -657,4 +657,10 @@
 304. Created `LoginCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
 305. Test run
 
-**Next**: Step 6 - Set up Integration test infrastructure (WebApplicationFactory) 301. Executed unit tests:
+### Backend Testing - Step 6: Set up Integration test infrastructure (WebApplicationFactory)
+
+306. Made Program class accessible to integration tests
+307. Created `IntegrationTestWebApplicationFactory` in `BookingSystem.IntegrationTests`nvironment to Test
+308. Created `IntegrationTestBase`
+309. Created `InfrastructureSmokeTests`
+310. Executed integration smoke tests: `dotnet test BookingSystem.IntegrationTests --filter
