@@ -6,6 +6,7 @@ using BookingSystem.Application.Features.Bookings.Commands.ConfirmBooking;
 using BookingSystem.Application.Features.Bookings.Commands.DeleteBooking;
 using BookingSystem.Application.Features.Bookings.Queries.GetBookingById;
 using BookingSystem.Application.Features.Bookings.Queries.GetAllBookings;
+using BookingSystem.Application.Features.Bookings.Queries.GetBookingStatistics;
 using BookingSystem.Application.Features.Bookings.DTOs;
 using BookingSystem.Domain.Enums;
 using MediatR;
@@ -199,6 +200,35 @@ public class BookingsController : ControllerBase
         var command = new DeleteBookingCommand { Id = id };
 
         var result = await _mediator.Send(command);
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Get booking statistics for the current tenant
+    /// </summary>
+    /// <param name="startDate">Optional start date for statistics period</param>
+    /// <param name="endDate">Optional end date for statistics period</param>
+    /// <param name="topResourcesCount">Number of top resources to include (default: 10, max: 50)</param>
+    /// <returns>Booking statistics including counts, rates, utilization, and popular time slots</returns>
+    [HttpGet("statistics")]
+    [Authorize]
+    [ProducesResponseType(typeof(BookingStatisticsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetStatistics(
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] int topResourcesCount = 10)
+    {
+        var query = new GetBookingStatisticsQuery
+        {
+            StartDate = startDate,
+            EndDate = endDate,
+            TopResourcesCount = topResourcesCount
+        };
+
+        var result = await _mediator.Send(query);
 
         return Ok(result);
     }

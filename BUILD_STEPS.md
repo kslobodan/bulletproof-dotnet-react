@@ -559,3 +559,13 @@
 254. Implemented `GetPagedAsync` in `BookingRepository.cs` in `Infrastructure/Repositories`:
 255. Updated `GetAllBookingsQueryHandler`:
 256. Created `GetAllBookingsQueryValidator.cs`:
+
+### Other features - Step 4: Create Statistics Endpoints
+
+258. Created `BookingStatisticsDto` in `Application/Features/Bookings/DTOs/`:
+259. Created `GetBookingStatisticsQuery` in `Application/Features/Bookings/Queries/GetBookingStatistics`:
+260. Created `GetBookingStatisticsQueryValidator`:
+261. Updated `IBookingRepository` interface
+262. Created `GetBookingStatisticsQueryHandler`
+263. Implemented `GetStatisticsAsync` in `BookingRepository.cs`:
+264. Updated `BookingsController`

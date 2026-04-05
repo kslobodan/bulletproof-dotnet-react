@@ -1,4 +1,5 @@
 using BookingSystem.Application.Common.Models;
+using BookingSystem.Application.Features.Bookings.DTOs;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Domain.Enums;
 
@@ -45,5 +46,14 @@ public interface IBookingRepository : IRepository<Booking>
         DateTime? endDate = null,
         string orderBy = "StartTime",
         bool descending = false,
+        CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Gets booking statistics for the current tenant
+    /// </summary>
+    Task<BookingStatisticsDto> GetStatisticsAsync(
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int topResourcesCount = 10,
         CancellationToken cancellationToken = default);
 }

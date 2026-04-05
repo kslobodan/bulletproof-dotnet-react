@@ -1,6 +1,7 @@
 using Dapper;
 using BookingSystem.Application.Common.Interfaces;
 using BookingSystem.Application.Common.Models;
+using BookingSystem.Application.Features.Bookings.DTOs;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Domain.Enums;
 
@@ -263,5 +264,119 @@ public class BookingRepository : BaseRepository<Booking>, IBookingRepository
             pageNumber,
             pageSize
         );
+    }
+
+    public async Task<BookingStatisticsDto> GetStatisticsAsync(
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int topResourcesCount = 10,
+        CancellationToken cancellationToken = default)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        // Build date filter
+        var dateFilter = string.Empty;
+        var parameters = new DynamicParameters();
+        parameters.Add("TenantId", TenantId);
+
+        if (startDate.HasValue)
+        {
+            dateFilter += " AND StartTime >= @StartDate";
+            parameters.Add("StartDate", startDate.Value);
+        }
+
+        if (endDate.HasValue)
+        {
+            dateFilter += " AND EndTime <= @EndDate";
+            parameters.Add("EndDate", endDate.Value);
+        }
+
+        // 1. Get booking counts by status
+        var statusCountsSql = $@"
+            SELECT 
+                Status,
+                COUNT(*)::int as Count
+            FROM Bookings
+            WHERE TenantId = @TenantId
+              AND IsDeleted = FALSE
+              {dateFilter}
+            GROUP BY Status";
+
+        var statusCounts = await connection.QueryAsync<(int Status, int Count)>(statusCountsSql, parameters);
+        var statusDict = statusCounts.ToDictionary(x => (BookingStatus)x.Status, x => x.Count);
+
+        var totalBookings = statusDict.Values.Sum();
+        var pendingCount = statusDict.GetValueOrDefault(BookingStatus.Pending, 0);
+        var confirmedCount = statusDict.GetValueOrDefault(BookingStatus.Confirmed, 0);
+        var completedCount = statusDict.GetValueOrDefault(BookingStatus.Completed, 0);
+        var cancelledCount = statusDict.GetValueOrDefault(BookingStatus.Cancelled, 0);
+
+        // Calculate rates
+        var confirmationRate = totalBookings > 0 
+            ? (decimal)(confirmedCount + completedCount) / totalBookings * 100 
+            : 0;
+        var cancellationRate = totalBookings > 0 
+            ? (decimal)cancelledCount / totalBookings * 100 
+            : 0;
+
+        // 2. Get resource utilization (top N resources by booking count)
+        parameters.Add("TopCount", topResourcesCount);
+        var resourceUtilizationSql = $@"
+            SELECT 
+                r.Id as ResourceId,
+                r.Name as ResourceName,
+                COUNT(b.Id)::int as TotalBookings,
+                ROUND(
+                    (COUNT(b.Id)::decimal / NULLIF(
+                        (SELECT COUNT(*)::decimal 
+                         FROM Bookings 
+                         WHERE TenantId = @TenantId 
+                           AND IsDeleted = FALSE
+                           {dateFilter}), 0
+                    ) * 100), 2
+                ) as UtilizationPercentage
+            FROM Resources r
+            LEFT JOIN Bookings b ON r.Id = b.ResourceId 
+                AND b.TenantId = @TenantId 
+                AND b.IsDeleted = FALSE
+                {dateFilter.Replace("StartTime", "b.StartTime").Replace("EndTime", "b.EndTime")}
+            WHERE r.TenantId = @TenantId
+              AND r.IsDeleted = FALSE
+            GROUP BY r.Id, r.Name
+            ORDER BY TotalBookings DESC
+            LIMIT @TopCount";
+
+        var resourceUtilization = await connection.QueryAsync<ResourceUtilizationDto>(resourceUtilizationSql, parameters);
+
+        // 3. Get popular time slots (group by hour of day)
+        var popularTimeSlotsSql = $@"
+            SELECT 
+                EXTRACT(HOUR FROM StartTime)::int as HourOfDay,
+                COUNT(*)::int as BookingCount,
+                TO_CHAR(EXTRACT(HOUR FROM StartTime)::int, 'FM00') || ':00-' || 
+                TO_CHAR((EXTRACT(HOUR FROM StartTime)::int + 1), 'FM00') || ':00' as TimeSlotLabel
+            FROM Bookings
+            WHERE TenantId = @TenantId
+              AND IsDeleted = FALSE
+              AND Status IN (0, 1, 2)  -- Pending, Confirmed, Completed
+              {dateFilter}
+            GROUP BY HourOfDay
+            ORDER BY BookingCount DESC
+            LIMIT 10";
+
+        var popularTimeSlots = await connection.QueryAsync<PopularTimeSlotDto>(popularTimeSlotsSql, parameters);
+
+        return new BookingStatisticsDto
+        {
+            TotalBookings = totalBookings,
+            PendingBookings = pendingCount,
+            ConfirmedBookings = confirmedCount,
+            CompletedBookings = completedCount,
+            CancelledBookings = cancelledCount,
+            ConfirmationRate = Math.Round(confirmationRate, 2),
+            CancellationRate = Math.Round(cancellationRate, 2),
+            ResourceUtilization = resourceUtilization.ToList(),
+            PopularTimeSlots = popularTimeSlots.ToList()
+        };
     }
 }
