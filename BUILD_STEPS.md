@@ -646,6 +646,15 @@
 
 ### Backend Testing - Step 4: Write unit tests for CQRS Command Handlers
 
-299. Created `CreateResourceCommandHandlerTests`
-300. Created `CreateBookingCommandHandlerTests` w
-301. Executed unit tests:
+299. Created `CreateResourceCommandHandlerTests` in `BookingSystem.UnitTests/Application/Commands`
+300. Created `CreateBookingCommandHandlerTests` in `BookingSystem.UnitTests/Application/Commands`
+301. Executed unit tests
+
+### Backend Testing - Step 5: Write unit tests for FluentValidation Validators
+
+302. Created `CreateResourceCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
+303. Created `CreateBookingCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
+304. Created `LoginCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
+305. Test run
+
+**Next**: Step 6 - Set up Integration test infrastructure (WebApplicationFactory) 301. Executed unit tests:
