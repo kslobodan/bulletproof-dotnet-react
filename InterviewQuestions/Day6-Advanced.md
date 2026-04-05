@@ -1003,6 +1003,841 @@ public async Task<IEnumerable<AvailabilityRule>> GetByResourceIdAndDayAsync(
 
 ---
 
+## Q: "Explain your RefreshToken mechanism. Why not just make JWT expiration longer?"
+
+**A:** "RefreshTokens solve the security vs UX tradeoff between short-lived access tokens and long-lived user sessions through token rotation:
+
+**The Core Problem:**
+
+```
+❌ Long-lived JWT (7 days):
+- If stolen, attacker has 7 days of access
+- Cannot revoke (JWTs are stateless)
+- No logout capability
+- Security risk: compromised tokens = compromised accounts
+
+❌ Short-lived JWT (60 min) + re-login:
+- Secure (limited damage window)
+- Terrible UX (login every hour)
+- Users abandon app
+```
+
+**✅ The Solution: RefreshToken Pattern**
+
+```
+Access Token (JWT): 60 minutes, stateless
+Refresh Token: 7 days, stateful (in database)
+
+Client stores both tokens:
+- Access token used for API requests
+- Refresh token used to get new access tokens
+```
+
+**Token Rotation Flow:**
+
+```csharp
+// Initial Login
+POST /auth/login { email, password }
+→ Returns: { accessToken: "...", refreshToken: "ABC123..." }
+
+// After 60 minutes, access token expires
+GET /api/resources → 401 Unauthorized
+
+// Client refreshes tokens
+POST /auth/refresh { refreshToken: "ABC123" }
+→ Server validates "ABC123" in database:
+  ✓ Exists
+  ✓ Not revoked
+  ✓ Not expired
+→ Server generates new access token + new refresh token
+→ Server marks "ABC123" as revoked, replaced by "XYZ789"
+→ Returns: { accessToken: "...", refreshToken: "XYZ789" }
+
+// Client retries original request
+GET /api/resources with new access token → 200 OK
+
+// If someone tries to reuse old refresh token
+POST /auth/refresh { refreshToken: "ABC123" }
+→ Server checks database: REVOKED
+→ Returns: 401 Unauthorized ❌
+```
+
+**Database Schema:**
+
+```sql
+CREATE TABLE RefreshTokens (
+    Id UUID PRIMARY KEY,
+    Token VARCHAR(500) NOT NULL UNIQUE,  -- Base64 random token
+    UserId UUID NOT NULL,
+    TenantId UUID NOT NULL,
+    CreatedAt TIMESTAMP NOT NULL,
+    ExpiresAt TIMESTAMP NOT NULL,        -- 7 days from creation
+    IsRevoked BOOLEAN DEFAULT FALSE,
+    RevokedAt TIMESTAMP NULL,
+    ReplacedByToken VARCHAR(500) NULL,   -- Token rotation tracking
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+);
+```
+
+**Implementation Details:**
+
+```csharp
+// 1. Generate cryptographically secure random token
+public string GenerateRefreshToken()
+{
+    var randomBytes = new byte[32];  // 256 bits
+    using var rng = RandomNumberGenerator.Create();
+    rng.GetBytes(randomBytes);
+    return Convert.ToBase64String(randomBytes);  // "1j54JTLufIsTapexRv9h9JROawjZuuinBH/A6QnvrNU="
+}
+
+// 2. Store refresh token on login
+var refreshToken = new RefreshToken
+{
+    Id = Guid.NewGuid(),
+    Token = _jwtTokenService.GenerateRefreshToken(),
+    UserId = user.Id,
+    TenantId = tenant.Id,
+    CreatedAt = DateTime.UtcNow,
+    ExpiresAt = DateTime.UtcNow.AddDays(7),  // Configurable
+    IsRevoked = false
+};
+await _refreshTokenRepository.AddAsync(refreshToken);
+
+// 3. Token rotation on refresh
+var oldToken = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken);
+if (oldToken == null || oldToken.IsRevoked || oldToken.IsExpired)
+    throw new UnauthorizedAccessException();
+
+var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
+await _refreshTokenRepository.RevokeAsync(oldToken.Id, newRefreshToken);
+```
+
+**Security Benefits:**
+
+| Feature              | JWT Only (7-day) | RefreshToken Pattern |
+| -------------------- | ---------------- | -------------------- |
+| **Revocation**       | ❌ Impossible    | ✅ Instant           |
+| **Logout**           | ❌ Can't enforce | ✅ Revoke token      |
+| **Token Theft**      | ❌ 7 days damage | ✅ 60 min damage     |
+| **Replay Attacks**   | ❌ Vulnerable    | ✅ One-time use      |
+| **Audit Trail**      | ❌ No tracking   | ✅ Full history      |
+| **Session Control**  | ❌ None          | ✅ Can limit devices |
+| **Suspicious Login** | ❌ Can't detect  | ✅ Can revoke all    |
+
+**Token Rotation Security:**
+
+```
+Login → RT1 (active)
+Refresh → RT1 revoked, RT2 active
+Refresh → RT2 revoked, RT3 active
+Refresh → RT3 revoked, RT4 active
+
+Attacker steals RT2 (already revoked):
+POST /refresh { refreshToken: RT2 }
+→ Server: "Token revoked on 2026-04-05 at 14:35, replaced by RT3"
+→ 401 Unauthorized ✅
+```
+
+**Real-World Scenarios:**
+
+```csharp
+// Scenario 1: Logout
+POST /auth/logout
+→ Revoke current refresh token
+→ User must re-authenticate
+
+// Scenario 2: Security breach detected
+var userTokens = await _repository.GetAllByUserIdAsync(compromisedUserId);
+foreach (var token in userTokens)
+    await _repository.RevokeAsync(token.Id);
+// All sessions terminated, user must login again
+
+// Scenario 3: Cleanup
+await _repository.DeleteExpiredAsync();
+// Deletes revoked/expired tokens older than 30 days
+// Prevents database bloat while keeping audit trail
+```
+
+**Why This is Production-Grade:**
+
+- **OAuth 2.0 Standard**: Industry-standard pattern used by Google, Facebook, GitHub
+- **Defense in Depth**: Multiple layers (HTTPS, short-lived JWT, token rotation, database validation)
+- **Compliance Ready**: Session tracking for GDPR, audit requirements
+- **User Experience**: Seamless (no repeated logins) but secure"
+
+---
+
+## Q: "How does your Rate Limiting middleware prevent DoS attacks? Walk me through the configuration."
+
+**A:** "I use AspNetCoreRateLimit to implement IP-based rate limiting with per-endpoint rules and whitelisting:
+
+**The Configuration (appsettings.json):**
+
+```json
+{
+  "IpRateLimiting": {
+    "EnableEndpointRateLimiting": true,
+    "StackBlockedRequests": false,
+    "HttpStatusCode": 429,
+    "GeneralRules": [
+      {
+        "Endpoint": "*",
+        "Period": "1m",
+        "Limit": 60
+      },
+      {
+        "Endpoint": "*",
+        "Period": "1h",
+        "Limit": 1000
+      }
+    ],
+    "EndpointWhitelist": ["get:/swagger/*", "get:/health"],
+    "IpRateLimitPolicies": {
+      "IpRules": [
+        {
+          "Ip": "127.0.0.1",
+          "Rules": [{ "Endpoint": "*", "Period": "1m", "Limit": 1000 }]
+        }
+      ]
+    }
+  }
+}
+```
+
+**How It Works:**
+
+```
+1. Request arrives → Rate Limit Middleware (BEFORE authentication)
+2. Extract client IP → "203.0.113.42"
+3. Check request count in memory cache
+4. IP "203.0.113.42" → Window "14:30:00-14:31:00" → Count: 45
+5. Count < Limit (60) → Allow request ✅
+6. Increment counter → Save to cache
+7. Add response headers:
+   X-Rate-Limit-Limit: 60
+   X-Rate-Limit-Remaining: 14
+   X-Rate-Limit-Reset: 900 (seconds until window resets)
+8. Continue to next middleware
+
+If count > limit:
+→ Return 429 Too Many Requests ❌
+→ Add Retry-After header
+→ Request rejected before reaching application logic
+```
+
+**Configuration Explained:**
+
+```csharp
+// EnableEndpointRateLimiting: true
+// Different endpoints can have different limits
+POST /auth/login → can have stricter limit (10/min)
+GET /resources → can have relaxed limit (100/min)
+
+// StackBlockedRequests: false
+// Rejected requests DON'T count toward limit
+User makes 100 requests → 60 allowed, 40 rejected
+→ Next minute: Fresh 60 requests allowed (not impacted by previous rejections)
+// If true, user would be "penalty boxed" for repeated violations
+
+// HttpStatusCode: 429
+// Standard HTTP status for rate limiting
+// Clients can handle gracefully (retry with backoff)
+
+// GeneralRules
+"Period": "1m", "Limit": 60  → 60 requests per minute
+"Period": "1h", "Limit": 1000 → 1000 requests per hour
+// Both rules enforced simultaneously (sliding windows)
+
+// EndpointWhitelist
+"get:/swagger/*" → Documentation unrestricted
+"get:/health" → Health checks unrestricted (monitoring tools)
+
+// IpRateLimitPolicies
+"Ip": "127.0.0.1", "Limit": 1000
+// Localhost gets higher limit for development/testing
+```
+
+**Middleware Pipeline Placement:**
+
+```csharp
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();  // 1. Error handling
+app.UseIpRateLimiting();                                // 2. Rate limiting ← EARLY!
+app.UseMiddleware<TenantResolutionMiddleware>();        // 3. Tenant resolution
+app.UseAuthentication();                                // 4. Authentication
+app.UseAuthorization();                                 // 5. Authorization
+app.MapControllers();                                   // 6. Controllers
+```
+
+**Why Rate Limiting is Second:**
+
+```
+DoS Attack: 10,000 requests/sec to /auth/login
+
+Without rate limiting:
+→ All 10,000 requests hit authentication
+→ 10,000 database queries
+→ Server overloaded
+→ Legitimate users can't access
+
+With rate limiting (2nd in pipeline):
+→ Only 60 requests/min pass through
+→ 9,940 requests rejected immediately (no DB hit)
+→ Server remains responsive
+→ Legitimate users unaffected ✅
+```
+
+**Attack Scenarios Protected:**
+
+```csharp
+// 1. Brute Force Login
+POST /auth/login (60 attempts/min)
+→ Attacker limited to 60 password guesses per minute
+→ Far too slow to crack passwords
+→ Can lower to 10/min for login endpoint specifically
+
+// 2. API Scraping
+GET /resources (1000 requests/hour)
+→ Attacker can't extract entire database
+→ Scraping becomes economically unfeasible
+
+// 3. Distributed DoS
+100 IPs × 60 requests/min = 6000 req/min total
+→ Each IP individually limited
+→ Server handles load easily
+→ Can implement IP ban for repeat offenders
+
+// 4. Resource Exhaustion
+Complex search: GET /bookings?filters=...
+→ Limited to 60/min per IP
+→ Can't exhaust database connections
+→ Can't cause out-of-memory errors
+```
+
+**Response Headers (for clients):**
+
+```http
+HTTP/1.1 200 OK
+X-Rate-Limit-Limit: 60
+X-Rate-Limit-Remaining: 45
+X-Rate-Limit-Reset: 1775392280
+
+HTTP/1.1 429 Too Many Requests
+Retry-After: 15
+X-Rate-Limit-Limit: 60
+X-Rate-Limit-Remaining: 0
+X-Rate-Limit-Reset: 1775392280
+Content-Type: application/json
+
+{
+  "error": "Rate limit exceeded. Try again in 15 seconds."
+}
+```
+
+**Production Enhancements:**
+
+```csharp
+// 1. Distributed Caching (Redis)
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "redis:6379";
+});
+// Allows multiple API servers to share rate limit counters
+
+// 2. Per-Endpoint Rules
+{
+  "Endpoint": "post:/api/*/auth/login",
+  "Period": "1m",
+  "Limit": 5  // Stricter for sensitive endpoints
+}
+
+// 3. Client ID Header (for authenticated users)
+"ClientIdHeader": "X-ClientId"
+// Rate limit by user ID instead of IP (better for mobile apps behind NAT)
+
+// 4. Whitelist Trusted IPs
+"IpWhitelist": ["192.168.1.0/24", "10.0.0.100"]
+// Internal network, monitoring tools, CDN origins
+```
+
+**Why This Approach:**
+
+- **Zero Code Changes**: Middleware handles everything automatically
+- **Flexible**: Easy to adjust limits based on monitoring
+- **Standard**: X-Rate-Limit headers follow RFC 6585
+- **Production-Ready**: Used by Twitter API, GitHub API, Stripe API
+- **Multi-Layered**: Combines with authentication, WAF, CDN for comprehensive protection"
+
+---
+
+## Q: "Explain your soft delete implementation. Why track both IsDeleted and DeletedAt?"
+
+**A:** "Soft delete marks records as deleted without physically removing them, enabling recovery and maintaining data integrity:
+
+**Schema Changes:**
+
+```sql
+-- Migration 0009: Add soft delete support
+ALTER TABLE Resources ADD COLUMN IsDeleted BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE Resources ADD COLUMN DeletedAt TIMESTAMP NULL;
+
+ALTER TABLE Bookings ADD COLUMN IsDeleted BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE Bookings ADD COLUMN DeletedAt TIMESTAMP NULL;
+
+ALTER TABLE AvailabilityRules ADD COLUMN IsDeleted BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE AvailabilityRules ADD COLUMN DeletedAt TIMESTAMP NULL;
+```
+
+**Why Both Columns?**
+
+```csharp
+// IsDeleted: Fast boolean check
+SELECT * FROM Resources WHERE IsDeleted = false;
+// Index: CREATE INDEX ix_resources_isdeleted ON Resources(IsDeleted);
+// Use case: All active queries (99% of queries)
+
+// DeletedAt: Audit trail and recovery
+SELECT * FROM Resources WHERE DeletedAt BETWEEN @Start AND @End;
+// Use case: "Show me all resources deleted last week"
+// Use case: "Who deleted this resource and when?"
+
+// Combined use:
+SELECT * FROM Resources
+WHERE IsDeleted = false  // Fast index scan
+   OR (IsDeleted = true AND DeletedAt > @CutoffDate);  // Show recently deleted
+```
+
+**Updated IRepository Interface:**
+
+```csharp
+public interface IRepository<T> where T : class
+{
+    Task<T?> GetByIdAsync(Guid id);  // Returns only non-deleted
+    Task<PagedResult<T>> GetPagedAsync(int pageNumber, int pageSize);  // Non-deleted only
+    Task<T> AddAsync(T entity);
+    Task UpdateAsync(T entity);
+    Task DeleteAsync(Guid id);  // Hard delete (admin only)
+    Task SoftDeleteAsync(Guid id);  // Soft delete (normal users) ← NEW
+}
+```
+
+**BaseRepository Implementation:**
+
+```csharp
+public async Task SoftDeleteAsync(Guid id)
+{
+    var sql = $@"
+        UPDATE {TableName}
+        SET IsDeleted = true,
+            DeletedAt = @DeletedAt,
+            UpdatedAt = @UpdatedAt
+        WHERE Id = @Id AND TenantId = @TenantId AND IsDeleted = false";
+
+    using var connection = _connectionFactory.CreateConnection();
+    var rowsAffected = await connection.ExecuteAsync(sql, new
+    {
+        Id = id,
+        TenantId = TenantId,
+        DeletedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow
+    });
+
+    if (rowsAffected == 0)
+    {
+        throw new NotFoundException($"{typeof(T).Name} not found or already deleted");
+    }
+}
+
+// Updated GetAll to exclude soft-deleted
+protected virtual string BuildGetPagedQuery()
+{
+    return $@"
+        SELECT * FROM {TableName}
+        WHERE TenantId = @TenantId
+          AND IsDeleted = false  ← Filter soft-deleted
+        ORDER BY CreatedAt DESC
+        LIMIT @PageSize OFFSET @Offset";
+}
+```
+
+**Command Handler Update:**
+
+```csharp
+// DeleteResourceCommandHandler
+public async Task<DeleteResourceResponse> Handle(
+    DeleteResourceCommand request,
+    CancellationToken cancellationToken)
+{
+    // Regular users: soft delete
+    if (!_currentUserService.IsAdmin)
+    {
+        await _resourceRepository.SoftDeleteAsync(request.Id);
+        return new DeleteResourceResponse
+        {
+            Message = "Resource deleted successfully (can be recovered)"
+        };
+    }
+
+    // Admins: hard delete
+    await _resourceRepository.DeleteAsync(request.Id);
+    return new DeleteResourceResponse
+    {
+        Message = "Resource permanently deleted"
+    };
+}
+```
+
+**Benefits of Soft Delete:**
+
+```csharp
+// 1. Recovery
+// User: "I accidentally deleted Meeting Room A!"
+var deletedResource = await connection.QuerySingleAsync<Resource>(@"
+    SELECT * FROM Resources
+    WHERE Id = @Id AND TenantId = @TenantId AND IsDeleted = true
+", new { Id, TenantId });
+
+// Restore it
+await connection.ExecuteAsync(@"
+    UPDATE Resources
+    SET IsDeleted = false, DeletedAt = NULL, UpdatedAt = @Now
+    WHERE Id = @Id
+", new { Id, Now = DateTime.UtcNow });
+
+// 2. Referential Integrity
+// Booking references Resource
+// If resource is soft-deleted, bookings remain intact
+SELECT b.*, r.Name as ResourceName
+FROM Bookings b
+INNER JOIN Resources r ON b.ResourceId = r.Id  -- Still works!
+WHERE b.TenantId = @TenantId;
+
+// 3. Audit Compliance
+// "Show me all deleted resources in Q1 2026"
+SELECT *
+FROM Resources
+WHERE IsDeleted = true
+  AND DeletedAt BETWEEN '2026-01-01' AND '2026-03-31'
+ORDER BY DeletedAt DESC;
+
+// 4. Data Analysis
+// "How many resources were deleted each month?"
+SELECT
+    DATE_TRUNC('month', DeletedAt) as Month,
+    COUNT(*) as DeletedCount
+FROM Resources
+WHERE IsDeleted = true
+GROUP BY DATE_TRUNC('month', DeletedAt);
+```
+
+**Hard Delete (Permanent):**
+
+```csharp
+// Still available for admins - complete data removal
+public async Task DeleteAsync(Guid id)
+{
+    var sql = $@"
+        DELETE FROM {TableName}
+        WHERE Id = @Id AND TenantId = @TenantId";
+
+    using var connection = _connectionFactory.CreateConnection();
+    var rowsAffected = await connection.ExecuteAsync(sql, new
+    {
+        Id = id,
+        TenantId = TenantId
+    });
+
+    if (rowsAffected == 0)
+    {
+        throw new NotFoundException($"{typeof(T).Name} not found");
+    }
+}
+```
+
+**Database Cleanup:**
+
+```csharp
+// Periodic cleanup job (runs monthly)
+public async Task PurgeOldSoftDeletedAsync(int daysOld = 90)
+{
+    var sql = @"
+        DELETE FROM Resources
+        WHERE IsDeleted = true
+          AND DeletedAt < @CutoffDate";
+
+    var cutoffDate = DateTime.UtcNow.AddDays(-daysOld);
+    var deletedCount = await connection.ExecuteAsync(sql, new { CutoffDate = cutoffDate });
+
+    _logger.LogInformation($"Purged {deletedCount} soft-deleted resources older than {daysOld} days");
+}
+```
+
+**Trade-offs:**
+
+| Aspect          | Soft Delete          | Hard Delete          |
+| --------------- | -------------------- | -------------------- |
+| **Recovery**    | ✅ Easy              | ❌ Impossible        |
+| **Disk Space**  | ❌ Grows over time   | ✅ Freed immediately |
+| **Query Speed** | ❌ Slightly slower\* | ✅ Faster            |
+| **Compliance**  | ✅ Audit trail       | ❌ No record         |
+| **Complexity**  | ❌ More code         | ✅ Simple            |
+
+\*With proper index on IsDeleted, performance impact is negligible"
+
+---
+
+## Q: "How did you implement the booking statistics endpoint? What SQL aggregation techniques did you use?"
+
+**A:** "The statistics endpoint uses PostgreSQL aggregate functions and GROUP BY to calculate metrics efficiently at the database level:
+
+**The DTO:**
+
+```csharp
+public class BookingStatisticsDto
+{
+    public int TotalBookings { get; set; }
+    public int PendingCount { get; set; }
+    public int ConfirmedCount { get; set; }
+    public int CancelledCount { get; set; }
+    public int CompletedCount { get; set; }
+    public Dictionary<string, int> BookingsByResource { get; set; } = new();
+    public Dictionary<string, int> BookingsByMonth { get; set; } = new();
+}
+```
+
+**The SQL Query:**
+
+```csharp
+public async Task<BookingStatisticsDto> GetStatisticsAsync(
+    DateTime? startDate = null,
+    DateTime? endDate = null)
+{
+    using var connection = _connectionFactory.CreateConnection();
+
+    var parameters = new DynamicParameters();
+    parameters.Add("TenantId", TenantId);
+
+    var whereClause = "WHERE TenantId = @TenantId AND IsDeleted = false";
+
+    if (startDate.HasValue)
+    {
+        whereClause += " AND StartTime >= @StartDate";
+        parameters.Add("StartDate", startDate.Value);
+    }
+
+    if (endDate.HasValue)
+    {
+        whereClause += " AND EndTime <= @EndDate";
+        parameters.Add("EndDate", endDate.Value);
+    }
+
+    // 1. Count by status (single query, multiple aggregates)
+    var statusSql = $@"
+        SELECT
+            COUNT(*)::int AS TotalBookings,
+            COUNT(*) FILTER (WHERE Status = 'Pending')::int AS PendingCount,
+            COUNT(*) FILTER (WHERE Status = 'Confirmed')::int AS ConfirmedCount,
+            COUNT(*) FILTER (WHERE Status = 'Cancelled')::int AS CancelledCount,
+            COUNT(*) FILTER (WHERE Status = 'Completed')::int AS CompletedCount
+        FROM Bookings
+        {whereClause}";
+
+    var statusResult = await connection.QuerySingleAsync<StatusCountsDto>(
+        statusSql,
+        parameters);
+
+    // 2. Bookings by resource (GROUP BY)
+    var resourceSql = $@"
+        SELECT
+            r.Name AS ResourceName,
+            COUNT(b.Id)::int AS BookingCount
+        FROM Bookings b
+        INNER JOIN Resources r ON b.ResourceId = r.Id
+        {whereClause}
+        GROUP BY r.Name
+        ORDER BY BookingCount DESC
+        LIMIT 10";
+
+    var resourceStats = await connection.QueryAsync<ResourceStatDto>(
+        resourceSql,
+        parameters);
+
+    // 3. Bookings by month (DATE_TRUNC for time grouping)
+    var monthSql = $@"
+        SELECT
+            TO_CHAR(DATE_TRUNC('month', StartTime), 'YYYY-MM') AS Month,
+            COUNT(*)::int AS BookingCount
+        FROM Bookings
+        {whereClause}
+        GROUP BY DATE_TRUNC('month', StartTime)
+        ORDER BY Month DESC";
+
+    var monthStats = await connection.QueryAsync<MonthStatDto>(
+        monthSql,
+        parameters);
+
+    return new BookingStatisticsDto
+    {
+        TotalBookings = statusResult.TotalBookings,
+        PendingCount = statusResult.PendingCount,
+        ConfirmedCount = statusResult.ConfirmedCount,
+        CancelledCount = statusResult.CancelledCount,
+        CompletedCount = statusResult.CompletedCount,
+        BookingsByResource = resourceStats.ToDictionary(x => x.ResourceName, x => x.BookingCount),
+        BookingsByMonth = monthStats.ToDictionary(x => x.Month, x => x.BookingCount)
+    };
+}
+```
+
+**SQL Techniques Explained:**
+
+```sql
+-- 1. FILTER clause (aggregate with condition)
+COUNT(*) FILTER (WHERE Status = 'Pending')
+-- Equivalent to:
+SUM(CASE WHEN Status = 'Pending' THEN 1 ELSE 0 END)
+-- But more readable and performant
+
+-- 2. GROUP BY for aggregation
+SELECT
+    r.Name,
+    COUNT(b.Id) AS BookingCount
+FROM Bookings b
+INNER JOIN Resources r ON b.ResourceId = r.Id
+GROUP BY r.Name;
+
+Result:
+| Name              | BookingCount |
+|-------------------|--------------|
+| Meeting Room A    | 45           |
+| Conference Hall B | 32           |
+| Lab Room 101      | 18           |
+
+-- 3. DATE_TRUNC for time-based grouping
+DATE_TRUNC('month', StartTime)  -- Truncates to first day of month
+'2026-04-15 10:30' → '2026-04-01 00:00'
+'2026-03-22 14:15' → '2026-03-01 00:00'
+
+SELECT
+    DATE_TRUNC('month', StartTime) AS Month,
+    COUNT(*) AS BookingCount
+FROM Bookings
+GROUP BY DATE_TRUNC('month', StartTime);
+
+Result:
+| Month               | BookingCount |
+|---------------------|--------------|
+| 2026-04-01 00:00:00 | 127          |
+| 2026-03-01 00:00:00 | 98           |
+| 2026-02-01 00:00:00 | 85           |
+
+-- 4. TO_CHAR for formatting
+TO_CHAR(DATE_TRUNC('month', StartTime), 'YYYY-MM')
+'2026-04-01 00:00:00' → '2026-04'
+
+-- 5. ::int type casting
+COUNT(*)::int
+-- Postgres returns COUNT as bigint (64-bit)
+-- Cast to int (32-bit) for C# compatibility
+```
+
+**Why Database-Level Aggregation?**
+
+```csharp
+// ❌ BAD: Aggregate in application code
+var allBookings = await _repository.GetAllAsync();  // Fetch 100,000 bookings
+var pendingCount = allBookings.Count(b => b.Status == BookingStatus.Pending);
+var confirmedCount = allBookings.Count(b => b.Status == BookingStatus.Confirmed);
+// Problems:
+// - Transfers 100,000 rows over network
+// - Uses memory for all 100,000 objects
+// - Slow LINQ aggregation in .NET
+
+// ✅ GOOD: Aggregate in database
+var sql = "SELECT COUNT(*) FILTER (WHERE Status = 'Pending') FROM Bookings";
+var pendingCount = await connection.ExecuteScalarAsync<int>(sql);
+// Benefits:
+// - Only 1 integer transferred over network
+// - Zero .NET memory allocation
+// - Database index-optimized aggregation
+```
+
+**Performance Comparison:**
+
+```
+Dataset: 100,000 bookings
+
+Application Aggregation:
+- Network transfer: 50 MB
+- Memory: 500 MB
+- Time: 2.5 seconds
+
+Database Aggregation:
+- Network transfer: 0.5 KB
+- Memory: 1 MB
+- Time: 15 milliseconds
+
+167x faster! ✅
+```
+
+**Query Endpoint:**
+
+```csharp
+[HttpGet("statistics")]
+[Authorize(Policy = "ManagerOrAbove")]
+public async Task<IActionResult> GetStatistics(
+    [FromQuery] DateTime? startDate = null,
+    [FromQuery] DateTime? endDate = null)
+{
+    var query = new GetBookingStatisticsQuery
+    {
+        StartDate = startDate,
+        EndTime = endDate
+    };
+
+    var result = await _mediator.Send(query);
+    return Ok(result);
+}
+```
+
+**Example Request/Response:**
+
+```http
+GET /api/v1/bookings/statistics?startDate=2026-01-01&endDate=2026-12-31
+
+Response:
+{
+  "totalBookings": 345,
+  "pendingCount": 42,
+  "confirmedCount": 187,
+  "cancelledCount": 38,
+  "completedCount": 78,
+  "bookingsByResource": {
+    "Meeting Room A": 95,
+    "Conference Hall B": 72,
+    "Lab Room 101": 58,
+    "Training Room": 45,
+    "Board Room": 75
+  },
+  "bookingsByMonth": {
+    "2026-12": 32,
+    "2026-11": 28,
+    "2026-10": 35,
+    "2026-09": 29,
+    "2026-08": 31
+  }
+}
+```
+
+**Why This Design:**
+
+- **Efficient**: Aggregates 100k+ records in milliseconds
+- **Scalable**: Performance doesn't degrade with data growth (uses indexes)
+- **Flexible**: Easy to add new metrics (AVG duration, peak hours, etc.)
+- **Standard SQL**: Works with any SQL database (not PostgreSQL-specific except FILTER)"
+
+---
+
 ## 🎯 Key Takeaways
 
 1. **MediatR Pipeline Behaviors** provide cross-cutting concerns (audit logging, validation, caching) without duplicating code in handlers
@@ -1011,6 +1846,10 @@ public async Task<IEnumerable<AvailabilityRule>> GetByResourceIdAndDayAsync(
 4. **Composite indexes** dramatically improve query performance when designed for specific access patterns
 5. **CHECK constraints** enforce data integrity at the database level, providing defense-in-depth
 6. **Clean Architecture** keeps business logic independent of infrastructure concerns
+7. **RefreshToken pattern** combines security and UX through token rotation and stateful validation
+8. **Rate limiting** protects APIs from abuse and DoS attacks with minimal performance overhead
+9. **Soft delete** enables data recovery and audit trails while maintaining referential integrity
+10. **Database-level aggregation** is orders of magnitude faster than application-level aggregation
 
 ---
 

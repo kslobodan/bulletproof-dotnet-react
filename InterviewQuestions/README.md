@@ -44,15 +44,27 @@
 - CQRS pattern with MediatR
 - Repository pattern with Dapper
 - Multi-tenant data isolation
+- MediatR Pipeline Behaviors for cross-cutting concerns
 
 ### Backend Technologies
 
 - .NET 9.0 Web API
 - PostgreSQL 16 with Docker
-- JWT authentication
+- JWT authentication with RefreshToken mechanism
 - BCrypt password hashing
 - FluentValidation
 - Serilog structured logging
+- Dapper for data access
+
+### Advanced Features
+
+- Audit logging with MediatR pipeline
+- AvailabilityRules with TIME data types
+- Soft delete pattern (IsDeleted/DeletedAt)
+- Rate limiting (AspNetCoreRateLimit)
+- RefreshToken rotation for secure sessions
+- Statistics endpoints with SQL aggregation
+- Dynamic WHERE clause building
 
 ### DevOps & Tools
 
@@ -63,7 +75,9 @@
 
 ### Security
 
-- Multi-tenant isolation
-- Role-based authorization
-- SQL injection prevention
-- Password security best practices
+- Multi-tenant isolation (tenant-scoped queries)
+- Role-based authorization (TenantAdmin, Manager, User)
+- Token rotation for refresh tokens
+- Rate limiting for DoS protection
+- SQL injection prevention (parameterized queries)
+- Password security best practices (BCrypt)
