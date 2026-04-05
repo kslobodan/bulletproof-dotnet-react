@@ -546,7 +546,16 @@
 245. Updated `BaseRepository` in `Infrastructure/Repositories/BaseRepository`
 246. Updated `BookingRepository`
 247. Updated `AvailabilityRuleRepository`
-248. Updated Delete command handlers to use SoftDeleteAsync (
+248. Updated Delete command handlers to use SoftDeleteAsync
 249. Updated `TenantRepository`
 250. Migration execution:
      - Started API: `cd src/BookingSystem.API; dotnet run`
+
+### Other features - Step 3: Add Filtering and Sorting to Booking Queries
+
+252. Updated `GetAllBookingsQuery` in `Application/Features/Bookings/Queries/GetAllBookings`:
+
+253. Updated `IBookingRepository` interface in `Application/Common/Interfaces`:
+254. Implemented `GetPagedAsync` in `BookingRepository.cs` in `Infrastructure/Repositories`:
+255. Updated `GetAllBookingsQueryHandler`:
+256. Created `GetAllBookingsQueryValidator.cs`:

@@ -1,3 +1,4 @@
+using BookingSystem.Application.Common.Models;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Domain.Enums;
 
@@ -30,4 +31,19 @@ public interface IBookingRepository : IRepository<Booking>
     /// Gets all bookings with a specific status (tenant-filtered).
     /// </summary>
     Task<IEnumerable<Booking>> GetByStatusAsync(BookingStatus status);
+    
+    /// <summary>
+    /// Gets paginated bookings with advanced filtering and sorting (tenant-filtered).
+    /// </summary>
+    Task<PagedResult<Booking>> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        Guid? resourceId = null,
+        Guid? userId = null,
+        BookingStatus? status = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string orderBy = "StartTime",
+        bool descending = false,
+        CancellationToken cancellationToken = default);
 }

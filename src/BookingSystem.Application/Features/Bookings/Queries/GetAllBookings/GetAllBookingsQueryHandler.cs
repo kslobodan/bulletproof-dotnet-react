@@ -30,55 +30,27 @@ public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, P
             throw new UnauthorizedAccessException("Tenant context is required for this operation");
         }
 
-        // TODO: Implement filtering in repository for better performance
-        // For now, get all bookings and filter in memory
-        var allBookings = await _bookingRepository.GetAllAsync(cancellationToken);
+        // Use repository method with database-level filtering for better performance
+        var pagedBookings = await _bookingRepository.GetPagedAsync(
+            request.PageNumber,
+            request.PageSize,
+            request.ResourceId,
+            request.UserId,
+            request.Status,
+            request.StartDate,
+            request.EndDate,
+            request.OrderBy ?? "StartTime",
+            request.Descending,
+            cancellationToken
+        );
 
-        // Apply filters
-        var filteredBookings = allBookings.AsQueryable();
-
-        if (request.ResourceId.HasValue)
-        {
-            filteredBookings = filteredBookings.Where(b => b.ResourceId == request.ResourceId.Value);
-        }
-
-        if (request.UserId.HasValue)
-        {
-            filteredBookings = filteredBookings.Where(b => b.UserId == request.UserId.Value);
-        }
-
-        if (request.Status.HasValue)
-        {
-            filteredBookings = filteredBookings.Where(b => b.Status == request.Status.Value);
-        }
-
-        if (request.StartDate.HasValue)
-        {
-            filteredBookings = filteredBookings.Where(b => b.StartTime >= request.StartDate.Value);
-        }
-
-        if (request.EndDate.HasValue)
-        {
-            filteredBookings = filteredBookings.Where(b => b.EndTime <= request.EndDate.Value);
-        }
-
-        // Order by StartTime descending
-        var orderedBookings = filteredBookings.OrderByDescending(b => b.StartTime).ToList();
-
-        // Apply pagination
-        var totalCount = orderedBookings.Count;
-        var pagedBookings = orderedBookings
-            .Skip((request.PageNumber - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToList();
-
-        var bookingDtos = _mapper.Map<List<BookingDto>>(pagedBookings);
+        var bookingDtos = _mapper.Map<List<BookingDto>>(pagedBookings.Items);
 
         return new PagedResult<BookingDto>(
             bookingDtos,
-            totalCount,
-            request.PageNumber,
-            request.PageSize
+            pagedBookings.TotalCount,
+            pagedBookings.PageNumber,
+            pagedBookings.PageSize
         );
     }
 }

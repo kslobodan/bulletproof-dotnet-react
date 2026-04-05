@@ -16,4 +16,8 @@ public class GetAllBookingsQuery : IRequest<PagedResult<BookingDto>>
     public BookingStatus? Status { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
+    
+    // Sorting
+    public string? OrderBy { get; set; } = "StartTime"; // Default: StartTime
+    public bool Descending { get; set; } = false;
 }

@@ -1,5 +1,6 @@
 using Dapper;
 using BookingSystem.Application.Common.Interfaces;
+using BookingSystem.Application.Common.Models;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Domain.Enums;
 
@@ -178,5 +179,89 @@ public class BookingRepository : BaseRepository<Booking>, IBookingRepository
             TenantId = TenantId,
             Status = (int)status
         });
+    }
+
+    public async Task<PagedResult<Booking>> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        Guid? resourceId = null,
+        Guid? userId = null,
+        BookingStatus? status = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string orderBy = "StartTime",
+        bool descending = false,
+        CancellationToken cancellationToken = default)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        // Build dynamic WHERE clause
+        var whereConditions = new List<string> { "TenantId = @TenantId", "IsDeleted = FALSE" };
+        var parameters = new DynamicParameters();
+        parameters.Add("TenantId", TenantId);
+
+        if (resourceId.HasValue)
+        {
+            whereConditions.Add("ResourceId = @ResourceId");
+            parameters.Add("ResourceId", resourceId.Value);
+        }
+
+        if (userId.HasValue)
+        {
+            whereConditions.Add("UserId = @UserId");
+            parameters.Add("UserId", userId.Value);
+        }
+
+        if (status.HasValue)
+        {
+            whereConditions.Add("Status = @Status");
+            parameters.Add("Status", (int)status.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            whereConditions.Add("StartTime >= @StartDate");
+            parameters.Add("StartDate", startDate.Value);
+        }
+
+        if (endDate.HasValue)
+        {
+            whereConditions.Add("EndTime <= @EndDate");
+            parameters.Add("EndDate", endDate.Value);
+        }
+
+        var whereClause = string.Join(" AND ", whereConditions);
+
+        // Validate and sanitize ORDER BY to prevent SQL injection
+        var validOrderByColumns = new[] { "StartTime", "EndTime", "CreatedAt", "Status", "Title" };
+        var sanitizedOrderBy = validOrderByColumns.Contains(orderBy) ? orderBy : "StartTime";
+        var orderDirection = descending ? "DESC" : "ASC";
+
+        // Get total count
+        var countSql = $@"
+            SELECT COUNT(*)::int FROM Bookings 
+            WHERE {whereClause}";
+
+        var totalCount = await connection.ExecuteScalarAsync<int>(countSql, parameters);
+
+        // Get paginated data
+        var offset = (pageNumber - 1) * pageSize;
+        parameters.Add("PageSize", pageSize);
+        parameters.Add("Offset", offset);
+
+        var dataSql = $@"
+            SELECT * FROM Bookings 
+            WHERE {whereClause}
+            ORDER BY {sanitizedOrderBy} {orderDirection}
+            LIMIT @PageSize OFFSET @Offset";
+
+        var items = await connection.QueryAsync<Booking>(dataSql, parameters);
+
+        return new PagedResult<Booking>(
+            items.ToList(),
+            totalCount,
+            pageNumber,
+            pageSize
+        );
     }
 }
