@@ -602,3 +602,26 @@
      - Refresh: Used refresh token → Got new access token + new refresh token ✅
      - Token rotation: Old refresh token marked as revoked in database, ReplacedByToken set ✅
      - Security: Old refresh token rejected on reuse attempt ✅
+
+---
+
+## Day 7:
+
+### Backend Testing - Step 1: Set up xUnit test projects
+
+284. Created xUnit test project for unit tests
+285. Created xUnit test project for integration tests
+286. Added test projects to solution
+287. Configured project references for UnitTests
+288. Configured project references for IntegrationTests
+289. Deleted default test files:
+     - `Remove-Item BookingSystem.UnitTests/UnitTest1.cs -Force`
+     - `Remove-Item BookingSystem.IntegrationTests/UnitTest1.cs -Force`
+290. Created folder structure in UnitTests project:
+     - `Domain/Entities`
+     - `Application/Commands`
+     - `Application/Queries`
+     - `Application/Validators`
+291. Created folder structure in IntegrationTests project:
+     - `Controllers`
+     - `Infrastructure`
