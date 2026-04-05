@@ -636,3 +636,10 @@
      - `dotnet add package Microsoft.AspNetCore.Mvc.Testing --version 9.0.*` → version 9.0.14 (WebApplicationFactory for in-memory testing)
      - `dotnet add package Testcontainers.PostgreSql` → version 4.11.0 (PostgreSQL container for integration tests)
      - `dotnet add package FluentAssertions` → version 8.9.0 (readable assertions)
+
+### Backend Testing - Step 3: Write unit tests for Domain entities
+
+295. Created `RefreshTokenTests` with 9 test methods
+296. Created `BookingTests` with 7 test methods
+297. Created `AvailabilityRuleTests`
+298. Executed unit tests
