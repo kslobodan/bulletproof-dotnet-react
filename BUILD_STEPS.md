@@ -723,3 +723,37 @@
      - CreateBooking_WithoutTenantHeader_ShouldReturn400
 
 336. Added `InvalidOperationException`
+
+### Step 11: Architecture Tests (NetArchTest.Rules)
+
+**Goal**: Validate Clean Architecture principles and enforce coding conventions using automated architecture tests.
+
+341. Installed NetArchTest.Rules package: `dotnet add package NetArchTest.Rules` (version 1.3.2)
+342. Created AssemblyReference
+343. Created ArchitectureTests in BookingSystem.UnitTests/Architecture with 15 comprehensive tests:
+
+     **Layer Dependency Tests**:
+     - Domain_Should_NotHaveAnyDependencies (Domain is innermost layer)
+     - Application_Should_OnlyDependOnDomain (Application layer isolation)
+     - Infrastructure_Should_NotDependOnAPI (Infrastructure independent of API)
+     - API_Controllers_Should_NotDirectlyUseRepositories (Controllers use MediatR, not repositories)
+
+     **Naming Convention Tests**:
+     - Commands_Should_EndWithCommand
+     - Queries_Should_EndWithQuery
+     - Handlers_Should_EndWithHandler
+     - Validators_Should_EndWithValidator
+     - Controllers_Should_EndWithController
+     - Repositories_Should_EndWithRepository (excludes abstract base classes)
+
+     **CQRS Pattern Tests**:
+     - Handlers_Should_ResideInCorrectNamespace (all in Features namespace)
+     - DTOs_Should_ResideInDTOsFolder (Request/Response/Dto classes)
+     - Entities_Should_ResideInDomainLayer (Domain.Entities namespace)
+
+     **Interface and Implementation Tests**:
+     - Repositories_Should_ImplementIRepository (concrete classes)
+     - Middleware_Should_ResideInAPILayer (API.Middleware namespace)
+
+344. Added project references to UnitTests)
+345. Test execution
