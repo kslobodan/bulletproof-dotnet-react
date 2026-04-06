@@ -6,7 +6,78 @@
 
 ## Q: "Why did you choose Clean Architecture for this project?"
 
-**A:** "I chose Clean Architecture because it provides clear separation of concerns and makes the codebase maintainable and testable. The dependency rule—where inner layers have no knowledge of outer layers—means my business logic (Domain) is completely independent of frameworks or databases. This makes it easy to swap implementations, like changing from Dapper to Entity Framework, without touching business logic. It also makes testing easier since I can mock dependencies at layer boundaries."
+**A:** "I chose Clean Architecture because it provides clear separation of concerns and makes the codebase maintainable and testable. The dependency rule—where inner layers have no knowledge of outer layers—means my business logic (Domain) is completely independent of frameworks or databases.
+
+**In detail:** Clean Architecture is a software design pattern created by Robert C. Martin (Uncle Bob) that organizes code into layers with strict dependency rules, making applications maintainable, testable, and independent of frameworks, databases, and UI.
+
+### Core Principle: The Dependency Rule
+
+**Dependencies point inward only** - outer layers can depend on inner layers, but inner layers cannot depend on outer layers.
+
+```
+┌─────────────────────────────────────┐
+│         API Layer (Web)             │ ← Outermost
+├─────────────────────────────────────┤
+│    Infrastructure (Repositories)    │
+├─────────────────────────────────────┤
+│   Application (Business Logic)      │
+├─────────────────────────────────────┤
+│      Domain (Entities/Rules)        │ ← Innermost (no dependencies)
+└─────────────────────────────────────┘
+```
+
+### The 4 Layers in My Project
+
+**1. Domain Layer (Core/Innermost)**
+
+- **What**: Entities, business rules, enums
+- **Dependencies**: NONE (pure C# classes)
+- **Example**: `Booking`, `Resource`, `User`, `BookingStatus`
+- **Why pure**: Business logic shouldn't care about databases or frameworks
+
+**2. Application Layer (Use Cases)**
+
+- **What**: CQRS commands/queries, handlers, validators, DTOs, interfaces
+- **Dependencies**: Only Domain
+- **Example**: `CreateBookingCommand`, `IResourceRepository`, `BookingValidator`
+- **Why**: Defines 'what the app does' without 'how it's done'
+
+**3. Infrastructure Layer (Implementation Details)**
+
+- **What**: Database access (Dapper), external services, file systems
+- **Dependencies**: Application + Domain
+- **Example**: `BookingRepository`, `JwtTokenService`, `PasswordHasher`
+- **Why**: Keeps technical details replaceable (swap Dapper for EF Core later)
+
+**4. API Layer (Presentation/Entry Point)**
+
+- **What**: Controllers, middleware, Program.cs, HTTP concerns
+- **Dependencies**: Application + Infrastructure (wires everything together)
+- **Example**: `BookingsController`, `TenantResolutionMiddleware`
+- **Why**: UI/API can be replaced (add mobile app, console app, etc.)
+
+### Key Benefits
+
+1. **Testability**: Business logic (Domain/Application) has no framework dependencies → easy unit tests
+2. **Flexibility**: Swap PostgreSQL for SQL Server? Only change Infrastructure layer
+3. **Independence**: Domain entities don't know about HTTP, databases, or UI
+4. **Maintainability**: Changes in one layer don't break others (if dependencies are correct)
+5. **Interview Appeal**: Shows understanding of enterprise architecture patterns
+
+### Why Assembly Scanning Matters
+
+My `AssemblyReference.cs` pattern follows Clean Architecture:
+
+- **Application defines contracts** (`IValidator`, `IRequestHandler`, `Profile`)
+- **Infrastructure registers implementations** via `typeof(AssemblyReference).Assembly`
+- **Keeps API layer thin** - just wires dependencies, doesn't implement logic
+
+### Interview Talking Points
+
+- **'Why not just MVC?'** - Clean Architecture separates concerns. MVC mixes business logic with controllers.
+- **'What if requirements change?'** - Swap Dapper for EF Core without touching Domain/Application.
+- **'How do you test this?'** - Unit test handlers without databases (mock `IRepository<T>`).
+- **'Isn't it over-engineering?'** - For large projects, this prevents 'big ball of mud' code."
 
 ---
 
