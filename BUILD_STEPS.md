@@ -705,3 +705,21 @@
      - Diagnostic_CreateResourceWithLoginToken_ShouldWork (for debugging)
 
 324. Updated TestWebApplicationFactory to explicitly override JWT validation
+
+### Step 10: Bookings Integration Tests
+
+**Goal**: Write comprehensive integration tests for Bookings endpoints including conflict detection, status workflows, and authorization.
+
+335. Created BookingsControllerTests in BookingSystem.IntegrationTests/Controllers with 11 tests:
+     - CreateBooking_WithValidData_ShouldReturn201AndBooking
+     - CreateBooking_WithOverlappingTimes_ShouldReturn400Conflict (validates conflict detection)
+     - GetBookingById_WithValidId_ShouldReturn200AndBooking
+     - GetBookingById_WithInvalidId_ShouldReturn404
+     - GetAllBookings_WithPagination_ShouldReturnPagedResults
+     - UpdateBooking_WithValidData_ShouldReturn200AndUpdatedBooking
+     - CancelBooking_WithValidId_ShouldReturn200AndCancelledBooking
+     - MultiTenant_BookingIsolation_TenantCannotAccessOtherTenantsBookings
+     - CreateBooking_WithoutAuthentication_ShouldReturn401
+     - CreateBooking_WithoutTenantHeader_ShouldReturn400
+
+336. Added `InvalidOperationException`

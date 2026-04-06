@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using BookingSystem.Application.Common.Models;
 using BookingSystem.Application.Features.Resources.DTOs;
 using BookingSystem.IntegrationTests.Infrastructure;
 using FluentAssertions;
@@ -80,7 +81,7 @@ public class ResourcesControllerTests : IntegrationTestBase
         using var connection = DbConnectionFactory.CreateConnection();
         connection.Open();
         var cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM resources WHERE id = @id AND tenant_id = @tenantId";
+        cmd.CommandText = "SELECT COUNT(*) FROM resources WHERE id = @id AND tenantid = @tenantId";
         var idParam = cmd.CreateParameter();
         idParam.ParameterName = "@id";
         idParam.Value = result.Resource.Id;
@@ -120,8 +121,12 @@ public class ResourcesControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
-        var result = await response.Content.ReadFromJsonAsync<dynamic>();
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ResourceDto>>();
         result.Should().NotBeNull();
+        result!.Items.Should().HaveCount(3);
+        result.PageNumber.Should().Be(1);
+        result.PageSize.Should().Be(3);
+        result.TotalCount.Should().Be(5);
     }
 
     [Fact]
@@ -266,7 +271,7 @@ public class ResourcesControllerTests : IntegrationTestBase
         using var connection = DbConnectionFactory.CreateConnection();
         connection.Open();
         var cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT is_deleted, deleted_at FROM resources WHERE id = @id";
+        cmd.CommandText = "SELECT isdeleted, deletedat FROM resources WHERE id = @id";
         var idParam = cmd.CreateParameter();
         idParam.ParameterName = "@id";
         idParam.Value = createdResource.Resource.Id;

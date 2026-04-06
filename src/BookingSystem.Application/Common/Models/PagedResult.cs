@@ -10,6 +10,11 @@ public class PagedResult<T>
     public bool HasPreviousPage => PageNumber > 1;
     public bool HasNextPage => PageNumber < TotalPages;
 
+    // Parameterless constructor for deserialization
+    public PagedResult()
+    {
+    }
+
     public PagedResult(List<T> items, int count, int pageNumber, int pageSize)
     {
         Items = items;
