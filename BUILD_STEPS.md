@@ -679,9 +679,29 @@
 
 ### Backend Testing - Step 8: Write integration tests for Auth endpoints
 
-317. Created AuthControllerTests. in BookingSystem.IntegrationTests/Controllers
-318. Updated GlobalExceptionHandlerMiddleware to map UnauthorizedAccessException
+317. Created AuthControllerTests in BookingSystem.IntegrationTests/Controllers
+318. Updated GlobalExceptionHandlerMiddleware to map UnauthorizedAccessException → 401, ArgumentException → 400
 319. Updated RegisterTenantCommandHandler to generate and store RefreshToken
 320. Updated RegisterUserCommandHandler to generate and store RefreshToken
 321. Fixed IntegrationTestBase helper methods to return full DTO objects (RegisterTenantResponse, LoginResponse)
 322. Test execution
+
+### Step 9: Resources CRUD Integration Tests
+
+**Goal**: Write comprehensive integration tests for Resources endpoints with authentication, multi-tenant isolation, pagination, and database verification.
+
+323. Created ResourcesControllerTests in BookingSystem.IntegrationTests/Controllers with 12 tests:
+     - CreateResource_WithValidData_ShouldReturn201AndResource
+     - GetAllResources_WithPagination_ShouldReturnPagedResults
+     - GetResourceById_WithValidId_ShouldReturn200AndResource
+     - GetResourceById_WithInvalidId_ShouldReturn404
+     - UpdateResource_WithValidData_ShouldReturn200AndUpdatedResource
+     - DeleteResource_WithValidId_ShouldReturn200AndSoftDelete (verifies is_deleted, deleted_at)
+     - MultiTenant_ResourceIsolation_TenantCannotAccessOtherTenantsResources
+     - GetAllResources_WithResourceTypeFilter_ShouldReturnFilteredResults
+     - CreateResource_WithoutAuthentication_ShouldReturn401
+     - CreateResource_WithoutTenantHeader_ShouldReturn400
+     - UpdateResource_OfDifferentTenant_ShouldReturn404
+     - Diagnostic_CreateResourceWithLoginToken_ShouldWork (for debugging)
+
+324. Updated TestWebApplicationFactory to explicitly override JWT validation
