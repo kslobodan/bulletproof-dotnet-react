@@ -64,6 +64,36 @@
 19. Configured FluentValidation in `Program.cs`
 20. Configured AutoMapper in `Program.cs`
 
+### ⭐ VS Code C# Auto-Formatting Setup
+
+**Enable auto-format on save for better code quality:**
+
+Press `Ctrl+Shift+P` → Type "Preferences: Open User Settings (JSON)"
+
+Add these settings:
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "[csharp]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
+  }
+}
+```
+
+**Required Extension:** C# Dev Kit by Microsoft (`ms-dotnettools.csharp`)
+
+**Benefits:**
+
+- Auto-formats code on every save
+- Organizes imports (removes unused, sorts alphabetically)
+- Consistent code style across the project
+- Works with EditorConfig for team-wide consistency
+
 ---
 
 ## Day 2: Core Infrastructure & Multi-tenancy
