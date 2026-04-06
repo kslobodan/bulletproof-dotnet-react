@@ -755,5 +755,35 @@
      - Repositories_Should_ImplementIRepository (concrete classes)
      - Middleware_Should_ResideInAPILayer (API.Middleware namespace)
 
-344. Added project references to UnitTests)
+344. Added project references to UnitTests
 345. Test execution
+
+### Step 12: Code Coverage Measurement
+
+**Goal**: Measure code coverage from unit and integration tests, generate reports, and document coverage by layer.
+
+348. Installed coverlet.msbuild for code coverage collection
+349. Ran unit tests with coverage collection:
+350. Installed ReportGenerator global tool for HTML coverage reports Version: 5.5.4
+351. Generated HTML coverage report from unit tests
+352. **Unit Test Coverage Statistics** (by layer):
+     - **Domain Layer**: 64% line coverage, 100% branch coverage
+       - Booking entity: 100% covered
+       - AvailabilityRule entity: 100% covered
+       - RefreshToken entity: 100% covered
+       - Resource entity: 90.9% covered
+       - User, Tenant, AuditLog: 0% covered (no unit tests yet)
+     - **Application Layer**: 12% line coverage, 5% branch coverage
+       - Commands, Validators, Handlers: Partial coverage
+       - Focus areas: CreateResource, CreateBooking, Login operations
+     - **Infrastructure Layer**: 0% line coverage (expected - tested via integration tests)
+     - **API Layer**: 0% line coverage (expected - tested via integration tests)
+     - **Overall**: 7.82% line coverage, 3.92% branch coverage (243/3104 lines covered)
+
+353. Attempted integration test coverage measurement
+354. **Coverage Analysis Summary**:
+     - Unit tests provide **accurate coverage** for Domain (64%) and Application (12%) layers
+     - Integration tests validate **end-to-end functionality** but don't contribute to coverage metrics reliably
+     - Combined test suite: **147 tests** (92 unit + 40 integration + 15 architecture)
+     - **Total passing**: ~130 tests (88%)
+     - Coverage reports available in BookingSystem.UnitTests/TestResults/CoverageReport/index.html
