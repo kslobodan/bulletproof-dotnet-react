@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using BookingSystem.Application.Common.Interfaces;
+using BookingSystem.Application.Features.Authentication.DTOs;
 using BookingSystem.Infrastructure.Data;
 using BookingSystem.IntegrationTests.Infrastructure;
 using Xunit;
@@ -134,9 +135,9 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IDisposable
     #region Authentication Helper Methods
 
     /// <summary>
-    /// Registers a new tenant and returns the response with access token.
+    /// Registers a new tenant and returns the full response.
     /// </summary>
-    protected async Task<(string TenantId, string Token, HttpResponseMessage Response)> RegisterTenantAsync(
+    protected async Task<RegisterTenantResponse> RegisterTenantAsync(
         string tenantName = "Test Tenant",
         string email = "admin@test.com",
         string password = "Test1234",
@@ -144,7 +145,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IDisposable
         string lastName = "Admin",
         string plan = "Pro")
     {
-        var request = new
+        var request = new RegisterTenantRequest
         {
             TenantName = tenantName,
             Email = email,
@@ -155,55 +156,31 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IDisposable
         };
 
         var response = await Client.PostAsJsonAsync("/api/v1/auth/register-tenant", request);
+        response.EnsureSuccessStatusCode();
         
-        if (response.IsSuccessStatusCode)
-        {
-            var result = await response.Content.ReadFromJsonAsync<RegisterTenantResponseDto>();
-            return (result!.TenantId, result.AccessToken, response);
-        }
-
-        return (string.Empty, string.Empty, response);
+        var result = await response.Content.ReadFromJsonAsync<RegisterTenantResponse>();
+        return result!;
     }
 
     /// <summary>
-    /// Logs in and returns the access token.
+    /// Logs in and returns the full response.
     /// </summary>
-    protected async Task<(string Token, HttpResponseMessage Response)> LoginAsync(
+    protected async Task<LoginResponse> LoginAsync(
         string email,
         string password)
     {
-        var request = new
+        var request = new LoginRequest
         {
             Email = email,
             Password = password
         };
 
         var response = await Client.PostAsJsonAsync("/api/v1/auth/login", request);
+        response.EnsureSuccessStatusCode();
         
-        if (response.IsSuccessStatusCode)
-        {
-            var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-            return (result!.AccessToken, response);
-        }
-
-        return (string.Empty, response);
+        var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        return result!;
     }
-
-    #endregion
-
-    #region DTOs (for deserialization)
-
-    private record RegisterTenantResponseDto(
-        string TenantId,
-        string UserId,
-        string AccessToken,
-        string RefreshToken);
-
-    private record LoginResponseDto(
-        string UserId,
-        string Email,
-        string AccessToken,
-        string RefreshToken);
 
     #endregion
 }

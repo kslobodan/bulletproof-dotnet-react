@@ -18,6 +18,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
     private readonly IJwtTokenService _jwtTokenService;
     private readonly ITenantContext _tenantContext;
     private readonly IDbConnectionFactory _connectionFactory;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
     public RegisterUserCommandHandler(
         IUserRepository userRepository,
@@ -25,7 +26,8 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         IPasswordHasher passwordHasher,
         IJwtTokenService jwtTokenService,
         ITenantContext tenantContext,
-        IDbConnectionFactory connectionFactory)
+        IDbConnectionFactory connectionFactory,
+        IRefreshTokenRepository refreshTokenRepository)
     {
         _userRepository = userRepository;
         _tenantRepository = tenantRepository;
@@ -33,6 +35,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         _jwtTokenService = jwtTokenService;
         _tenantContext = tenantContext;
         _connectionFactory = connectionFactory;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<RegisterUserResponse> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -106,12 +109,28 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         // 7. Generate JWT token
         var token = _jwtTokenService.GenerateToken(userId, request.Email, request.Roles);
 
-        // 8. Return response
+        // 8. Generate and store refresh token
+        var refreshToken = _jwtTokenService.GenerateRefreshToken();
+        var refreshTokenEntity = new Domain.Entities.RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            Token = refreshToken,
+            UserId = userId,
+            TenantId = tenantId,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7), // 7 days refresh token lifetime
+            IsRevoked = false
+        };
+
+        await _refreshTokenRepository.AddAsync(refreshTokenEntity);
+
+        // 9. Return response
         return new RegisterUserResponse
         {
             AuthResult = new AuthResult
             {
                 Token = token,
+                RefreshToken = refreshToken,
                 UserId = userId,
                 Email = request.Email,
                 FirstName = request.FirstName,

@@ -194,14 +194,21 @@ Create a **Multi-tenant Booking System** that demonstrates senior full-stack dev
 - [x] Write unit tests for validators (FluentValidation)
 - [x] Set up integration tests with WebApplicationFactory
 - [x] Configure Testcontainers for PostgreSQL (DatabaseFixture, TestWebApplicationFactory)
-- [ ] Write integration tests for auth endpoints
+- [x] Write integration tests for auth endpoints
 - [ ] Write integration tests for CRUD operations (Resources, Bookings)
 - [ ] Add architecture tests (layer dependencies)
 - [ ] Aim for 80%+ code coverage
 
 **Learning Focus**: Testing strategies, test isolation, mocking, Testcontainers
 
-**Current Status**: Steps 1-7 complete (unit tests + Testcontainers infrastructure). 5 integration smoke tests passing ✅
+**Current Status**: Steps 1-8 complete (8/10 tasks done). 18 integration tests passing (5 smoke + 13 auth) ✅
+
+- ✅ Unit tests covering Domain, Handlers, Validators
+- ✅ Testcontainers with real PostgreSQL database
+- ✅ Auth integration tests (JWT validation, token rotation, multi-tenant flows)
+- ✅ Exception handling improvements (UnauthorizedAccessException → 401)
+
+**Next**: Resources and Bookings integration tests, architecture tests, code coverage
 
 ---
 

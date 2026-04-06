@@ -30,12 +30,23 @@ public class GlobalExceptionHandlerMiddleware
     private static Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+        
+        // Map exception types to HTTP status codes
+        var statusCode = exception switch
+        {
+            UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+            ArgumentException => HttpStatusCode.BadRequest,
+            _ => HttpStatusCode.InternalServerError
+        };
+        
+        context.Response.StatusCode = (int)statusCode;
 
         var response = new
         {
             StatusCode = context.Response.StatusCode,
-            Message = "An error occurred while processing your request.",
+            Message = statusCode == HttpStatusCode.InternalServerError 
+                ? "An error occurred while processing your request." 
+                : exception.Message,
             Detailed = exception.Message // Remove in production
         };
 

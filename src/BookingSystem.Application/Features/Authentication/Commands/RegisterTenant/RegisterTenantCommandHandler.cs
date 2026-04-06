@@ -17,19 +17,22 @@ public class RegisterTenantCommandHandler : IRequestHandler<RegisterTenantComman
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IDbConnectionFactory _connectionFactory;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
     public RegisterTenantCommandHandler(
         ITenantRepository tenantRepository,
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IJwtTokenService jwtTokenService,
-        IDbConnectionFactory connectionFactory)
+        IDbConnectionFactory connectionFactory,
+        IRefreshTokenRepository refreshTokenRepository)
     {
         _tenantRepository = tenantRepository;
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _jwtTokenService = jwtTokenService;
         _connectionFactory = connectionFactory;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<RegisterTenantResponse> Handle(RegisterTenantCommand request, CancellationToken cancellationToken)
@@ -97,12 +100,28 @@ public class RegisterTenantCommandHandler : IRequestHandler<RegisterTenantComman
         var roles = new List<string> { "TenantAdmin" };
         var token = _jwtTokenService.GenerateToken(userId, request.Email, roles);
 
-        // 8. Return response
+        // 8. Generate and store refresh token
+        var refreshToken = _jwtTokenService.GenerateRefreshToken();
+        var refreshTokenEntity = new Domain.Entities.RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            Token = refreshToken,
+            UserId = userId,
+            TenantId = tenantId,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7), // 7 days refresh token lifetime
+            IsRevoked = false
+        };
+
+        await _refreshTokenRepository.AddAsync(refreshTokenEntity);
+
+        // 9. Return response
         return new RegisterTenantResponse
         {
             AuthResult = new AuthResult
             {
                 Token = token,
+                RefreshToken = refreshToken,
                 UserId = userId,
                 Email = request.Email,
                 FirstName = request.FirstName,

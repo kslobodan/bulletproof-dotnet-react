@@ -672,3 +672,16 @@
 313. Updated `IntegrationTestBase`:
 314. Updated `InfrastructureSmokeTests`:
 315. Executed integration tests
+
+316. Created DatabaseFixture with PostgreSqlContainer lifecycle management
+317. Created TestWebApplicationFactory with database connection injection
+318. Updated IntegrationTestBase to use DatabaseFixture,
+
+### Backend Testing - Step 8: Write integration tests for Auth endpoints
+
+317. Created AuthControllerTests. in BookingSystem.IntegrationTests/Controllers
+318. Updated GlobalExceptionHandlerMiddleware to map UnauthorizedAccessException
+319. Updated RegisterTenantCommandHandler to generate and store RefreshToken
+320. Updated RegisterUserCommandHandler to generate and store RefreshToken
+321. Fixed IntegrationTestBase helper methods to return full DTO objects (RegisterTenantResponse, LoginResponse)
+322. Test execution
