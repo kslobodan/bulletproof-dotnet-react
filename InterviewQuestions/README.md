@@ -14,7 +14,7 @@
 - [Day 4: Resources CRUD & Multi-Tenant Isolation](./Day4-Resources.md)
 - [Day 5: Bookings CRUD & Business Logic](./Day5-Bookings.md)
 - [Day 6: Advanced Features & Audit Logging](./Day6-Advanced.md)
-- [Day 7: Backend Testing](./Day7-Testing.md) _(Coming soon)_
+- [Day 7: Backend Testing](./Day7-Testing.md)
 
 ---
 
@@ -72,6 +72,19 @@
 - DbUp database migrations
 - API versioning
 - Swagger/OpenAPI documentation
+
+### Testing
+
+- xUnit testing framework
+- Unit testing (Domain entities, CQRS handlers, FluentValidation validators)
+- Integration testing with Testcontainers (PostgreSQL)
+- Architecture tests with NetArchTest.Rules
+- AAA pattern (Arrange-Act-Assert)
+- Mocking with Moq
+- FluentAssertions for readable test assertions
+- Code coverage measurement with Coverlet
+- Multi-tenant isolation testing
+- Test organization and naming conventions
 
 ### Security
 
