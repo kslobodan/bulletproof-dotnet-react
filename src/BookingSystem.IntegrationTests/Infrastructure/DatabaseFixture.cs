@@ -27,7 +27,9 @@ public class DatabaseFixture : IAsyncLifetime
     /// </summary>
     public async Task InitializeAsync()
     {
-        // Create PostgreSQL container with explicit image
+        // Create PostgreSQL container using builder
+        // Note: Suppressing obsolete warning - builder pattern still recommended for configuration
+        #pragma warning disable CS0618
         _postgresContainer = new PostgreSqlBuilder()
             .WithImage("postgres:16-alpine")
             .WithDatabase("BookingSystemTestDB")
@@ -35,6 +37,7 @@ public class DatabaseFixture : IAsyncLifetime
             .WithPassword("testpass123")
             .WithCleanUp(true)
             .Build();
+        #pragma warning restore CS0618
 
         // Start the container
         await _postgresContainer.StartAsync();
