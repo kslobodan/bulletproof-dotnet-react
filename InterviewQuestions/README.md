@@ -15,6 +15,7 @@
 - [Day 5: Bookings CRUD & Business Logic](./Day5-Bookings.md)
 - [Day 6: Advanced Features & Audit Logging](./Day6-Advanced.md)
 - [Day 7: Backend Testing](./Day7-Testing.md)
+- [Day 8: Frontend Setup (React + TypeScript + Vite)](./Day8-Frontend.md)
 
 ---
 
@@ -85,6 +86,18 @@
 - Code coverage measurement with Coverlet
 - Multi-tenant isolation testing
 - Test organization and naming conventions
+
+### Frontend Technologies
+
+- React 19 with TypeScript
+- Vite 8 (fast dev server, HMR, optimized builds)
+- TailwindCSS 4 (utility-first CSS)
+- Redux Toolkit 2 (state management)
+- React Router 7 (client-side routing)
+- Axios (HTTP client with interceptors)
+- shadcn/ui (copy-paste component library)
+- ESM modules and modern JavaScript
+- Path aliases and TypeScript strict mode
 
 ### Security
 

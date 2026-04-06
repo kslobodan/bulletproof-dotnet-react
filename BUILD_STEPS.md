@@ -104,7 +104,7 @@
 35. Implemented `DbConnectionFactory` in Infrastructure using Npgsql
 36. Registered factory in DI container as singleton
 37. Fixed package conflict: Removed `Microsoft.AspNetCore.OpenApi` (conflicted with Swashbuckle 10.1.7)
-38. Verified application startup: `dotnet run --project D:\Posao\bulletproof-dotnet-react\src\BookingSystem.API\BookingSystem.API.csproj`
+38. Verified application startup: `dotnet run --project ...\bulletproof-dotnet-react\src\BookingSystem.API\BookingSystem.API.csproj`
 39. Database migrations executed successfully, all tables created
 40. Verified database schema with `docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "\dt"`
 41. Verified seed data: 3 roles (TenantAdmin, Manager, User) inserted successfully
