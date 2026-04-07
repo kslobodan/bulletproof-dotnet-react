@@ -967,3 +967,22 @@ Add these settings:
 ### Token Storage Utilities - Step 2
 
 381. Created token storage utilities in `src/lib/tokenStorage.ts`
+
+### Axios Configuration with Interceptors - Step 3
+
+382. Created axios instance with interceptors in `src/lib/apiClient.ts`:
+     - **Base configuration**: baseURL: '/api/v1' (uses Vite proxy to backend)
+     - **Request interceptor**: Automatically adds headers to every request:
+       - `Authorization: Bearer <accessToken>` (from localStorage)
+       - `X-Tenant-Id: <tenantId>` (required by backend TenantResolutionMiddleware)
+     - **Response interceptor**: Handles 401 Unauthorized errors:
+       - Detects expired access token
+       - Calls `/api/v1/auth/refresh` with refresh token
+       - Updates tokens in localStorage
+       - Retries original request with new access token
+       - On refresh failure: clears auth data, redirects to `/login`
+     - **Token refresh queue**: Prevents duplicate refresh requests
+       - `isRefreshing` flag ensures only one refresh call at a time
+       - `failedQueue` holds concurrent 401 requests
+       - After refresh success, all queued requests retry automatically
+     - Purpose: Seamless token management, no manual header injection needed
