@@ -16,6 +16,7 @@
 - [Day 6: Advanced Features & Audit Logging](./Day6-Advanced.md)
 - [Day 7: Backend Testing](./Day7-Testing.md)
 - [Day 8: Frontend Setup (React + TypeScript + Vite)](./Day8-Frontend.md)
+- [Day 9: Authentication Flow & Tenant Setup (Frontend)](./Day9-AuthenticationUI.md)
 
 ---
 
@@ -92,12 +93,26 @@
 - React 19 with TypeScript
 - Vite 8 (fast dev server, HMR, optimized builds)
 - TailwindCSS 4 (utility-first CSS)
-- Redux Toolkit 2 (state management)
+- Redux Toolkit 2 (state management with createAsyncThunk)
 - React Router 7 (client-side routing)
 - Axios (HTTP client with interceptors)
+- React Hook Form 7 (performant forms with minimal re-renders)
+- Zod 3 (TypeScript-first schema validation)
+- @hookform/resolvers (connects Zod to React Hook Form)
 - shadcn/ui (copy-paste component library)
 - ESM modules and modern JavaScript
 - Path aliases and TypeScript strict mode
+
+### Frontend Authentication
+
+- Redux Toolkit for centralized auth state management
+- JWT + RefreshToken flow (automatic token refresh)
+- Axios interceptors (auto-inject tokens, handle 401 errors)
+- Protected routes with React Router
+- localStorage for token persistence
+- Multi-tenant context (X-Tenant-Id header)
+- Form validation with Zod + React Hook Form
+- Logout functionality with state cleanup
 
 ### Security
 
