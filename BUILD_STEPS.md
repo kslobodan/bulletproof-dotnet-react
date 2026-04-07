@@ -1023,3 +1023,28 @@ Add these settings:
 ### Navigation with User Menu - Step 9
 
 388. Created Navigation component in `src/components`
+
+### Test Complete Auth Flow - Step 10
+
+389. Created page components in `src/pages/`:
+     - **Dashboard.tsx**: Protected dashboard page showing user and tenant info
+     - **LoginPage.tsx**: Wrapper for LoginForm component
+     - **RegisterTenantPage.tsx**: Wrapper for RegisterTenantForm component
+     - **RegisterUserPage.tsx**: Wrapper for RegisterUserForm component
+
+390. Updated `src/App.tsx` with React Router setup:
+     - Added `BrowserRouter` wrapper
+     - Configured routes
+     - Protected routes use `<ProtectedRoute>` wrapper component
+
+391. Updated `src/main.tsx` with Redux Provider:
+     - Wrapped `<App />` with Redux `<Provider store={store}>`
+     - Makes Redux state available throughout the application
+
+392. Auth flow is now ready to test:
+     - **Register Tenant**: Create new tenant + admin user → Auto-login → Redirect to dashboard
+     - **Login**: Existing user login → Redirect to dashboard
+     - **Register User**: Add user to existing tenant (requires login) → Redirect to dashboard
+     - **Logout**: Click sign out in navigation → Clear state → Redirect to login
+     - **Protected Routes**: Unauthenticated access to `/dashboard` → Redirect to `/login`
+     - **Token Refresh**: Axios interceptor automatically refreshes expired tokens

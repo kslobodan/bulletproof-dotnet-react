@@ -1,13 +1,34 @@
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { Dashboard } from "./pages/Dashboard";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterTenantPage } from "./pages/RegisterTenantPage";
+import { RegisterUserPage } from "./pages/RegisterUserPage";
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Booking System
-        </h1>
-        <p className="text-gray-600">Multi-tenant Resource Booking Platform</p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register-tenant" element={<RegisterTenantPage />} />
+        <Route path="/register-user" element={<RegisterUserPage />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
