@@ -1011,3 +1011,7 @@ Add these settings:
 ### Tenant Registration Form - Step 6
 
 385. Created RegisterTenantForm component in `src/features/auth/components`
+
+### Login Form - Step 7
+
+386. Created LoginForm component in `src/features/auth/components`
