@@ -1015,3 +1015,7 @@ Add these settings:
 ### Login Form - Step 7
 
 386. Created LoginForm component in `src/features/auth/components`
+
+### User Registration Form - Step 8
+
+387. Created RegisterUserForm component in `src/features/auth/components`
