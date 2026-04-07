@@ -947,3 +947,19 @@ Add these settings:
        - Redux Toolkit v2.x
        - React Router v7.x
        - Axios v1.x
+
+---
+
+## Day 9: Authentication Flow & Tenant Setup
+
+### Auth Redux Slice - Step 1
+
+377. Created TypeScript auth types in `src/types/auth.types.ts`
+378. Created Redux store configuration in `src/store/store.ts`:
+     - Configured `configureStore` with auth reducer
+     - Added middleware for serializable check (ignored persist actions)
+     - Exported `RootState` type: `ReturnType<typeof store.getState>`
+     - Exported `AppDispatch` type: `typeof store.dispatch`
+
+379. Created typed Redux hooks in `src/store/hooks.ts`
+380. Created auth Redux slice in `src/features/auth/authSlice.ts`
