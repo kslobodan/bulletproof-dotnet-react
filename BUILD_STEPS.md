@@ -963,3 +963,7 @@ Add these settings:
 
 379. Created typed Redux hooks in `src/store/hooks.ts`
 380. Created auth Redux slice in `src/features/auth/authSlice.ts`
+
+### Token Storage Utilities - Step 2
+
+381. Created token storage utilities in `src/lib/tokenStorage.ts`
