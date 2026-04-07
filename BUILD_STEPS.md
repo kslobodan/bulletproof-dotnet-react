@@ -986,3 +986,16 @@ Add these settings:
        - `failedQueue` holds concurrent 401 requests
        - After refresh success, all queued requests retry automatically
      - Purpose: Seamless token management, no manual header injection needed
+
+### Protected Route Component - Step 4
+
+383. Created ProtectedRoute component in `src/components/ProtectedRoute.tsx`:
+     - Wraps protected pages/routes that require authentication
+     - Uses `useAppSelector` to check Redux auth state (`isAuthenticated`, `isLoading`)
+     - **Three states**:
+       - Loading: Shows "Loading..." message while checking auth
+       - Not authenticated: Redirects to `/login` with `<Navigate replace />`
+       - Authenticated: Renders `{children}` (protected content)
+     - `replace` prop: Prevents adding redirect to browser history
+     - Purpose: Centralized route protection, prevents unauthorized access
+     - Usage: `<ProtectedRoute><DashboardPage /></ProtectedRoute>`
