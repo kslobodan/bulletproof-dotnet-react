@@ -38,7 +38,12 @@ export const RegisterUserForm = () => {
   }, [dispatch]);
 
   const onSubmit = async (data: RegisterUserFormData) => {
-    const result = await dispatch(registerUser(data));
+    const result = await dispatch(
+      registerUser({
+        ...data,
+        roles: ["User"],
+      }),
+    );
 
     if (registerUser.fulfilled.match(result)) {
       navigate("/dashboard");
