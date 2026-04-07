@@ -1019,3 +1019,7 @@ Add these settings:
 ### User Registration Form - Step 8
 
 387. Created RegisterUserForm component in `src/features/auth/components`
+
+### Navigation with User Menu - Step 9
+
+388. Created Navigation component in `src/components`
