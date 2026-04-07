@@ -999,3 +999,11 @@ Add these settings:
      - `replace` prop: Prevents adding redirect to browser history
      - Purpose: Centralized route protection, prevents unauthorized access
      - Usage: `<ProtectedRoute><DashboardPage /></ProtectedRoute>`
+
+### Form Handling and Validation Libraries - Step 5
+
+384. Installed React Hook Form and Zod validation:
+     - Command: `npm install react-hook-form zod @hookform/resolvers`
+     - **react-hook-form** (v7.x): Performant form library with minimal re-renders
+     - **zod** (v3.x): TypeScript-first schema validation library
+     - **@hookform/resolvers**: Connects Zod schemas to React Hook Form
