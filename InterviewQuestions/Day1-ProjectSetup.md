@@ -22,8 +22,8 @@
 ├─────────────────────────────────────┤
 │   Application (Business Logic)      │
 ├─────────────────────────────────────┤
-│      Domain (Entities/Rules)        │ ← Innermost (no dependencies)
-└─────────────────────────────────────┘
+│      Domain (Entities/Rules)        │ ← Innermost (no
+└─────────────────────────────────────┘   dependencies)
 ```
 
 ### The 4 Layers in My Project
@@ -93,14 +93,66 @@ This mirrors real-world microservices architecture where each service runs in co
 
 ## Q: "Explain the dependency flow in Clean Architecture."
 
-**A:** "The dependency flow is: API → Infrastructure → Application → Domain.
+**A:** "This is a great question because there are two interpretations—pure Clean Architecture vs. pragmatic .NET implementation.
 
-- **Domain** has zero dependencies—it's pure business entities and rules
-- **Application** depends only on Domain—it contains business logic and CQRS handlers
-- **Infrastructure** depends on Application—it implements interfaces like repositories
-- **API** depends on everything—it's the entry point that wires up dependency injection
+### Pure Clean Architecture (Theory)
 
-This ensures the business logic is protected from framework changes and external dependencies."
+In Uncle Bob's original design, **API and Infrastructure are siblings** at the same outer layer:
+
+```
+        API (Presentation)
+              ↘
+               Application → Domain
+              ↗
+    Infrastructure (Data)
+```
+
+- **Domain** (center): Zero dependencies—pure business entities and rules
+- **Application**: Depends only on Domain—defines interfaces like `IRepository<T>`
+- **Infrastructure**: Depends on Application—implements `IRepository<T>` as `BookingRepository`
+- **API**: Depends on Application—controllers call handlers via MediatR
+
+**Key point**: API and Infrastructure don't know about each other! They communicate through Application interfaces.
+
+### Pragmatic .NET Implementation (My Project)
+
+In practice, most .NET projects use: **API → Infrastructure → Application → Domain**
+
+```
+API → Infrastructure → Application → Domain
+```
+
+**Why?** Because the API project needs to register Infrastructure implementations in `Program.cs`:
+
+```csharp
+// In API/Program.cs
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+//                         ↑ Application        ↑ Infrastructure
+```
+
+To access `BookingRepository`, API must reference Infrastructure. This violates pure architecture but simplifies DI setup.
+
+### Pure vs. Pragmatic Trade-offs
+
+**Pure Approach** (API ↔ Infrastructure siblings):
+
+- ✅ Follows Uncle Bob's original design exactly
+- ✅ API and Infrastructure are truly independent
+- ❌ Requires separate Composition Root project for DI wiring
+- ❌ More complex setup for simple projects
+
+**Pragmatic Approach** (API → Infrastructure):
+
+- ✅ Simple DI setup in one place (`Program.cs`)
+- ✅ Industry standard for .NET projects
+- ✅ Works fine for most applications
+- ❌ API has unnecessary dependency on Infrastructure layer
+
+### Interview Talking Point
+
+"In my project, I use the pragmatic approach where API references Infrastructure for simplicity. However, I understand the pure architecture where they're siblings. For larger systems with multiple UI frontends (Web API, gRPC, GraphQL), I'd use a separate Composition Root project to wire dependencies and keep API/Infrastructure independent.
+
+The core principle remains: **Domain and Application are protected**. They don't know about databases, HTTP, or UI. That's what matters most."
 
 ---
 
