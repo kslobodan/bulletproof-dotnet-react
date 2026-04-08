@@ -12,8 +12,8 @@
 ## API Versioning
 
 3. Installed API versioning packages:
-    - `dotnet add package Asp.Versioning.Http`
-    - `dotnet add package Asp.Versioning.Mvc.ApiExplorer`
+   - `dotnet add package Asp.Versioning.Http`
+   - `dotnet add package Asp.Versioning.Mvc.ApiExplorer`
 4. Configured API versioning in `Program.cs` (default v1.0)
 5. Added Controllers support with `AddControllers()` and `MapControllers()`
 
@@ -43,20 +43,19 @@
 18. Verified application startup: `dotnet run --project ...\bulletproof-dotnet-react\src\BookingSystem.API\BookingSystem.API.csproj`
 19. Database migrations executed successfully, all tables created
 20. Verified database schema with `docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "\dt"`
-1. Verified seed data: 3 roles (TenantAdmin, Manager, User) inserted successfully
-2. Updated INSTALLATION_GUIDE.md to reflect working package configuration
+21. Verified seed data: 3 roles (TenantAdmin, Manager, User) inserted successfully
 
 ## Multi-Tenancy (TenantContext Service)
 
-3. Created `ITenantContext` interface in Application/Common/Interfaces
-4. Implemented `TenantContext` service in Infrastructure/Services with SetTenantId() and Clear() methods
-5. Created `TenantResolutionMiddleware` in API/Middleware to extract tenant from X-Tenant-Id header
-6. Registered TenantContext as scoped service in DI container
-7. Added TenantResolutionMiddleware to pipeline (after global error handling, before controllers)
-8. Middleware skips Swagger and health check endpoints
-9. Middleware validates X-Tenant-Id header format (GUID) and returns 400 if invalid or missing
-10. Created test controller `TenantController` (v1) to verify tenant resolution
-11. Tested middleware:
+22. Created `ITenantContext` interface in Application/Common/Interfaces
+23. Implemented `TenantContext` service in Infrastructure/Services with SetTenantId() and Clear() methods
+24. Created `TenantResolutionMiddleware` in API/Middleware to extract tenant from X-Tenant-Id header
+25. Registered TenantContext as scoped service in DI container
+26. Added TenantResolutionMiddleware to pipeline (after global error handling, before controllers)
+27. Middleware skips Swagger and health check endpoints
+28. Middleware validates X-Tenant-Id header format (GUID) and returns 400 if invalid or missing
+29. Created test controller `TenantController` (v1) to verify tenant resolution
+30. Tested middleware:
     - ✅ Request without header: 400 "X-Tenant-Id header is required"
     - ✅ Request with invalid GUID: 400 "Invalid X-Tenant-Id header format"
     - ✅ Request with valid GUID: 200 with tenantId and isResolved=true
@@ -64,25 +63,25 @@
 
 ## Multi-Tenant Query Filter (Repository Pattern with Dapper)
 
-12. Installed Dapper in Application project for extension methods
-13. Created `DapperExtensions.cs` with tenant-aware query methods:
+31. Installed Dapper in Application project for extension methods
+32. Created `DapperExtensions.cs` with tenant-aware query methods:
     - `QueryWithTenantAsync<T>()` - SELECT with automatic TenantId filtering
     - `QuerySingleOrDefaultWithTenantAsync<T>()` - Single result with tenant filter
     - `ExecuteWithTenantAsync()` - INSERT/UPDATE/DELETE with tenant filter
-14. Created `IRepository<T>` base interface in Application/Common/Interfaces
-15. Created `BaseRepository<T>` abstract class in Infrastructure/Repositories with:
+33. Created `IRepository<T>` base interface in Application/Common/Interfaces
+34. Created `BaseRepository<T>` abstract class in Infrastructure/Repositories with:
     - Automatic TenantId injection in all queries
     - GetByIdAsync, GetAllAsync, DeleteAsync, ExistsAsync with tenant filtering
     - Abstract AddAsync and UpdateAsync for entity-specific implementation
-16. Created `User` entity in Domain/Entities with UUID Id and TenantId
-17. Created `IUserRepository` interface extending IRepository<User>
-18. Implemented `UserRepository` with tenant-aware CRUD operations
-19. Registered `IUserRepository` in DI container as scoped service
-20. Created migration `0002_ConvertToUUID.sql` to convert all ID columns from SERIAL to UUID
-1. Migration drops and recreates tables with `gen_random_uuid()` for PostgreSQL UUID support
-2. Created `UsersController` (v1) to demonstrate multi-tenant filtering
-3. Created test tenants in database (aaaaa... and bbbbb...)
-4. Tested multi-tenant data isolation:
+35. Created `User` entity in Domain/Entities with UUID Id and TenantId
+36. Created `IUserRepository` interface extending IRepository<User>
+37. Implemented `UserRepository` with tenant-aware CRUD operations
+38. Registered `IUserRepository` in DI container as scoped service
+39. Created migration `0002_ConvertToUUID.sql` to convert all ID columns from SERIAL to UUID
+40. Migration drops and recreates tables with `gen_random_uuid()` for PostgreSQL UUID support
+41. Created `UsersController` (v1) to demonstrate multi-tenant filtering
+42. Created test tenants in database (aaaaa... and bbbbb...)
+43. Tested multi-tenant data isolation:
     - ✅ Created user for Tenant 1 (john@tenant1.com)
     - ✅ Created user for Tenant 2 (jane@tenant2.com)
     - ✅ Tenant 1 query returns only Tenant 1 users
