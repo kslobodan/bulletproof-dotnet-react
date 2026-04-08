@@ -133,6 +133,58 @@ This prevents returning thousands of rows in one response and provides everythin
 
 ---
 
+## Q: "Why use a static Create() method instead of directly calling the PagedResult<T> constructor?"
+
+**A:** "The `PagedResult<T>.Create()` is a **static factory method pattern**. Both approaches work, but the factory method offers several advantages:
+
+**Code comparison:**
+
+```csharp
+// Using static factory method (preferred)
+var result = PagedResult<ResourceDto>.Create(resources, totalCount, 1, 10);
+
+// Using constructor directly (also valid)
+var result = new PagedResult<ResourceDto>(resources, totalCount, 1, 10);
+```
+
+**Advantages of factory method:**
+
+1. **Named creation** - `Create()` is more semantic than `new`
+2. **Readability** - Clearer intent in repository code
+3. **Future flexibility** - Can add validation without changing all callers:
+   ```csharp
+   public static PagedResult<T> Create(List<T> items, int count, int pageNumber, int pageSize)
+   {
+       if (pageSize > 100) throw new ArgumentException("Max page size is 100");
+       if (pageNumber < 1) throw new ArgumentException("Page number must be >= 1");
+       return new PagedResult<T>(items, count, pageNumber, pageSize);
+   }
+   ```
+4. **Encapsulation** - Could make constructor private, forcing use of factory
+5. **Type inference** - In some cases, compiler infers `T` better with methods
+
+**Real-world usage in repository:**
+
+```csharp
+public async Task<PagedResult<Resource>> GetPagedAsync(int pageNumber, int pageSize)
+{
+    var resources = await connection.QueryAsync<Resource>(...);
+    var totalCount = await connection.ExecuteScalarAsync<int>(...);
+
+    // Factory method reads better than "new"
+    return PagedResult<Resource>.Create(
+        resources.ToList(),
+        totalCount,
+        pageNumber,
+        pageSize
+    );
+}
+```
+
+**Interview talking point:** 'Both approaches are identical at runtime. The factory method is a design pattern choice for maintainability—if I need to add validation or logging later, I can do it in one place without breaking existing code.'"
+
+---
+
 ## Q: "Why did you choose DbUp for database migrations?"
 
 **A:** "I chose **DbUp** over Entity Framework Migrations or FluentMigrator because:
