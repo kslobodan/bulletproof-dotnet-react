@@ -185,6 +185,55 @@ public async Task<PagedResult<Resource>> GetPagedAsync(int pageNumber, int pageS
 
 ---
 
+## Q: "What is database migration and why use it?"
+
+**A:** "**Database migration** is a version-controlled way to evolve your database schema over time.
+
+**The problem it solves:**
+
+Without migrations: manual SQL changes, no history, team members have different schemas, hard to reproduce.
+
+**How it works:**
+
+1. Write numbered SQL scripts (`0001_InitialSchema.sql`, `0002_AddUsers.sql`)
+2. Migration tool tracks which scripts ran (stores in `schemaversions` table)
+3. On app startup, tool runs only new scripts in order
+4. **Idempotent** - same script never runs twice
+
+**Implementation (`DatabaseMigration.cs` runs on API startup):**
+
+```csharp
+// Ensures database exists
+EnsureDatabase.For.PostgresqlDatabase(connectionString);
+
+// Runs all unexecuted scripts
+upgrader.PerformUpgrade();
+```
+
+**PostgreSQL tracks executed scripts:**
+
+```sql
+SELECT * FROM schemaversions;
+-- Shows: 0001_InitialSchema.sql, 0002_ConvertToUUID.sql, etc.
+```
+
+**Benefits:**
+
+- ✅ **Reproducible** - New developer runs app, gets same database
+- ✅ **Trackable** - Git history shows all schema changes
+- ✅ **Team-friendly** - Everyone stays in sync
+- ✅ **Production-safe** - Same scripts tested in dev run in production
+
+**My workflow:**
+
+1. Create `0011_AddNewFeature.sql`
+2. Write SQL (CREATE TABLE, ALTER, etc.)
+3. Restart API → DbUp auto-executes → Database updated
+
+No manual SQL execution needed—everything tracked and reproducible."
+
+---
+
 ## Q: "Why did you choose DbUp for database migrations?"
 
 **A:** "I chose **DbUp** over Entity Framework Migrations or FluentMigrator because:
