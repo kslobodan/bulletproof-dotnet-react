@@ -40,10 +40,13 @@
 15. Implemented `DbConnectionFactory` in Infrastructure using Npgsql
 16. Registered factory in DI container as singleton
 17. Fixed package conflict: Removed `Microsoft.AspNetCore.OpenApi` (conflicted with Swashbuckle 10.1.7)
-18. Verified application startup: `dotnet run --project ...\bulletproof-dotnet-react\src\BookingSystem.API\BookingSystem.API.csproj`
+18. Verified application startup:
+    `dotnet run --project ...\bulletproof-dotnet-react\src\BookingSystem.API\BookingSystem.API.csproj`
 19. Database migrations executed successfully, all tables created
-20. Verified database schema with `docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "\dt"`
-21. Verified seed data: 3 roles (TenantAdmin, Manager, User) inserted successfully
+20. Verified database schema with:
+    `docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "\dt"`
+21. Verified seed data: 3 roles (TenantAdmin, Manager, User) inserted successfully with:
+    `docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT * FROM roles;"`
 
 ## Multi-Tenancy (TenantContext Service)
 
@@ -55,7 +58,7 @@
 27. Middleware skips Swagger and health check endpoints
 28. Middleware validates X-Tenant-Id header format (GUID) and returns 400 if invalid or missing
 29. Created test controller `TenantController` (v1) to verify tenant resolution
-30. Tested middleware:
+30. Tested middleware (see [API_TESTS.md](../API_TESTS.md#test-tenant-resolution-middleware) for commands):
     - ✅ Request without header: 400 "X-Tenant-Id header is required"
     - ✅ Request with invalid GUID: 400 "Invalid X-Tenant-Id header format"
     - ✅ Request with valid GUID: 200 with tenantId and isResolved=true
@@ -63,7 +66,7 @@
 
 ## Multi-Tenant Query Filter (Repository Pattern with Dapper)
 
-31. Installed Dapper in Application project for extension methods
+31. Installed Dapper in Application project: `dotnet add package Dapper`
 32. Created `DapperExtensions.cs` with tenant-aware query methods:
     - `QueryWithTenantAsync<T>()` - SELECT with automatic TenantId filtering
     - `QuerySingleOrDefaultWithTenantAsync<T>()` - Single result with tenant filter
@@ -80,8 +83,20 @@
 39. Created migration `0002_ConvertToUUID.sql` to convert all ID columns from SERIAL to UUID
 40. Migration drops and recreates tables with `gen_random_uuid()` for PostgreSQL UUID support
 41. Created `UsersController` (v1) to demonstrate multi-tenant filtering
-42. Created test tenants in database (aaaaa... and bbbbb...)
-43. Tested multi-tenant data isolation:
+42. Created test tenants in database:
+
+    ```powershell
+    # Create Tenant 1
+    docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "INSERT INTO Tenants (Id, Name, Email, Plan, IsActive, CreatedAt) VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Tenant One', 'tenant1@example.com', 'Pro', true, CURRENT_TIMESTAMP);"
+
+    # Create Tenant 2
+    docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "INSERT INTO Tenants (Id, Name, Email, Plan, IsActive, CreatedAt) VALUES ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Tenant Two', 'tenant2@example.com', 'Pro', true, CURRENT_TIMESTAMP);"
+
+    # Verify tenants created
+    docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT id, name, email FROM Tenants;"
+    ```
+
+43. Tested multi-tenant data isolation (see [test-multitenant.http](../src/BookingSystem.API/test-multitenant.http) for full test suite):
     - ✅ Created user for Tenant 1 (john@tenant1.com)
     - ✅ Created user for Tenant 2 (jane@tenant2.com)
     - ✅ Tenant 1 query returns only Tenant 1 users
