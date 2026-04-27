@@ -1,7 +1,5 @@
 # Day 7: Backend Testing
 
-**Steps: 1-71**
-
 ---
 
 ## Backend Testing - Step 1: Set up xUnit test projects
@@ -12,27 +10,27 @@
 4. Configured project references for UnitTests
 5. Configured project references for IntegrationTests
 6. Deleted default test files:
-     - `Remove-Item BookingSystem.UnitTests/UnitTest1.cs -Force`
-     - `Remove-Item BookingSystem.IntegrationTests/UnitTest1.cs -Force`
+   - `Remove-Item BookingSystem.UnitTests/UnitTest1.cs -Force`
+   - `Remove-Item BookingSystem.IntegrationTests/UnitTest1.cs -Force`
 7. Created folder structure in UnitTests project:
-     - `Domain/Entities`
-     - `Application/Commands`
-     - `Application/Queries`
-     - `Application/Validators`
+   - `Domain/Entities`
+   - `Application/Commands`
+   - `Application/Queries`
+   - `Application/Validators`
 8. Created folder structure in IntegrationTests project:
-     - `Controllers`
-     - `Infrastructure`
+   - `Controllers`
+   - `Infrastructure`
 9. Verified build: Test projects compiled successfully ✅
 
 ## Backend Testing - Step 2: Install testing NuGet packages
 
 10. Installed testing packages for UnitTests project:
-     - `dotnet add package Moq` → version 4.20.72
-     - `dotnet add package FluentAssertions` → version 8.9.0
+    - `dotnet add package Moq` → version 4.20.72
+    - `dotnet add package FluentAssertions` → version 8.9.0
 11. Installed testing packages for IntegrationTests project:
-     - `dotnet add package Microsoft.AspNetCore.Mvc.Testing --version 9.0.*` → version 9.0.14 (WebApplicationFactory for in-memory testing)
-     - `dotnet add package Testcontainers.PostgreSql` → version 4.11.0 (PostgreSQL container for integration tests)
-     - `dotnet add package FluentAssertions` → version 8.9.0 (readable assertions)
+    - `dotnet add package Microsoft.AspNetCore.Mvc.Testing --version 9.0.*` → version 9.0.14 (WebApplicationFactory for in-memory testing)
+    - `dotnet add package Testcontainers.PostgreSql` → version 4.11.0 (PostgreSQL container for integration tests)
+    - `dotnet add package FluentAssertions` → version 8.9.0 (readable assertions)
 
 ## Backend Testing - Step 3: Write unit tests for Domain entities
 
@@ -88,18 +86,18 @@
 **Goal**: Write comprehensive integration tests for Resources endpoints with authentication, multi-tenant isolation, pagination, and database verification.
 
 40. Created ResourcesControllerTests in BookingSystem.IntegrationTests/Controllers with 12 tests:
-     - CreateResource_WithValidData_ShouldReturn201AndResource
-     - GetAllResources_WithPagination_ShouldReturnPagedResults
-     - GetResourceById_WithValidId_ShouldReturn200AndResource
-     - GetResourceById_WithInvalidId_ShouldReturn404
-     - UpdateResource_WithValidData_ShouldReturn200AndUpdatedResource
-     - DeleteResource_WithValidId_ShouldReturn200AndSoftDelete (verifies is_deleted, deleted_at)
-     - MultiTenant_ResourceIsolation_TenantCannotAccessOtherTenantsResources
-     - GetAllResources_WithResourceTypeFilter_ShouldReturnFilteredResults
-     - CreateResource_WithoutAuthentication_ShouldReturn401
-     - CreateResource_WithoutTenantHeader_ShouldReturn400
-     - UpdateResource_OfDifferentTenant_ShouldReturn404
-     - Diagnostic_CreateResourceWithLoginToken_ShouldWork (for debugging)
+    - CreateResource_WithValidData_ShouldReturn201AndResource
+    - GetAllResources_WithPagination_ShouldReturnPagedResults
+    - GetResourceById_WithValidId_ShouldReturn200AndResource
+    - GetResourceById_WithInvalidId_ShouldReturn404
+    - UpdateResource_WithValidData_ShouldReturn200AndUpdatedResource
+    - DeleteResource_WithValidId_ShouldReturn200AndSoftDelete (verifies is_deleted, deleted_at)
+    - MultiTenant_ResourceIsolation_TenantCannotAccessOtherTenantsResources
+    - GetAllResources_WithResourceTypeFilter_ShouldReturnFilteredResults
+    - CreateResource_WithoutAuthentication_ShouldReturn401
+    - CreateResource_WithoutTenantHeader_ShouldReturn400
+    - UpdateResource_OfDifferentTenant_ShouldReturn404
+    - Diagnostic_CreateResourceWithLoginToken_ShouldWork (for debugging)
 
 41. Updated TestWebApplicationFactory to explicitly override JWT validation
 
@@ -108,16 +106,16 @@
 **Goal**: Write comprehensive integration tests for Bookings endpoints including conflict detection, status workflows, and authorization.
 
 52. Created BookingsControllerTests in BookingSystem.IntegrationTests/Controllers with 11 tests:
-     - CreateBooking_WithValidData_ShouldReturn201AndBooking
-     - CreateBooking_WithOverlappingTimes_ShouldReturn400Conflict (validates conflict detection)
-     - GetBookingById_WithValidId_ShouldReturn200AndBooking
-     - GetBookingById_WithInvalidId_ShouldReturn404
-     - GetAllBookings_WithPagination_ShouldReturnPagedResults
-     - UpdateBooking_WithValidData_ShouldReturn200AndUpdatedBooking
-     - CancelBooking_WithValidId_ShouldReturn200AndCancelledBooking
-     - MultiTenant_BookingIsolation_TenantCannotAccessOtherTenantsBookings
-     - CreateBooking_WithoutAuthentication_ShouldReturn401
-     - CreateBooking_WithoutTenantHeader_ShouldReturn400
+    - CreateBooking_WithValidData_ShouldReturn201AndBooking
+    - CreateBooking_WithOverlappingTimes_ShouldReturn400Conflict (validates conflict detection)
+    - GetBookingById_WithValidId_ShouldReturn200AndBooking
+    - GetBookingById_WithInvalidId_ShouldReturn404
+    - GetAllBookings_WithPagination_ShouldReturnPagedResults
+    - UpdateBooking_WithValidData_ShouldReturn200AndUpdatedBooking
+    - CancelBooking_WithValidId_ShouldReturn200AndCancelledBooking
+    - MultiTenant_BookingIsolation_TenantCannotAccessOtherTenantsBookings
+    - CreateBooking_WithoutAuthentication_ShouldReturn401
+    - CreateBooking_WithoutTenantHeader_ShouldReturn400
 
 53. Added `InvalidOperationException`
 
@@ -129,28 +127,28 @@
 59. Created AssemblyReference
 60. Created ArchitectureTests in BookingSystem.UnitTests/Architecture with 15 comprehensive tests:
 
-     **Layer Dependency Tests**:
-     - Domain_Should_NotHaveAnyDependencies (Domain is innermost layer)
-     - Application_Should_OnlyDependOnDomain (Application layer isolation)
-     - Infrastructure_Should_NotDependOnAPI (Infrastructure independent of API)
-     - API_Controllers_Should_NotDirectlyUseRepositories (Controllers use MediatR, not repositories)
+    **Layer Dependency Tests**:
+    - Domain_Should_NotHaveAnyDependencies (Domain is innermost layer)
+    - Application_Should_OnlyDependOnDomain (Application layer isolation)
+    - Infrastructure_Should_NotDependOnAPI (Infrastructure independent of API)
+    - API_Controllers_Should_NotDirectlyUseRepositories (Controllers use MediatR, not repositories)
 
-     **Naming Convention Tests**:
-     - Commands_Should_EndWithCommand
-     - Queries_Should_EndWithQuery
-     - Handlers_Should_EndWithHandler
-     - Validators_Should_EndWithValidator
-     - Controllers_Should_EndWithController
-     - Repositories_Should_EndWithRepository (excludes abstract base classes)
+    **Naming Convention Tests**:
+    - Commands_Should_EndWithCommand
+    - Queries_Should_EndWithQuery
+    - Handlers_Should_EndWithHandler
+    - Validators_Should_EndWithValidator
+    - Controllers_Should_EndWithController
+    - Repositories_Should_EndWithRepository (excludes abstract base classes)
 
-     **CQRS Pattern Tests**:
-     - Handlers_Should_ResideInCorrectNamespace (all in Features namespace)
-     - DTOs_Should_ResideInDTOsFolder (Request/Response/Dto classes)
-     - Entities_Should_ResideInDomainLayer (Domain.Entities namespace)
+    **CQRS Pattern Tests**:
+    - Handlers_Should_ResideInCorrectNamespace (all in Features namespace)
+    - DTOs_Should_ResideInDTOsFolder (Request/Response/Dto classes)
+    - Entities_Should_ResideInDomainLayer (Domain.Entities namespace)
 
-     **Interface and Implementation Tests**:
-     - Repositories_Should_ImplementIRepository (concrete classes)
-     - Middleware_Should_ResideInAPILayer (API.Middleware namespace)
+    **Interface and Implementation Tests**:
+    - Repositories_Should_ImplementIRepository (concrete classes)
+    - Middleware_Should_ResideInAPILayer (API.Middleware namespace)
 
 61. Added project references to UnitTests
 62. Test execution
@@ -164,23 +162,23 @@
 67. Installed ReportGenerator global tool for HTML coverage reports Version: 5.5.4
 68. Generated HTML coverage report from unit tests
 69. **Unit Test Coverage Statistics** (by layer):
-     - **Domain Layer**: 64% line coverage, 100% branch coverage
-       - Booking entity: 100% covered
-       - AvailabilityRule entity: 100% covered
-       - RefreshToken entity: 100% covered
-       - Resource entity: 90.9% covered
-       - User, Tenant, AuditLog: 0% covered (no unit tests yet)
-     - **Application Layer**: 12% line coverage, 5% branch coverage
-       - Commands, Validators, Handlers: Partial coverage
-       - Focus areas: CreateResource, CreateBooking, Login operations
-     - **Infrastructure Layer**: 0% line coverage (expected - tested via integration tests)
-     - **API Layer**: 0% line coverage (expected - tested via integration tests)
-     - **Overall**: 7.82% line coverage, 3.92% branch coverage (243/3104 lines covered)
+    - **Domain Layer**: 64% line coverage, 100% branch coverage
+      - Booking entity: 100% covered
+      - AvailabilityRule entity: 100% covered
+      - RefreshToken entity: 100% covered
+      - Resource entity: 90.9% covered
+      - User, Tenant, AuditLog: 0% covered (no unit tests yet)
+    - **Application Layer**: 12% line coverage, 5% branch coverage
+      - Commands, Validators, Handlers: Partial coverage
+      - Focus areas: CreateResource, CreateBooking, Login operations
+    - **Infrastructure Layer**: 0% line coverage (expected - tested via integration tests)
+    - **API Layer**: 0% line coverage (expected - tested via integration tests)
+    - **Overall**: 7.82% line coverage, 3.92% branch coverage (243/3104 lines covered)
 
 70. Attempted integration test coverage measurement
 71. **Coverage Analysis Summary**:
-     - Unit tests provide **accurate coverage** for Domain (64%) and Application (12%) layers
-     - Integration tests validate **end-to-end functionality** but don't contribute to coverage metrics reliably
-     - Combined test suite: **147 tests** (92 unit + 40 integration + 15 architecture)
-     - **Total passing**: ~130 tests (88%)
-     - Coverage reports available in BookingSystem.UnitTests/TestResults/CoverageReport/index.html
+    - Unit tests provide **accurate coverage** for Domain (64%) and Application (12%) layers
+    - Integration tests validate **end-to-end functionality** but don't contribute to coverage metrics reliably
+    - Combined test suite: **147 tests** (92 unit + 40 integration + 15 architecture)
+    - **Total passing**: ~130 tests (88%)
+    - Coverage reports available in BookingSystem.UnitTests/TestResults/CoverageReport/index.html

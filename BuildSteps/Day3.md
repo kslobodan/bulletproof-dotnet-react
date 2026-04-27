@@ -1,7 +1,5 @@
 # Day 3: Authentication & Authorization
 
-**Steps: 1-37**
-
 ---
 
 ## Password Hashing Setup

@@ -1,7 +1,5 @@
 # Day 4: Resources CRUD
 
-**Steps: 1-45**
-
 ---
 
 ## Resource Entity (Domain Layer)
@@ -46,8 +44,6 @@
 
 27. Created `ResourceRepository` in `Infrastructure/Repositories/ResourceRepository.cs`
 28. Registered `IResourceRepository` in DI container (`Program.cs`):
-
-
     - `builder.Services.AddScoped<IResourceRepository, ResourceRepository>();`
 
 ## Resources Controller (API Endpoints)
@@ -64,26 +60,26 @@
 ## Testing Resources CRUD
 
 33. **Register Tenant (Acme Corp)**:
-     `Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/register-tenant" -Method POST -Body '{"tenantName":"Acme Corp","email":"admin@acme.com","password":"Admin1234","firstName":"Alice","lastName":"Admin","plan":"Pro"}' -ContentType "application/json"`
-     Result: Got JWT token + tenantId `4b47f363-8f8d-4dce-bcec-4ee66d2a2eb4`
+    `Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/register-tenant" -Method POST -Body '{"tenantName":"Acme Corp","email":"admin@acme.com","password":"Admin1234","firstName":"Alice","lastName":"Admin","plan":"Pro"}' -ContentType "application/json"`
+    Result: Got JWT token + tenantId `4b47f363-8f8d-4dce-bcec-4ee66d2a2eb4`
 34. **Create Resource**:
-     `POST /api/v1/resources` with headers (Authorization: Bearer {token}, X-Tenant-Id: {guid})
-     Result: Conference Room A created, ID `3ebb51d2-36af-4a56-89e5-17db7eec34a5`
+    `POST /api/v1/resources` with headers (Authorization: Bearer {token}, X-Tenant-Id: {guid})
+    Result: Conference Room A created, ID `3ebb51d2-36af-4a56-89e5-17db7eec34a5`
 35. **List Resources (Paginated)**:
-     `GET /api/v1/resources?pageNumber=1&pageSize=10`
-     Result: PagedResult with 1 item, totalCount=1, totalPages=1
+    `GET /api/v1/resources?pageNumber=1&pageSize=10`
+    Result: PagedResult with 1 item, totalCount=1, totalPages=1
 36. **Get Resource by ID**:
-     `GET /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
-     Result: Single ResourceDto returned
+    `GET /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
+    Result: Single ResourceDto returned
 37. **Update Resource**:
-     `PUT /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
-     Result: Name changed to "Conference Room A (Updated)", capacity 10→12, updatedAt set
+    `PUT /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
+    Result: Name changed to "Conference Room A (Updated)", capacity 10→12, updatedAt set
 38. **Delete Resource**:
-     `DELETE /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
-     Result: 200 OK "Resource deleted successfully"
+    `DELETE /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
+    Result: 200 OK "Resource deleted successfully"
 39. **Verify Deletion**:
-     `GET /api/v1/resources`
-     Result: Empty list, totalCount=0
+    `GET /api/v1/resources`
+    Result: Empty list, totalCount=0
 
 ## Multi-Tenant Isolation Testing
 
@@ -93,4 +89,4 @@
 43. Registered third tenant: GlobalCorp (`email:admin@globalcorp.com`, tenantId: `e13ea0c3-b658-424b-91da-d286df05703e`)
 44. Created resource for GlobalCorp: "GlobalCorp Boardroom" (ID: `b1846791-47f2-4a27-860f-40977d1feb18`)
 45. **Verified database isolation**: `docker exec bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT id, name, resourcetype, tenantid FROM resources"`
-     Result: 3 resources, each with different tenantId
+    Result: 3 resources, each with different tenantId

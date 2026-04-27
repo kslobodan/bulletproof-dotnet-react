@@ -1,7 +1,5 @@
 # Day 8: Frontend Setup (React + TypeScript + Vite)
 
-**Steps: 1-22**
-
 ---
 
 ## Manual Vite Project Creation

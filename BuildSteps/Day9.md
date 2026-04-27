@@ -1,7 +1,5 @@
 # Day 9: Authentication Flow & Tenant Setup
 
-**Steps: 1-16**
-
 ---
 
 ## Auth Redux Slice - Step 1

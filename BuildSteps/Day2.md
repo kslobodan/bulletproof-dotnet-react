@@ -1,7 +1,5 @@
 # Day 2: Core Infrastructure & Multi-tenancy
 
-**Steps: 1-44**
-
 ---
 
 ## Middleware

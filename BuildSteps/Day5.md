@@ -1,7 +1,5 @@
 # Day 5: Bookings CRUD & Business Logic
 
-**Steps: 1-11**
-
 ---
 
 ## Booking Entity & Enum (Domain Layer)

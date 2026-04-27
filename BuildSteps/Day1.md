@@ -1,7 +1,5 @@
 # Day 1: Project Setup & Architecture
 
-**Steps: 1-20**
-
 ---
 
 ## Project Setup & Architecture

@@ -1,7 +1,5 @@
 # Day 6: Advanced Features & Audit Logging
 
-**Steps: 1-125**
-
 ---
 
 ## Audit Logging - Step 1: AuditLog Entity
@@ -112,9 +110,9 @@
 ## Other features - Step 2: Implement Soft Delete for Entities
 
 84. Updated domain entities with soft delete properties:
-     - **Resource.cs**: Added `IsDeleted` (default false) and `DeletedAt` properties
-     - **Booking.cs**: Added `IsDeleted` and `DeletedAt` properties
-     - **AvailabilityRule.cs**: Added `IsDeleted` and `DeletedAt` properties
+    - **Resource.cs**: Added `IsDeleted` (default false) and `DeletedAt` properties
+    - **Booking.cs**: Added `IsDeleted` and `DeletedAt` properties
+    - **AvailabilityRule.cs**: Added `IsDeleted` and `DeletedAt` properties
 
 85. Created migration `0009_AddSoftDeleteSupport.sql` in `Infrastructure/Data/Scripts`:
 86. Updated `IRepository<T>` interface in `Application/Common/Interfaces`
@@ -124,7 +122,7 @@
 90. Updated Delete command handlers to use SoftDeleteAsync
 91. Updated `TenantRepository`
 92. Migration execution:
-     - Started API: `cd src/BookingSystem.API; dotnet run`
+    - Started API: `cd src/BookingSystem.API; dotnet run`
 
 ## Other features - Step 3: Add Filtering and Sorting to Booking Queries
 
