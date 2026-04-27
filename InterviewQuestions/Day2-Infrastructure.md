@@ -384,23 +384,6 @@ public interface ITenantContext {
 - **Index size**: Slightly larger B-tree indexes
 - **Readability**: Less human-readable than integers
 
-**PostgreSQL implementation:**
-
-```sql
-CREATE TABLE Users (
-    Id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    TenantId UUID NOT NULL REFERENCES Tenants(Id),
-    ...
-);
-```
-
-**C# usage:**
-
-```csharp
-entity.Id = Guid.NewGuid(); // Generate in application
-entity.TenantId = TenantId;  // From TenantContext
-```
-
 **Best practice:** UUIDs are industry standard for microservices and multi-tenant SaaS applications."
 
 ---
