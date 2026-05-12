@@ -36,57 +36,54 @@
 21. Created `GetAllResourcesQuery` in `Application/Features/Resources/Queries/GetAllResources/`
 22. Created `GetAllResourcesQueryHandler`
 23. Created `GetAllResourcesQueryValidator`
-24. Added `GetPagedAsync` method to `IRepository<T>` interface
-25. Implemented `GetPagedAsync` in `BaseRepository<T>`
-26. Implemented `GetPagedAsync` in `TenantRepository`
 
 ## Resource Repository Implementation
 
-27. Created `ResourceRepository` in `Infrastructure/Repositories/ResourceRepository.cs`
-28. Registered `IResourceRepository` in DI container (`Program.cs`):
+24. Created `ResourceRepository` in `Infrastructure/Repositories/ResourceRepository.cs`
+25. Registered `IResourceRepository` in DI container (`Program.cs`):
     - `builder.Services.AddScoped<IResourceRepository, ResourceRepository>();`
 
 ## Resources Controller (API Endpoints)
 
-29. Created `ResourcesController` in `API/Controllers/v1/ResourcesController.cs`
+26. Created `ResourcesController` in `API/Controllers/v1/ResourcesController.cs`
 
 ## Database Migration for Resources Table
 
-30. Created migration script `0003_CreateResourcesTable.sql`
+27. Created migration script `0003_CreateResourcesTable.sql`
 
-31. Executed migration: Rebuild and restart API → DbUp applied 0003_CreateResourcesTable.sql
-32. Verified table creation: `docker exec bookingsystem-db psql -U postgres -d BookingSystemDB -c "\d resources"`
+28. Executed migration: Rebuild and restart API → DbUp applied 0003_CreateResourcesTable.sql
+29. Verified table creation: `docker exec bookingsystem-db psql -U postgres -d BookingSystemDB -c "\d resources"`
 
 ## Testing Resources CRUD
 
-33. **Register Tenant (Acme Corp)**:
+30. **Register Tenant (Acme Corp)**:
     `Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/register-tenant" -Method POST -Body '{"tenantName":"Acme Corp","email":"admin@acme.com","password":"Admin1234","firstName":"Alice","lastName":"Admin","plan":"Pro"}' -ContentType "application/json"`
     Result: Got JWT token + tenantId `4b47f363-8f8d-4dce-bcec-4ee66d2a2eb4`
-34. **Create Resource**:
+31. **Create Resource**:
     `POST /api/v1/resources` with headers (Authorization: Bearer {token}, X-Tenant-Id: {guid})
     Result: Conference Room A created, ID `3ebb51d2-36af-4a56-89e5-17db7eec34a5`
-35. **List Resources (Paginated)**:
+32. **List Resources (Paginated)**:
     `GET /api/v1/resources?pageNumber=1&pageSize=10`
     Result: PagedResult with 1 item, totalCount=1, totalPages=1
-36. **Get Resource by ID**:
+33. **Get Resource by ID**:
     `GET /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
     Result: Single ResourceDto returned
-37. **Update Resource**:
+34. **Update Resource**:
     `PUT /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
     Result: Name changed to "Conference Room A (Updated)", capacity 10→12, updatedAt set
-38. **Delete Resource**:
+35. **Delete Resource**:
     `DELETE /api/v1/resources/3ebb51d2-36af-4a56-89e5-17db7eec34a5`
     Result: 200 OK "Resource deleted successfully"
-39. **Verify Deletion**:
+36. **Verify Deletion**:
     `GET /api/v1/resources`
     Result: Empty list, totalCount=0
 
 ## Multi-Tenant Isolation Testing
 
-40. Created resource for Acme Corp: "Acme Meeting Room 1" (ID: `47fd25cb-ad01-4e64-ba9a-4a4e28582b1c`)
-41. Registered second tenant: TechCo (`email:admin@techco.com`, tenantId: `fa6b63f7-55ae-4660-b1de-13a7d0258902`)
-42. Created resource for TechCo: "TechCo Lab Room" (Laboratory)
-43. Registered third tenant: GlobalCorp (`email:admin@globalcorp.com`, tenantId: `e13ea0c3-b658-424b-91da-d286df05703e`)
-44. Created resource for GlobalCorp: "GlobalCorp Boardroom" (ID: `b1846791-47f2-4a27-860f-40977d1feb18`)
-45. **Verified database isolation**: `docker exec bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT id, name, resourcetype, tenantid FROM resources"`
+37. Created resource for Acme Corp: "Acme Meeting Room 1" (ID: `47fd25cb-ad01-4e64-ba9a-4a4e28582b1c`)
+38. Registered second tenant: TechCo (`email:admin@techco.com`, tenantId: `fa6b63f7-55ae-4660-b1de-13a7d0258902`)
+39. Created resource for TechCo: "TechCo Lab Room" (Laboratory)
+40. Registered third tenant: GlobalCorp (`email:admin@globalcorp.com`, tenantId: `e13ea0c3-b658-424b-91da-d286df05703e`)
+41. Created resource for GlobalCorp: "GlobalCorp Boardroom" (ID: `b1846791-47f2-4a27-860f-40977d1feb18`)
+42. **Verified database isolation**: `docker exec bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT id, name, resourcetype, tenantid FROM resources"`
     Result: 3 resources, each with different tenantId

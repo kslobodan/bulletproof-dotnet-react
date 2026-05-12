@@ -49,7 +49,8 @@
 
 22. Created `RegisterTenantCommand` in `Application/Features/Authentication/Commands/RegisterTenant/`
 23. Created `RegisterTenantCommandHandler`
-24. Created `RegisterTenantCommandValidator` (FluentValidation)
+24. Created `
+` (FluentValidation)
 
 ## RegisterUser Command (CQRS)
 

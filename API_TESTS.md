@@ -84,8 +84,9 @@ $loginResponse = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/login
     "password": "Admin1234"
   }'
 
-$token = $loginResponse.token
-$refreshToken = $loginResponse.refreshToken
+$token = $loginResponse.authResult.token
+$tenantId = $loginResponse.authResult.tenantId
+$refreshToken = $loginResponse.authResult.refreshToken
 ```
 
 ### Refresh Token
