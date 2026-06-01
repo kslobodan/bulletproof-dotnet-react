@@ -202,7 +202,17 @@ However, I acknowledge EF Core's advantages for rapid prototyping and change tra
 - MediatR finds the appropriate handler and executes it
 - This decouples controllers from business logic—controllers become thin orchestrators
 
-Example flow: **Controller → MediatR → UserCommandHandler → Repository → Database**"
+Example flow: **Controller → MediatR → UserCommandHandler → Repository → Database**
+
+**AssemblyReference.cs pattern:**
+
+`AssemblyReference.cs` is a marker class in Application layer. It serves as a reference point so MediatR can scan the entire assembly:
+
+```csharp
+cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly)
+```
+
+This auto-registers all handlers in BookingSystem.Application without manual registration. It's stable (won't be deleted during refactoring) and follows Clean Architecture conventions."
 
 ---
 
