@@ -214,7 +214,7 @@ upgrader.PerformUpgrade();
 
 ```sql
 SELECT * FROM schemaversions;
--- Shows: 0001_InitialSchema.sql, 0002_ConvertToUUID.sql, etc.
+-- Shows: 0001_InitialSchema.sql, 0002_CreateResourcesTable.sql, etc.
 ```
 
 **Benefits:**
@@ -258,7 +258,7 @@ var upgrader = DeployChanges.To
 
 Scripts are **embedded resources** in the DLL (`.csproj` has `<EmbeddedResource Include="Data\Scripts\**\*.sql" />`), so migrations are part of the binary.
 
-**Numbering:** `0001_InitialSchema.sql`, `0002_ConvertToUUID.sql` - executed in order, skipped if already run.
+**Numbering:** `0001_InitialSchema.sql`, `0002_CreateResourcesTable.sql` - executed in order, skipped if already run.
 
 **Trade-off:** No automatic rollback like EF Migrations, but I rarely rollback in production—forward-only migrations are safer."
 
@@ -368,7 +368,7 @@ public interface ITenantContext {
 
 ## Q: "Why did you convert from SERIAL to UUID for IDs?"
 
-**A:** "I migrated from `SERIAL` (auto-increment integers) to `UUID` in migration `0002_ConvertToUUID.sql` because:
+**A:** "I used `UUID` for entity IDs from the start in `0001_InitialSchema.sql` instead of `SERIAL` (auto-increment integers) because:
 
 **UUID Advantages:**
 

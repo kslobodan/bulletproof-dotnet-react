@@ -51,7 +51,7 @@
 
 ## Database Migration (Infrastructure Layer)
 
-8. In `Infrastructure/Data/Scripts/` created `0006_CreateBookingsTable.sql`
+8. In `Infrastructure/Data/Scripts/` created `0005_CreateBookingsTable.sql`
 
 ## Dependency Injection Registration (API Layer)
 

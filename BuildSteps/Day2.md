@@ -30,7 +30,7 @@
 
 9. Installed DbUp: `dotnet add package dbup-postgresql` in Infrastructure project
 10. Created `DatabaseMigration.cs` class with migration runner in BookingSystem.Infrastructure/Data
-11. Created initial schema SQL script: `0001_InitialSchema.sql` (Tenants, Users, Roles, UserRoles) in Infrastructure/Data/Scripts
+11. Created initial schema SQL script: `0001_InitialSchema.sql` with UUID-based IDs (Tenants, Users, Roles, UserRoles) in Infrastructure/Data/Scripts
 12. Configured .csproj to embed SQL scripts as resources
 13. Integrated migration runner in `Program.cs` to run on startup
 
@@ -73,10 +73,8 @@
 36. Created `IUserRepository` interface in Application/Common/Interfaces
 37. Implemented `UserRepository` in Infrastructure/Repositories
 38. Registered `IUserRepository` in DI container as scoped service
-39. Created migration `0002_ConvertToUUID.sql` to convert all ID columns from SERIAL to UUID
-40. Migration drops and recreates tables with `gen_random_uuid()` for PostgreSQL UUID support
-41. Created `UsersController` (v1) to demonstrate multi-tenant filtering
-42. Created test tenants in database:
+39. Created `UsersController` (v1) to demonstrate multi-tenant filtering
+40. Created test tenants in database:
 
     ```powershell
     # Create Tenant 1
@@ -89,7 +87,7 @@
     docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT id, name, email FROM Tenants;"
     ```
 
-43. Tested multi-tenant data isolation (see [test-multitenant.http](../src/BookingSystem.API/test-multitenant.http) for full test suite):
+41. Tested multi-tenant data isolation (see [test-multitenant.http](../src/BookingSystem.API/test-multitenant.http) for full test suite):
     - ✅ Created user for Tenant 1 (john@tenant1.com)
     - ✅ Created user for Tenant 2 (jane@tenant2.com)
     - ✅ Tenant 1 query returns only Tenant 1 users

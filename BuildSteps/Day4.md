@@ -49,9 +49,9 @@
 
 ## Database Migration for Resources Table
 
-27. Created migration script `0003_CreateResourcesTable.sql`
+27. Created migration script `0002_CreateResourcesTable.sql`
 
-28. Executed migration: Rebuild and restart API → DbUp applied 0003_CreateResourcesTable.sql
+28. Executed migration: Rebuild and restart API → DbUp applied 0002_CreateResourcesTable.sql
 29. Verified table creation: `docker exec bookingsystem-db psql -U postgres -d BookingSystemDB -c "\d resources"`
 
 ## Testing Resources CRUD
