@@ -10,14 +10,16 @@
 ## API Versioning
 
 3. Installed API versioning packages:
+   - `cd ../BookingSystem.API`
    - `dotnet add package Asp.Versioning.Http`
+   - `dotnet add package Asp.Versioning.Mvc`
    - `dotnet add package Asp.Versioning.Mvc.ApiExplorer`
 4. Configured API versioning in `Program.cs` (default v1.0)
-5. Added Controllers support with `AddControllers()` and `MapControllers()`
+5. Added Controllers support with `AddControllers()` and `MapControllers()` in Program.cs
 
 ## Swagger/OpenAPI
 
-6. Installed Swashbuckle: `dotnet add package Swashbuckle.AspNetCore`
+6. Installed Swashbuckle: `dotnet add package Swashbuckle.AspNetCore` in BookingSystem.API
 7. Configured Swagger in `Program.cs` with API documentation
 
 ## Common Patterns
@@ -27,23 +29,24 @@
 ## Database Migrations
 
 9. Installed DbUp: `dotnet add package dbup-postgresql` in Infrastructure project
-10. Created `DatabaseMigration.cs` class with migration runner
-11. Created initial schema SQL script: `0001_InitialSchema.sql` (Tenants, Users, Roles, UserRoles)
+10. Created `DatabaseMigration.cs` class with migration runner in BookingSystem.Infrastructure/Data
+11. Created initial schema SQL script: `0001_InitialSchema.sql` (Tenants, Users, Roles, UserRoles) in Infrastructure/Data/Scripts
 12. Configured .csproj to embed SQL scripts as resources
 13. Integrated migration runner in `Program.cs` to run on startup
 
 ## Repository Pattern
 
-14. Created `IDbConnectionFactory` interface in Application layer
-15. Implemented `DbConnectionFactory` in Infrastructure using Npgsql
-16. Registered factory in DI container as singleton
-17. Fixed package conflict: Removed `Microsoft.AspNetCore.OpenApi` (conflicted with Swashbuckle 10.1.7)
-18. Verified application startup:
+14. Created `IDbConnectionFactory` interface in Application/Common/Interfaces
+15. Installed DbUp: `dotnet add package Microsoft.Extensions.Configuration.Abstractions` in Infrastructure project
+16. Implemented `DbConnectionFactory` in Infrastructure using Npgsql in Infrastructure/Data
+17. Registered factory in Program.cs as singleton
+18. Fixed package conflict: Removed `Microsoft.AspNetCore.OpenApi` (conflicted with Swashbuckle 10.1.7)
+19. Verified application startup:
     `dotnet run --project ...\bulletproof-dotnet-react\src\BookingSystem.API\BookingSystem.API.csproj`
-19. Database migrations executed successfully, all tables created
-20. Verified database schema with:
+20. Database migrations executed successfully, all tables created
+21. Verified database schema with:
     `docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "\dt"`
-21. Verified seed data: 3 roles (TenantAdmin, Manager, User) inserted successfully with:
+22. Verified seed data: 3 roles (TenantAdmin, Manager, User) inserted successfully with:
     `docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT * FROM roles;"`
 
 ## Multi-Tenancy (TenantContext Service)
@@ -51,12 +54,10 @@
 22. Created `ITenantContext` interface in Application/Common/Interfaces
 23. Implemented `TenantContext` service in Infrastructure/Services with SetTenantId() and Clear() methods
 24. Created `TenantResolutionMiddleware` in API/Middleware to extract tenant from X-Tenant-Id header
-25. Registered TenantContext as scoped service in DI container
+25. Registered TenantContext as scoped service in Program.cs
 26. Added TenantResolutionMiddleware to pipeline (after global error handling, before controllers)
-27. Middleware skips Swagger and health check endpoints
-28. Middleware validates X-Tenant-Id header format (GUID) and returns 400 if invalid or missing
-29. Created test controller `TenantController` (v1) to verify tenant resolution
-30. Tested middleware (see [API_TESTS.md](../API_TESTS.md#test-tenant-resolution-middleware) for commands):
+27. Created test controller `TenantController` (v1) to verify tenant resolution in API/Controllers/v1
+28. Tested middleware (see [API_TESTS.md](../API_TESTS.md#test-tenant-resolution-middleware) for commands):
     - ✅ Request without header: 400 "X-Tenant-Id header is required"
     - ✅ Request with invalid GUID: 400 "Invalid X-Tenant-Id header format"
     - ✅ Request with valid GUID: 200 with tenantId and isResolved=true
@@ -65,18 +66,12 @@
 ## Multi-Tenant Query Filter (Repository Pattern with Dapper)
 
 31. Installed Dapper in Application project: `dotnet add package Dapper`
-32. Created `DapperExtensions.cs` with tenant-aware query methods:
-    - `QueryWithTenantAsync<T>()` - SELECT with automatic TenantId filtering
-    - `QuerySingleOrDefaultWithTenantAsync<T>()` - Single result with tenant filter
-    - `ExecuteWithTenantAsync()` - INSERT/UPDATE/DELETE with tenant filter
+32. Created `DapperExtensions.cs` with tenant-aware query methods in Application/Common/Extensions
 33. Created `IRepository<T>` base interface in Application/Common/Interfaces
-34. Created `BaseRepository<T>` abstract class in Infrastructure/Repositories with:
-    - Automatic TenantId injection in all queries
-    - GetByIdAsync, GetAllAsync, DeleteAsync, ExistsAsync with tenant filtering
-    - Abstract AddAsync and UpdateAsync for entity-specific implementation
+34. Created `BaseRepository<T>` abstract class in Infrastructure/Repositories
 35. Created `User` entity in Domain/Entities with UUID Id and TenantId
-36. Created `IUserRepository` interface extending IRepository<User>
-37. Implemented `UserRepository` with tenant-aware CRUD operations
+36. Created `IUserRepository` interface in Application/Common/Interfaces
+37. Implemented `UserRepository` in Infrastructure/Repositories
 38. Registered `IUserRepository` in DI container as scoped service
 39. Created migration `0002_ConvertToUUID.sql` to convert all ID columns from SERIAL to UUID
 40. Migration drops and recreates tables with `gen_random_uuid()` for PostgreSQL UUID support
