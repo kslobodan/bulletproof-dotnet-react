@@ -73,7 +73,7 @@
 36. Created `IUserRepository` interface in Application/Common/Interfaces
 37. Implemented `UserRepository` in Infrastructure/Repositories
 38. Registered `IUserRepository` in DI container as scoped service
-39. Created `UsersController` (v1) to demonstrate multi-tenant filtering
+39. Created `UsersController` in API/Controllers/v1
 40. Created test tenants in database:
 
     ```powershell
