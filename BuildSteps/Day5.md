@@ -4,14 +4,13 @@
 
 ## Booking Entity & Enum (Domain Layer)
 
-1. In `Domain/Entities/Booking.cs` creted:
-   - `BookingStatus`
-   - `Booking`
+1. In `Domain/Entities` creted `Booking`, in `Domain/Enums` created `BookingStatus`
 
 ## Booking DTOs (Application Layer)
 
-2. In `Application/Features/Bookings/DTOs/BookingDto.cs` created:
+2. In `Application/Features/Bookings/DTOs` created:
    - `BookingDto`
+   - `BookingStatisticsDto`
    - `CreateBookingRequest`
    - `CreateBookingResponse`
    - `UpdateBookingRequest`
@@ -20,54 +19,58 @@
    - `ConfirmBookingResponse`
    - `DeleteBookingResponse`
 
+## Booking Repository Interface (Application, Infrastructure, API Layer)
+
+3. - in `Application/Common/Interfaces` created `IBookingRepository`
+   - In `Infrastructure/Repositories` created`BookingRepository`
+   - in `API/Program.cs` registered `IBookingRepository`
+
+## HTTP Context Setup (Infrastructure, API Layer)
+
+4. - Add `Microsoft.AspNetCore.Http.Abstractions` package to Infrastructure project
+   - Register `HttpContextAccessor` in `API/Program.cs`
+
+## Current User Service Interface (Application, Infrastructure, API Layer)
+
+5. - in `Application/Common/Interfaces` created `ICurrentUserService`
+   - in `Infrastructure/Services` created `CurrentUserService` (extracts userId from JWT NameIdentifier claim)
+   - in `API/Program.cs` registered `ICurrentUserService`
+
 ## Booking Commands (Application Layer)
 
-3. In `Application/Features/Bookings/Commands/` created:
-   - `CreateBooking`
-   - `UpdateBooking`
-   - `CancelBooking`
-   - `ConfirmBooking`
-   - `DeleteBooking`
+6.  In `Application/Features/Bookings/Commands/` created:
+    - `CreateBooking`
+    - `UpdateBooking`
+    - `CancelBooking`
+    - `ConfirmBooking`
+    - `DeleteBooking`
 
 ## Booking Queries (Application Layer)
 
-4. In `Application/Features/Bookings/Queries/` created:
-   - `GetBookingById`
-   - `GetAllBookings`
+7. In `Application/Features/Bookings/Queries/GetAllBookings` created:
+   - `GetAllBookingsQuery`
+   - `GetAllBookingsQueryHandler`
+   - `GetAllBookingsQueryValidator`
 
-## Booking Repository Interface (Application Layer)
-
-5. In `Application/Common/Interfaces/IBookingRepository.cs`:
-   - created `IBookingRepository`
-   - updated `GetAllBookingsQueryHandler`
-
-## Booking Repository Implementation (Infrastructure Layer)
-
-6. In `Infrastructure/Repositories/BookingRepository.cs` created`BookingRepository`
+   In `Application/Features/Bookings/Queries/GetBookingById` created:
+   - `GetBookingByIdQuery`
+   - `GetBookingByIdQueryHandler`
 
 ## Bookings Controller (API Layer)
 
-7. In `API/Controllers/v1` created `BookingsController`
+8. In `API/Controllers/v1` created `BookingsController`
 
 ## Database Migration (Infrastructure Layer)
 
-8. In `Infrastructure/Data/Scripts/` created `0005_CreateBookingsTable.sql`
-
-## Dependency Injection Registration (API Layer)
-
-9. In `API/Program.cs` registered `IBookingRepository` → `BookingRepository`
+9. In `Infrastructure/Data/Scripts/` created `0005_CreateBookingsTable.sql`
 
 ## Bug Fixes & Missing Services
 
 10. Testing revealed missing services and bugs:
-    - Created `UserLoginDto` in `LoginCommandHandler.cs`
-    - Created `ICurrentUserService` interface in `Application/Common/Interfaces/`
-    - Created `CurrentUserService` in `Infrastructure/Services/` (extracts userId from JWT NameIdentifier claim)
-    - Added `Microsoft.AspNetCore.Http.Abstractions` package to Infrastructure project
-    - Registered `HttpContextAccessor` and `ICurrentUserService` in `Program.cs`
-    - Updated `CreateBookingCommandHandler` and `UpdateBookingCommandHandler` to use `ICurrentUserService.UserId`
-    - Created `BookingMappingProfile.cs` in `Application/Common/Mappings/` for Booking → BookingDto mapping
-    - Added `ManagerOrAbove` policy to `Program.cs` authorization configuration
+
+- Created `UserLoginDto` in `LoginCommandHandler.cs`
+- Created `BookingMappingProfile.cs` in `Application/Common/Mappings/` for Booking → BookingDto mapping
+- Added `ManagerOrAbove` policy to `Program.cs` authorization configuration
 
 ## Testing Day 5 - Bookings CRUD & Business Logic
 
