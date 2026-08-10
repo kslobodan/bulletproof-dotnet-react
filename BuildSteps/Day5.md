@@ -62,7 +62,7 @@
 
 ## Database Migration (Infrastructure Layer)
 
-9. In `Infrastructure/Data/Scripts/` created `0005_CreateBookingsTable.sql`
+9. In `Infrastructure/Data/Scripts/` created `0003_CreateBookingsTable.sql`
 
 ## Bug Fixes & Missing Services
 

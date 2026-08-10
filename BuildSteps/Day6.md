@@ -18,7 +18,7 @@
 
 ## Audit Logging - Step 4: Database Migration
 
-6. Created migration script `0006_CreateAuditLogsTable.sql` in `Infrastructure/Data/Scripts/`
+6. Created migration script `0004_CreateAuditLogsTable.sql` in `Infrastructure/Data/Scripts/`
 
 ## Audit Logging - Step 5: DI Registration
 
@@ -81,7 +81,7 @@
 
 ## AvailabilityRules - Step 7: Database Migration
 
-58. Created `0007_CreateAvailabilityRulesTable.sql` in `Infrastructure/Data/Scripts`
+58. Created `0005_CreateAvailabilityRulesTable.sql` in `Infrastructure/Data/Scripts`
 
 ## AvailabilityRules - Step 8: DI Registration
 
@@ -89,7 +89,7 @@
 
 ## AvailabilityRules - Step 9: Testing
 
-69. Verified migration 0007 executed: "Executing Database Server script '0007_CreateAvailabilityRulesTable.sql'" ✅
+69. Verified migration 0005 executed: "Executing Database Server script '0005_CreateAvailabilityRulesTable.sql'" ✅
 70. Verified AvailabilityRules
 71. Tested data insertion
 72. Verified check constraint
@@ -114,7 +114,7 @@
     - **Booking.cs**: Added `IsDeleted` and `DeletedAt` properties
     - **AvailabilityRule.cs**: Added `IsDeleted` and `DeletedAt` properties
 
-85. Created migration `0008_AddSoftDeleteSupport.sql` in `Infrastructure/Data/Scripts`:
+85. Created migration `0006_AddSoftDeleteSupport.sql` in `Infrastructure/Data/Scripts`:
 86. Updated `IRepository<T>` interface in `Application/Common/Interfaces`
 87. Updated `BaseRepository` in `Infrastructure/Repositories/BaseRepository`
 88. Updated `BookingRepository`
@@ -165,10 +165,10 @@
 119. Implemented `RefreshTokenRepository` in `Infrastructure/Repositories`:
 120. Updated `LoginCommandHandler` to generate and store refresh token
 121. Added refresh endpoint to `AuthController`
-122. Created database migration `0009_CreateRefreshTokensTable.sql`
+122. Created database migration `0007_CreateRefreshTokensTable.sql`
 123. Registered `IRefreshTokenRepository` in DI container (`Program.cs`):
 
-124. Migration execution: Started API → DbUp applied migration `0009_CreateRefreshTokensTable.sql` ✅
+124. Migration execution: Started API → DbUp applied migration `0007_CreateRefreshTokensTable.sql` ✅
 
 125. Tested refresh token flow:
      - Login: Received access token + refresh token ✅
