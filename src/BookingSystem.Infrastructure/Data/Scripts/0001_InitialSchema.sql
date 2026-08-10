@@ -44,14 +44,12 @@ CREATE INDEX idx_users_tenantid ON Users(TenantId);
 CREATE INDEX idx_users_email ON Users(Email);
 CREATE INDEX idx_users_tenantid_email ON Users(TenantId, Email);
 
--- UserRoles junction table (tenant-scoped)
+-- UserRoles junction table (simplified - no redundant TenantId)
 CREATE TABLE UserRoles (
     UserId UUID NOT NULL REFERENCES Users(Id) ON DELETE CASCADE,
     RoleId INT NOT NULL REFERENCES Roles(Id) ON DELETE CASCADE,
-    TenantId UUID NOT NULL REFERENCES Tenants(Id) ON DELETE CASCADE,
     AssignedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (UserId, RoleId, TenantId)
+    PRIMARY KEY (UserId, RoleId)
 );
 
 CREATE INDEX idx_userroles_userid ON UserRoles(UserId);
-CREATE INDEX idx_userroles_tenantid ON UserRoles(TenantId);
