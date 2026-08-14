@@ -1,4 +1,4 @@
-# Day 9: Authentication Flow & Tenant Setup (Frontend)
+# Day 10: Authentication Flow & Tenant Setup (Frontend)
 
 ## Q1: "Walk me through your frontend authentication architecture. How does it work end-to-end?"
 

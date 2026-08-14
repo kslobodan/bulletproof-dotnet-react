@@ -1,184 +1,339 @@
-# Day 7: Backend Testing
+# Day 7: Advanced Backend Features
 
 ---
 
-## Backend Testing - Step 1: Set up xUnit test projects
+## Admin Audit Endpoints - Step 1: Create Endpoints to View Audit Logs
 
-1. Created xUnit test project for unit tests
-2. Created xUnit test project for integration tests
-3. Added test projects to solution
-4. Configured project references for UnitTests
-5. Configured project references for IntegrationTests
-6. Deleted default test files:
-   - `Remove-Item BookingSystem.UnitTests/UnitTest1.cs -Force`
-   - `Remove-Item BookingSystem.IntegrationTests/UnitTest1.cs -Force`
-7. Created folder structure in UnitTests project:
-   - `Domain/Entities`
-   - `Application/Commands`
-   - `Application/Queries`
-   - `Application/Validators`
-8. Created folder structure in IntegrationTests project:
-   - `Controllers`
-   - `Infrastructure`
-9. Verified build: Test projects compiled successfully ✅
+1. Created `GetPaginatedAuditLogsQuery` in `Application/Features/AuditLogs/Queries/GetPaginatedAuditLogs`
+2. Created `GetPaginatedAuditLogsQueryHandler`
+3. Created `GetPaginatedAuditLogsQueryValidator`
+4. Updated `IAuditLogRepository` interface to add `GetPagedAsync` method
+5. Updated `AuditLogRepository` implementation with pagination and filtering
+6. Created `AuditLogsController` in `API/Controllers/v1`
+7. Build and verify: `dotnet build` - successful ✅
 
-## Backend Testing - Step 2: Install testing NuGet packages
+## Soft Delete Pattern - Step 2: Implement Soft Delete for Entities
 
-10. Installed testing packages for UnitTests project:
-    - `dotnet add package Moq` → version 4.20.72
-    - `dotnet add package FluentAssertions` → version 8.9.0
-11. Installed testing packages for IntegrationTests project:
-    - `dotnet add package Microsoft.AspNetCore.Mvc.Testing --version 9.0.*` → version 9.0.14 (WebApplicationFactory for in-memory testing)
-    - `dotnet add package Testcontainers.PostgreSql` → version 4.11.0 (PostgreSQL container for integration tests)
-    - `dotnet add package FluentAssertions` → version 8.9.0 (readable assertions)
+8. Updated domain entities with soft delete properties:
+   - **Resource.cs**: Added `IsDeleted` (default false) and `DeletedAt` properties
+   - **Booking.cs**: Added `IsDeleted` and `DeletedAt` properties
+   - **AvailabilityRule.cs**: Added `IsDeleted` and `DeletedAt` properties
 
-## Backend Testing - Step 3: Write unit tests for Domain entities
+9. Created migration `0006_AddSoftDeleteSupport.sql` in `Infrastructure/Data/Scripts`:
+   - Added `IsDeleted BOOLEAN NOT NULL DEFAULT FALSE`
+   - Added `DeletedAt TIMESTAMP NULL`
+   - Added index `IX_{Table}_IsDeleted` for each table
 
-12. Created `RefreshTokenTests` with 9 test methods
-13. Created `BookingTests` with 7 test methods
-14. Created `AvailabilityRuleTests`
-15. Executed unit tests
+10. Updated `IRepository<T>` interface in `Application/Common/Interfaces`:
 
-## Backend Testing - Step 4: Write unit tests for CQRS Command Handlers
+- Added `Task<bool> SoftDeleteAsync(Guid id, CancellationToken cancellationToken = default);`
 
-16. Created `CreateResourceCommandHandlerTests` in `BookingSystem.UnitTests/Application/Commands`
-17. Created `CreateBookingCommandHandlerTests` in `BookingSystem.UnitTests/Application/Commands`
-18. Executed unit tests
+11. Updated `BaseRepository` in `Infrastructure/Repositories/BaseRepository`:
 
-## Backend Testing - Step 5: Write unit tests for FluentValidation Validators
+- Implemented `SoftDeleteAsync` method with UPDATE query
 
-19. Created `CreateResourceCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
-20. Created `CreateBookingCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
-21. Created `LoginCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
-22. Test run
+12. Updated `BookingRepository`:
 
-## Backend Testing - Step 6: Set up Integration test infrastructure (WebApplicationFactory)
+- Added `WHERE IsDeleted = FALSE` to all query methods
+- Ensured soft-deleted bookings are excluded from conflict detection
 
-23. Made Program class accessible to integration tests
-24. Created `IntegrationTestWebApplicationFactory` in `BookingSystem.IntegrationTests`
-25. Created `IntegrationTestBase`
-26. Created `InfrastructureSmokeTests`
-27. Executed integration smoke tests
+13. Updated `AvailabilityRuleRepository`:
 
-## Backend Testing - Step 7: Configure Testcontainers for PostgreSQL
+- Added `WHERE IsDeleted = FALSE` to all query methods
 
-28. Created `DatabaseFixture` in `BookingSystem.IntegrationTests/Infrastructure`:
-29. Created `TestWebApplicationFactory` in `BookingSystem.IntegrationTests/Infrastructure`
-30. Updated `IntegrationTestBase`:
-31. Updated `InfrastructureSmokeTests`:
-32. Executed integration tests
+14. Updated Delete command handlers to use `SoftDeleteAsync`:
 
-33. Created DatabaseFixture with PostgreSqlContainer lifecycle management
-34. Created TestWebApplicationFactory with database connection injection
-35. Updated IntegrationTestBase to use DatabaseFixture,
+- **DeleteResourceCommandHandler**: Changed from `DeleteAsync` to `SoftDeleteAsync`
+- **DeleteBookingCommandHandler**: Changed from `DeleteAsync` to `SoftDeleteAsync`
+- **DeleteAvailabilityRuleCommandHandler**: Changed from `DeleteAsync` to `SoftDeleteAsync`
 
-## Backend Testing - Step 8: Write integration tests for Auth endpoints
+15. Updated `TenantRepository`:
 
-34. Created AuthControllerTests in BookingSystem.IntegrationTests/Controllers
-35. Updated GlobalExceptionHandlerMiddleware to map UnauthorizedAccessException → 401, ArgumentException → 400
-36. Updated RegisterTenantCommandHandler to generate and store RefreshToken
-37. Updated RegisterUserCommandHandler to generate and store RefreshToken
-38. Fixed IntegrationTestBase helper methods to return full DTO objects (RegisterTenantResponse, LoginResponse)
-39. Test execution
+- Added `WHERE IsDeleted = FALSE` filter to prevent showing deleted records
 
-## Step 9: Resources CRUD Integration Tests
+16. Migration execution:
+    - Started API: `cd src/BookingSystem.API; dotnet run`
+    - DbUp applied migration `0006_AddSoftDeleteSupport.sql` ✅
 
-**Goal**: Write comprehensive integration tests for Resources endpoints with authentication, multi-tenant isolation, pagination, and database verification.
+## Advanced Queries - Step 3: Add Filtering and Sorting to Booking Queries
 
-40. Created ResourcesControllerTests in BookingSystem.IntegrationTests/Controllers with 12 tests:
-    - CreateResource_WithValidData_ShouldReturn201AndResource
-    - GetAllResources_WithPagination_ShouldReturnPagedResults
-    - GetResourceById_WithValidId_ShouldReturn200AndResource
-    - GetResourceById_WithInvalidId_ShouldReturn404
-    - UpdateResource_WithValidData_ShouldReturn200AndUpdatedResource
-    - DeleteResource_WithValidId_ShouldReturn200AndSoftDelete (verifies is_deleted, deleted_at)
-    - MultiTenant_ResourceIsolation_TenantCannotAccessOtherTenantsResources
-    - GetAllResources_WithResourceTypeFilter_ShouldReturnFilteredResults
-    - CreateResource_WithoutAuthentication_ShouldReturn401
-    - CreateResource_WithoutTenantHeader_ShouldReturn400
-    - UpdateResource_OfDifferentTenant_ShouldReturn404
-    - Diagnostic_CreateResourceWithLoginToken_ShouldWork (for debugging)
+17. Updated `GetAllBookingsQuery` in `Application/Features/Bookings/Queries/GetAllBookings`:
+    - Added `BookingStatus? Status` filter property
+    - Added `Guid? ResourceId` filter property
+    - Added `Guid? UserId` filter property
+    - Added `DateTime? StartDate` filter property
+    - Added `DateTime? EndDate` filter property
+    - Added `string? SortBy` property (default: "StartTime")
+    - Added `string? SortOrder` property (default: "asc")
 
-41. Updated TestWebApplicationFactory to explicitly override JWT validation
+18. Updated `IBookingRepository` interface in `Application/Common/Interfaces`:
+    - Updated `GetPagedAsync` signature to accept filter parameters
 
-## Step 10: Bookings Integration Tests
+19. Implemented dynamic filtering in `GetPagedAsync` in `BookingRepository.cs`:
 
-**Goal**: Write comprehensive integration tests for Bookings endpoints including conflict detection, status workflows, and authorization.
+    ```csharp
+    // Build dynamic WHERE clause
+    var whereClause = "WHERE b.TenantId = @TenantId AND b.IsDeleted = FALSE";
+    if (status.HasValue)
+        whereClause += " AND b.Status = @Status";
+    if (resourceId.HasValue)
+        whereClause += " AND b.ResourceId = @ResourceId";
+    if (userId.HasValue)
+        whereClause += " AND b.UserId = @UserId";
+    if (startDate.HasValue)
+        whereClause += " AND b.StartTime >= @StartDate";
+    if (endDate.HasValue)
+        whereClause += " AND b.EndTime <= @EndDate";
 
-52. Created BookingsControllerTests in BookingSystem.IntegrationTests/Controllers with 11 tests:
-    - CreateBooking_WithValidData_ShouldReturn201AndBooking
-    - CreateBooking_WithOverlappingTimes_ShouldReturn400Conflict (validates conflict detection)
-    - GetBookingById_WithValidId_ShouldReturn200AndBooking
-    - GetBookingById_WithInvalidId_ShouldReturn404
-    - GetAllBookings_WithPagination_ShouldReturnPagedResults
-    - UpdateBooking_WithValidData_ShouldReturn200AndUpdatedBooking
-    - CancelBooking_WithValidId_ShouldReturn200AndCancelledBooking
-    - MultiTenant_BookingIsolation_TenantCannotAccessOtherTenantsBookings
-    - CreateBooking_WithoutAuthentication_ShouldReturn401
-    - CreateBooking_WithoutTenantHeader_ShouldReturn400
+    // Dynamic ORDER BY
+    var orderBy = sortBy?.ToLower() switch
+    {
+        "title" => "b.Title",
+        "resource" => "r.Name",
+        "status" => "b.Status",
+        _ => "b.StartTime"
+    };
+    var order = sortOrder?.ToLower() == "desc" ? "DESC" : "ASC";
+    ```
 
-53. Added `InvalidOperationException`
+20. Updated `GetAllBookingsQueryHandler`:
+    - Passed filter parameters to repository
 
-## Step 11: Architecture Tests (NetArchTest.Rules)
+21. Created `GetAllBookingsQueryValidator.cs`:
+    - Validated `PageNumber >= 1`
+    - Validated `PageSize >= 1 AND PageSize <= 100`
+    - Validated `SortBy` is one of: "StartTime", "Title", "Resource", "Status"
+    - Validated `SortOrder` is one of: "asc", "desc"
+    - Validated `StartDate < EndDate` if both provided
 
-**Goal**: Validate Clean Architecture principles and enforce coding conventions using automated architecture tests.
+## Statistics Endpoints - Step 4: Create Booking Statistics
 
-58. Installed NetArchTest.Rules package: `dotnet add package NetArchTest.Rules` (version 1.3.2)
-59. Created AssemblyReference
-60. Created ArchitectureTests in BookingSystem.UnitTests/Architecture with 15 comprehensive tests:
+22. Created `BookingStatisticsDto` in `Application/Features/Bookings/DTOs/`:
 
-    **Layer Dependency Tests**:
-    - Domain_Should_NotHaveAnyDependencies (Domain is innermost layer)
-    - Application_Should_OnlyDependOnDomain (Application layer isolation)
-    - Infrastructure_Should_NotDependOnAPI (Infrastructure independent of API)
-    - API_Controllers_Should_NotDirectlyUseRepositories (Controllers use MediatR, not repositories)
+    ```csharp
+    public record BookingStatisticsDto
+    {
+        public int TotalBookings { get; init; }
+        public int PendingBookings { get; init; }
+        public int ConfirmedBookings { get; init; }
+        public int CompletedBookings { get; init; }
+        public int CancelledBookings { get; init; }
+        public Dictionary<string, int> BookingsByResource { get; init; }
+        public Dictionary<string, int> BookingsByDay { get; init; }
+    }
+    ```
 
-    **Naming Convention Tests**:
-    - Commands_Should_EndWithCommand
-    - Queries_Should_EndWithQuery
-    - Handlers_Should_EndWithHandler
-    - Validators_Should_EndWithValidator
-    - Controllers_Should_EndWithController
-    - Repositories_Should_EndWithRepository (excludes abstract base classes)
+23. Created `GetBookingStatisticsQuery` in `Application/Features/Bookings/Queries/GetBookingStatistics`:
+    - Added `DateTime? StartDate` and `DateTime? EndDate` for date range filtering
 
-    **CQRS Pattern Tests**:
-    - Handlers_Should_ResideInCorrectNamespace (all in Features namespace)
-    - DTOs_Should_ResideInDTOsFolder (Request/Response/Dto classes)
-    - Entities_Should_ResideInDomainLayer (Domain.Entities namespace)
+24. Created `GetBookingStatisticsQueryValidator`:
+    - Validated `StartDate < EndDate` if both provided
 
-    **Interface and Implementation Tests**:
-    - Repositories_Should_ImplementIRepository (concrete classes)
-    - Middleware_Should_ResideInAPILayer (API.Middleware namespace)
+25. Updated `IBookingRepository` interface:
+    - Added `Task<BookingStatisticsDto> GetStatisticsAsync(Guid tenantId, DateTime? startDate, DateTime? endDate, CancellationToken cancellationToken);`
 
-61. Added project references to UnitTests
-62. Test execution
+26. Created `GetBookingStatisticsQueryHandler`:
+    - Called repository method and returned statistics
 
-## Step 12: Code Coverage Measurement
+27. Implemented `GetStatisticsAsync` in `BookingRepository.cs`:
 
-**Goal**: Measure code coverage from unit and integration tests, generate reports, and document coverage by layer.
+    ```sql
+    -- Count by status using FILTER clause
+    SELECT
+        COUNT(*) as TotalBookings,
+        COUNT(*) FILTER (WHERE Status = 0) as PendingBookings,
+        COUNT(*) FILTER (WHERE Status = 1) as ConfirmedBookings,
+        COUNT(*) FILTER (WHERE Status = 2) as CompletedBookings,
+        COUNT(*) FILTER (WHERE Status = 3) as CancelledBookings
+    FROM Bookings
+    WHERE TenantId = @TenantId
+        AND IsDeleted = FALSE
+        AND (@StartDate IS NULL OR StartTime >= @StartDate)
+        AND (@EndDate IS NULL OR EndTime <= @EndDate);
 
-65. Installed coverlet.msbuild for code coverage collection
-66. Ran unit tests with coverage collection:
-67. Installed ReportGenerator global tool for HTML coverage reports Version: 5.5.4
-68. Generated HTML coverage report from unit tests
-69. **Unit Test Coverage Statistics** (by layer):
-    - **Domain Layer**: 64% line coverage, 100% branch coverage
-      - Booking entity: 100% covered
-      - AvailabilityRule entity: 100% covered
-      - RefreshToken entity: 100% covered
-      - Resource entity: 90.9% covered
-      - User, Tenant, AuditLog: 0% covered (no unit tests yet)
-    - **Application Layer**: 12% line coverage, 5% branch coverage
-      - Commands, Validators, Handlers: Partial coverage
-      - Focus areas: CreateResource, CreateBooking, Login operations
-    - **Infrastructure Layer**: 0% line coverage (expected - tested via integration tests)
-    - **API Layer**: 0% line coverage (expected - tested via integration tests)
-    - **Overall**: 7.82% line coverage, 3.92% branch coverage (243/3104 lines covered)
+    -- Group by resource
+    SELECT r.Name, COUNT(*)
+    FROM Bookings b
+    JOIN Resources r ON b.ResourceId = r.Id
+    WHERE b.TenantId = @TenantId AND b.IsDeleted = FALSE
+    GROUP BY r.Name;
 
-70. Attempted integration test coverage measurement
-71. **Coverage Analysis Summary**:
-    - Unit tests provide **accurate coverage** for Domain (64%) and Application (12%) layers
-    - Integration tests validate **end-to-end functionality** but don't contribute to coverage metrics reliably
-    - Combined test suite: **147 tests** (92 unit + 40 integration + 15 architecture)
-    - **Total passing**: ~130 tests (88%)
-    - Coverage reports available in BookingSystem.UnitTests/TestResults/CoverageReport/index.html
+    -- Group by day using DATE_TRUNC
+    SELECT DATE_TRUNC('day', StartTime) as Day, COUNT(*)
+    FROM Bookings
+    WHERE TenantId = @TenantId AND IsDeleted = FALSE
+    GROUP BY DATE_TRUNC('day', StartTime)
+    ORDER BY Day DESC
+    LIMIT 30;
+    ```
+
+28. Updated `BookingsController`:
+    - Added `[HttpGet("statistics")]` endpoint
+    - Authorized with `[Authorize]` (any authenticated user can view their tenant's statistics)
+
+## Rate Limiting - Step 5: Add Rate Limiting Middleware
+
+29. Installed AspNetCoreRateLimit package in API project:
+
+    ```powershell
+    cd src/BookingSystem.API
+    dotnet add package AspNetCoreRateLimit
+    ```
+
+30. Configured rate limiting in `appsettings.json`:
+
+    ```json
+    "IpRateLimiting": {
+      "EnableEndpointRateLimiting": true,
+      "StackBlockedRequests": false,
+      "RealIpHeader": "X-Real-IP",
+      "ClientIdHeader": "X-ClientId",
+      "HttpStatusCode": 429,
+      "GeneralRules": [
+        {
+          "Endpoint": "*",
+          "Period": "1m",
+          "Limit": 60
+        },
+        {
+          "Endpoint": "*",
+          "Period": "1h",
+          "Limit": 1000
+        }
+      ]
+    }
+    ```
+
+31. Updated `Program.cs` imports:
+    - Added `using AspNetCoreRateLimit;`
+
+32. Registered rate limiting services in `Program.cs`:
+
+    ```csharp
+    builder.Services.AddMemoryCache();
+    builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+    builder.Services.AddInMemoryRateLimiting();
+    builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+    ```
+
+33. Added rate limiting middleware to pipeline in `Program.cs`:
+    ```csharp
+    app.UseIpRateLimiting(); // Before UseAuthentication()
+    ```
+
+## Refresh Token Security - Step 6: Implement RefreshToken Mechanism
+
+34. Created `RefreshToken` entity in `Domain/Entities`:
+    - Properties: `Id`, `Token`, `UserId`, `TenantId`, `ExpiresAt`, `CreatedAt`, `RevokedAt`, `ReplacedByToken`, `IsExpired`, `IsRevoked`, `IsActive`
+
+35. Updated `AuthResult` DTO to include `RefreshToken` property
+
+36. Created RefreshToken DTOs in `Application/Features/Authentication/DTOs`:
+    - `RefreshTokenRequest` (contains `RefreshToken` string)
+    - `RefreshTokenResponse` (contains new `Token` and `RefreshToken`)
+
+37. Created `RefreshAccessTokenCommand` in `Application/Features/Authentication/Commands/RefreshToken`:
+    - Command, Handler, Validator (validates token is not empty)
+
+38. Created `IRefreshTokenRepository` in `Application/Common/Interfaces`:
+    - `Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken)`
+    - `Task AddAsync(RefreshToken refreshToken, CancellationToken cancellationToken)`
+    - `Task RevokeAsync(Guid id, string replacedByToken, CancellationToken cancellationToken)`
+
+39. Updated `IJwtTokenService` interface:
+    - Added `string GenerateRefreshToken()`
+    - Kept existing `string GenerateJwtToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles)`
+
+40. Updated `JwtTokenService` implementation:
+
+    ```csharp
+    public string GenerateRefreshToken()
+    {
+        var randomBytes = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomBytes);
+        return Convert.ToBase64String(randomBytes);
+    }
+    ```
+
+41. Implemented `RefreshTokenRepository` in `Infrastructure/Repositories`:
+    - Used Dapper for CRUD operations
+    - Implemented token rotation logic (revoke old token when new one is generated)
+
+42. Updated `LoginCommandHandler` to generate and store refresh token:
+
+    ```csharp
+    var refreshToken = _jwtTokenService.GenerateRefreshToken();
+    var refreshTokenEntity = new RefreshToken
+    {
+        Token = refreshToken,
+        UserId = user.Id,
+        TenantId = user.TenantId,
+        ExpiresAt = DateTime.UtcNow.AddDays(7)
+    };
+    await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
+
+    return new AuthResult
+    {
+        Token = jwtToken,
+        RefreshToken = refreshToken,
+        // ... other properties
+    };
+    ```
+
+43. Implemented `RefreshAccessTokenCommandHandler`:
+    - Validate refresh token exists and is active
+    - Generate new JWT and refresh token
+    - Revoke old refresh token (set `RevokedAt`, `ReplacedByToken`)
+    - Store new refresh token
+    - Return new tokens
+
+44. Added refresh endpoint to `AuthController`:
+
+    ```csharp
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        var command = new RefreshAccessTokenCommand { RefreshToken = request.RefreshToken };
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+    ```
+
+45. Created database migration `0007_CreateRefreshTokensTable.sql`:
+
+    ```sql
+    CREATE TABLE RefreshTokens (
+        Id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        Token VARCHAR(500) NOT NULL UNIQUE,
+        UserId UUID NOT NULL,
+        TenantId UUID NOT NULL,
+        ExpiresAt TIMESTAMP NOT NULL,
+        CreatedAt TIMESTAMP NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
+        RevokedAt TIMESTAMP NULL,
+        ReplacedByToken VARCHAR(500) NULL,
+        CONSTRAINT FK_RefreshTokens_Users FOREIGN KEY (UserId)
+            REFERENCES Users(Id) ON DELETE CASCADE,
+        CONSTRAINT FK_RefreshTokens_Tenants FOREIGN KEY (TenantId)
+            REFERENCES Tenants(Id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IX_RefreshTokens_Token ON RefreshTokens(Token);
+    CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(UserId);
+    ```
+
+46. Registered `IRefreshTokenRepository` in DI container (`Program.cs`):
+
+    ```csharp
+    builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+    ```
+
+47. Migration execution:
+    - Started API → DbUp applied migration `0007_CreateRefreshTokensTable.sql` ✅
+
+48. Tested refresh token flow:
+    - Login: Received access token + refresh token ✅
+    - Refresh: Used refresh token → Got new access token + new refresh token ✅
+    - Token rotation: Old refresh token marked as revoked in database, `ReplacedByToken` set ✅
+    - Security: Old refresh token rejected on reuse attempt ✅

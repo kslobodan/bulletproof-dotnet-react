@@ -1,6 +1,6 @@
-# Day 7: Backend Testing
+# Day 8: Backend Testing
 
-[← Back to Index](./README.md) | [← Previous: Day 6](./Day6-Advanced.md)
+[← Back to Index](./README.md) | [← Previous: Day 7](./Day7-AdvancedFeatures.md) | [Next: Day 9 →](./Day9-Frontend.md)
 
 ---
 
@@ -1087,4 +1087,4 @@ Adding the above would make it **enterprise-grade** for high-stakes production u
 
 ---
 
-[← Previous: Day 6](./Day6-Advanced.md) | [Back to Index](./README.md)
+[← Previous: Day 7](./Day7-AdvancedFeatures.md) | [Back to Index](./README.md) | [Next: Day 9 →](./Day9-Frontend.md)

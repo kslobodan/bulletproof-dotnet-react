@@ -1,131 +1,184 @@
-# Day 8: Frontend Setup (React + TypeScript + Vite)
+# Day 8: Backend Testing
 
 ---
 
-## Manual Vite Project Creation
+## Backend Testing - Step 1: Set up xUnit test projects
 
-**Note**: Vite CLI `create-vite` required interactive prompts that couldn't be automated. Proceeded with manual project setup.
+1. Created xUnit test project for unit tests
+2. Created xUnit test project for integration tests
+3. Added test projects to solution
+4. Configured project references for UnitTests
+5. Configured project references for IntegrationTests
+6. Deleted default test files:
+   - `Remove-Item BookingSystem.UnitTests/UnitTest1.cs -Force`
+   - `Remove-Item BookingSystem.IntegrationTests/UnitTest1.cs -Force`
+7. Created folder structure in UnitTests project:
+   - `Domain/Entities`
+   - `Application/Commands`
+   - `Application/Queries`
+   - `Application/Validators`
+8. Created folder structure in IntegrationTests project:
+   - `Controllers`
+   - `Infrastructure`
+9. Verified build: Test projects compiled successfully ✅
 
-1. Created client folder and initialized project:
-   - `mkdir client; cd client`
-   - `npm init -y`
+## Backend Testing - Step 2: Install testing NuGet packages
 
-2. Installed React core dependencies:
-   - `npm install react react-dom`
-   - React v19.2.4, React-DOM v19.2.4
+10. Installed testing packages for UnitTests project:
+    - `dotnet add package Moq` → version 4.20.72
+    - `dotnet add package FluentAssertions` → version 8.9.0
+11. Installed testing packages for IntegrationTests project:
+    - `dotnet add package Microsoft.AspNetCore.Mvc.Testing --version 9.0.*` → version 9.0.14 (WebApplicationFactory for in-memory testing)
+    - `dotnet add package Testcontainers.PostgreSql` → version 4.11.0 (PostgreSQL container for integration tests)
+    - `dotnet add package FluentAssertions` → version 8.9.0 (readable assertions)
 
-3. Installed Vite and TypeScript tooling:
-   - `npm install -D vite @vitejs/plugin-react typescript @types/react @types/react-dom`
-   - Vite v8.0.5, TypeScript v6.0.2
+## Backend Testing - Step 3: Write unit tests for Domain entities
 
-4. Updated package.json:
-   - Changed `"type"` from "commonjs" to "module"
-   - Added scripts: `dev` (vite), `build` (tsc && vite build), `preview` (vite preview)
-   - Added `"private": true`
+12. Created `RefreshTokenTests` with 9 test methods
+13. Created `BookingTests` with 7 test methods
+14. Created `AvailabilityRuleTests`
+15. Executed unit tests
 
-5. Created vite.config.ts:
-   - React plugin: @vitejs/plugin-react
-   - Path alias: @ → ./src
-   - Dev server: port 3000
-   - Proxy: /api → http://localhost:5036 (backend API)
+## Backend Testing - Step 4: Write unit tests for CQRS Command Handlers
 
-6. Created tsconfig.json:
-   - Target: ES2020
-   - Module: ESNext
-   - JSX: react-jsx (automatic runtime)
-   - Strict mode: enabled
-   - Path mapping: @/_ → ./src/_
+16. Created `CreateResourceCommandHandlerTests` in `BookingSystem.UnitTests/Application/Commands`
+17. Created `CreateBookingCommandHandlerTests` in `BookingSystem.UnitTests/Application/Commands`
+18. Executed unit tests
 
-7. Created tsconfig.node.json:
-   - TypeScript config for Vite config file
-   - Module resolution: bundler
+## Backend Testing - Step 5: Write unit tests for FluentValidation Validators
 
-8. Created index.html (entry point):
-   - HTML5 structure
-   - div#root for React mounting
-   - script tag: type="module" src="/src/main.tsx"
+19. Created `CreateResourceCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
+20. Created `CreateBookingCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
+21. Created `LoginCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
+22. Test run
 
-## TailwindCSS Setup
+## Backend Testing - Step 6: Set up Integration test infrastructure (WebApplicationFactory)
 
-9. Installed TailwindCSS and PostCSS:
-   - `npm install -D tailwindcss postcss autoprefixer`
-   - TailwindCSS v4.x, PostCSS, Autoprefixer
+23. Made Program class accessible to integration tests
+24. Created `IntegrationTestWebApplicationFactory` in `BookingSystem.IntegrationTests`
+25. Created `IntegrationTestBase`
+26. Created `InfrastructureSmokeTests`
+27. Executed integration smoke tests
 
-10. Created tailwind.config.js:
-    - Dark mode: class-based
-    - Content: index.html and src/\*_/_.{js,ts,jsx,tsx}
-    - Theme extensions: CSS variables for border-radius (shadcn/ui compatible)
+## Backend Testing - Step 7: Configure Testcontainers for PostgreSQL
 
-11. Created postcss.config.js:
-    - Plugins: tailwindcss, autoprefixer
+28. Created `DatabaseFixture` in `BookingSystem.IntegrationTests/Infrastructure`:
+29. Created `TestWebApplicationFactory` in `BookingSystem.IntegrationTests/Infrastructure`
+30. Updated `IntegrationTestBase`:
+31. Updated `InfrastructureSmokeTests`:
+32. Executed integration tests
 
-12. Created src/index.css:
-    - TailwindCSS directives: @tailwind base, components, utilities
-    - CSS custom properties: --radius
+33. Created DatabaseFixture with PostgreSqlContainer lifecycle management
+34. Created TestWebApplicationFactory with database connection injection
+35. Updated IntegrationTestBase to use DatabaseFixture,
 
-## React Source Files
+## Backend Testing - Step 8: Write integration tests for Auth endpoints
 
-13. Created src/main.tsx:
-    - React 18+ entry point with createRoot API
-    - StrictMode wrapper
-    - Imports: React, ReactDOM, index.css, App
+34. Created AuthControllerTests in BookingSystem.IntegrationTests/Controllers
+35. Updated GlobalExceptionHandlerMiddleware to map UnauthorizedAccessException → 401, ArgumentException → 400
+36. Updated RegisterTenantCommandHandler to generate and store RefreshToken
+37. Updated RegisterUserCommandHandler to generate and store RefreshToken
+38. Fixed IntegrationTestBase helper methods to return full DTO objects (RegisterTenantResponse, LoginResponse)
+39. Test execution
 
-14. Created src/App.tsx:
-    - Root functional component
-    - Basic UI: "Booking System" heading with TailwindCSS classes
-    - Verified TailwindCSS working (bg-gray-50, text-4xl, etc.)
+## Step 9: Resources CRUD Integration Tests
 
-15. Created src/vite-env.d.ts:
-    - TypeScript reference types for Vite client
+**Goal**: Write comprehensive integration tests for Resources endpoints with authentication, multi-tenant isolation, pagination, and database verification.
 
-## Core Libraries Installation
+40. Created ResourcesControllerTests in BookingSystem.IntegrationTests/Controllers with 12 tests:
+    - CreateResource_WithValidData_ShouldReturn201AndResource
+    - GetAllResources_WithPagination_ShouldReturnPagedResults
+    - GetResourceById_WithValidId_ShouldReturn200AndResource
+    - GetResourceById_WithInvalidId_ShouldReturn404
+    - UpdateResource_WithValidData_ShouldReturn200AndUpdatedResource
+    - DeleteResource_WithValidId_ShouldReturn200AndSoftDelete (verifies is_deleted, deleted_at)
+    - MultiTenant_ResourceIsolation_TenantCannotAccessOtherTenantsResources
+    - GetAllResources_WithResourceTypeFilter_ShouldReturnFilteredResults
+    - CreateResource_WithoutAuthentication_ShouldReturn401
+    - CreateResource_WithoutTenantHeader_ShouldReturn400
+    - UpdateResource_OfDifferentTenant_ShouldReturn404
+    - Diagnostic_CreateResourceWithLoginToken_ShouldWork (for debugging)
 
-16. Installed Redux Toolkit and React Router:
-    - `npm install @reduxjs/toolkit react-redux react-router-dom axios`
-    - @reduxjs/toolkit v2.x (state management)
-    - react-redux v9.x (React bindings for Redux)
-    - react-router-dom v7.x (routing)
-    - axios v1.x (HTTP client)
+41. Updated TestWebApplicationFactory to explicitly override JWT validation
 
-17. Installed shadcn/ui peer dependencies:
-    - `npm install class-variance-authority clsx tailwind-merge lucide-react`
-    - class-variance-authority: variant-based styling
-    - clsx + tailwind-merge: className utility
-    - lucide-react: icon library
+## Step 10: Bookings Integration Tests
 
-18. Created src/lib/utils.ts:
-    - cn() utility function for combining class names with clsx and tailwind-merge
-    - Used by shadcn/ui components
+**Goal**: Write comprehensive integration tests for Bookings endpoints including conflict detection, status workflows, and authorization.
 
-## Project Structure
+52. Created BookingsControllerTests in BookingSystem.IntegrationTests/Controllers with 11 tests:
+    - CreateBooking_WithValidData_ShouldReturn201AndBooking
+    - CreateBooking_WithOverlappingTimes_ShouldReturn400Conflict (validates conflict detection)
+    - GetBookingById_WithValidId_ShouldReturn200AndBooking
+    - GetBookingById_WithInvalidId_ShouldReturn404
+    - GetAllBookings_WithPagination_ShouldReturnPagedResults
+    - UpdateBooking_WithValidData_ShouldReturn200AndUpdatedBooking
+    - CancelBooking_WithValidId_ShouldReturn200AndCancelledBooking
+    - MultiTenant_BookingIsolation_TenantCannotAccessOtherTenantsBookings
+    - CreateBooking_WithoutAuthentication_ShouldReturn401
+    - CreateBooking_WithoutTenantHeader_ShouldReturn400
 
-19. Created folder structure:
-    - src/features/ (auth, resources, bookings)
-    - src/components/ (shared UI components)
-    - src/store/ (Redux store configuration)
-    - src/types/ (TypeScript interfaces)
-    - src/lib/ (utilities)
+53. Added `InvalidOperationException`
 
-20. Created .gitignore for client:
-    - node_modules, dist, dist-ssr
-    - logs (\*.log)
-    - editor files (.vscode, .idea, .DS_Store)
-    - \*.local
+## Step 11: Architecture Tests (NetArchTest.Rules)
 
-## Verification
+**Goal**: Validate Clean Architecture principles and enforce coding conventions using automated architecture tests.
 
-21. Started Vite dev server:
-    - Command: `npm run dev`
-    - Server running on http://localhost:3000
+58. Installed NetArchTest.Rules package: `dotnet add package NetArchTest.Rules` (version 1.3.2)
+59. Created AssemblyReference
+60. Created ArchitectureTests in BookingSystem.UnitTests/Architecture with 15 comprehensive tests:
 
-22. **Package Summary**:
-    - Total packages: 77 audited
-    - Vulnerabilities: 0
-    - Key dependencies:
-      - React v19.2.4
-      - Vite v8.0.5
-      - TypeScript v6.0.2
-      - TailwindCSS v4.x
-      - Redux Toolkit v2.x
-      - React Router v7.x
-      - Axios v1.x
+    **Layer Dependency Tests**:
+    - Domain_Should_NotHaveAnyDependencies (Domain is innermost layer)
+    - Application_Should_OnlyDependOnDomain (Application layer isolation)
+    - Infrastructure_Should_NotDependOnAPI (Infrastructure independent of API)
+    - API_Controllers_Should_NotDirectlyUseRepositories (Controllers use MediatR, not repositories)
+
+    **Naming Convention Tests**:
+    - Commands_Should_EndWithCommand
+    - Queries_Should_EndWithQuery
+    - Handlers_Should_EndWithHandler
+    - Validators_Should_EndWithValidator
+    - Controllers_Should_EndWithController
+    - Repositories_Should_EndWithRepository (excludes abstract base classes)
+
+    **CQRS Pattern Tests**:
+    - Handlers_Should_ResideInCorrectNamespace (all in Features namespace)
+    - DTOs_Should_ResideInDTOsFolder (Request/Response/Dto classes)
+    - Entities_Should_ResideInDomainLayer (Domain.Entities namespace)
+
+    **Interface and Implementation Tests**:
+    - Repositories_Should_ImplementIRepository (concrete classes)
+    - Middleware_Should_ResideInAPILayer (API.Middleware namespace)
+
+61. Added project references to UnitTests
+62. Test execution
+
+## Step 12: Code Coverage Measurement
+
+**Goal**: Measure code coverage from unit and integration tests, generate reports, and document coverage by layer.
+
+65. Installed coverlet.msbuild for code coverage collection
+66. Ran unit tests with coverage collection:
+67. Installed ReportGenerator global tool for HTML coverage reports Version: 5.5.4
+68. Generated HTML coverage report from unit tests
+69. **Unit Test Coverage Statistics** (by layer):
+    - **Domain Layer**: 64% line coverage, 100% branch coverage
+      - Booking entity: 100% covered
+      - AvailabilityRule entity: 100% covered
+      - RefreshToken entity: 100% covered
+      - Resource entity: 90.9% covered
+      - User, Tenant, AuditLog: 0% covered (no unit tests yet)
+    - **Application Layer**: 12% line coverage, 5% branch coverage
+      - Commands, Validators, Handlers: Partial coverage
+      - Focus areas: CreateResource, CreateBooking, Login operations
+    - **Infrastructure Layer**: 0% line coverage (expected - tested via integration tests)
+    - **API Layer**: 0% line coverage (expected - tested via integration tests)
+    - **Overall**: 7.82% line coverage, 3.92% branch coverage (243/3104 lines covered)
+
+70. Attempted integration test coverage measurement
+71. **Coverage Analysis Summary**:
+    - Unit tests provide **accurate coverage** for Domain (64%) and Application (12%) layers
+    - Integration tests validate **end-to-end functionality** but don't contribute to coverage metrics reliably
+    - Combined test suite: **147 tests** (92 unit + 40 integration + 15 architecture)
+    - **Total passing**: ~130 tests (88%)
+    - Coverage reports available in BookingSystem.UnitTests/TestResults/CoverageReport/index.html

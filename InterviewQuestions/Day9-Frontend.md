@@ -1,4 +1,4 @@
-# Day 8: Frontend Setup (React + TypeScript + Vite)
+# Day 9: Frontend Setup (React + TypeScript + Vite)
 
 ## Q1: "Why did you choose React + TypeScript + Vite instead of other frameworks or setups?"
 

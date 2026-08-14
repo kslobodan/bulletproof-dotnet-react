@@ -14,9 +14,10 @@
 - [Day 4: Resources CRUD & Multi-Tenant Isolation](./Day4-Resources.md)
 - [Day 5: Bookings CRUD & Business Logic](./Day5-Bookings.md)
 - [Day 6: Advanced Features & Audit Logging](./Day6-Advanced.md)
-- [Day 7: Backend Testing](./Day7-Testing.md)
-- [Day 8: Frontend Setup (React + TypeScript + Vite)](./Day8-Frontend.md)
-- [Day 9: Authentication Flow & Tenant Setup (Frontend)](./Day9-AuthenticationUI.md)
+- [Day 7: Advanced Backend Features](./Day7-AdvancedFeatures.md)
+- [Day 8: Backend Testing](./Day8-Testing.md)
+- [Day 9: Frontend Setup (React + TypeScript + Vite)](./Day9-Frontend.md)
+- [Day 10: Authentication Flow & Tenant Setup (Frontend)](./Day10-AuthenticationUI.md)
 
 ---
 

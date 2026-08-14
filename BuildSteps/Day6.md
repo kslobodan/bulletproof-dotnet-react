@@ -58,6 +58,7 @@
     - Tested AuditLogsController API endpoint (admin-only access) ✅
 
 12. **Verified all operation types tracked**:
+
     ```powershell
     docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT Action, COUNT(*) FROM AuditLogs GROUP BY Action;"
     ```
@@ -121,88 +122,9 @@
 ## AvailabilityRules - Step 9: Testing
 
 69. Verified migration 0005 executed: "Executing Database Server script '0005_CreateAvailabilityRulesTable.sql'" ✅
-70. Verified AvailabilityRules
-71. Tested data insertion
-72. Verified check constraint
-73. Verified check constraint
-74. Verified queries
-75. All components integrated successfully
-
-## Other features - Step 1: Create Admin Endpoints to View Audit Logs
-
-234: Created GetPaginatedAuditLogsQuery
-235: Created GetPaginatedAuditLogsQueryHandler
-236: Created GetPaginatedAuditLogsQueryValidator
-237: Updated IAuditLogRepository Interface
-238: Updated AuditLogRepository Implementation
-240: Create AuditLogsController
-241: Build and Verify
-
-## Other features - Step 2: Implement Soft Delete for Entities
-
-84. Updated domain entities with soft delete properties:
-    - **Resource.cs**: Added `IsDeleted` (default false) and `DeletedAt` properties
-    - **Booking.cs**: Added `IsDeleted` and `DeletedAt` properties
-    - **AvailabilityRule.cs**: Added `IsDeleted` and `DeletedAt` properties
-
-85. Created migration `0006_AddSoftDeleteSupport.sql` in `Infrastructure/Data/Scripts`:
-86. Updated `IRepository<T>` interface in `Application/Common/Interfaces`
-87. Updated `BaseRepository` in `Infrastructure/Repositories/BaseRepository`
-88. Updated `BookingRepository`
-89. Updated `AvailabilityRuleRepository`
-90. Updated Delete command handlers to use SoftDeleteAsync
-91. Updated `TenantRepository`
-92. Migration execution:
-    - Started API: `cd src/BookingSystem.API; dotnet run`
-
-## Other features - Step 3: Add Filtering and Sorting to Booking Queries
-
-94. Updated `GetAllBookingsQuery` in `Application/Features/Bookings/Queries/GetAllBookings`:
-
-95. Updated `IBookingRepository` interface in `Application/Common/Interfaces`:
-96. Implemented `GetPagedAsync` in `BookingRepository.cs` in `Infrastructure/Repositories`:
-97. Updated `GetAllBookingsQueryHandler`:
-98. Created `GetAllBookingsQueryValidator.cs`:
-
-## Other features - Step 4: Create Statistics Endpoints
-
-100. Created `BookingStatisticsDto` in `Application/Features/Bookings/DTOs/`:
-101. Created `GetBookingStatisticsQuery` in `Application/Features/Bookings/Queries/GetBookingStatistics`:
-102. Created `GetBookingStatisticsQueryValidator`:
-103. Updated `IBookingRepository` interface
-104. Created `GetBookingStatisticsQueryHandler`
-105. Implemented `GetStatisticsAsync` in `BookingRepository.cs`:
-106. Updated `BookingsController`
-
-## Other features - Step 5: Add Rate Limiting Middleware
-
-107. Installed AspNetCoreRateLimit package in API project:
-     - `cd BookingSystem.API; dotnet add package AspNetCoreRateLimit`
-108. Configured rate limiting in `appsettings.json`:
-109. Updated `Program.cs` imports:
-     - Added `using AspNetCoreRateLimit;`
-110. Registered rate limiting services in `Program.cs`:
-111. Added rate limiting middleware to pipeline:
-
-## Other features - Step 6: Implement RefreshToken Mechanism
-
-112. Created `RefreshToken` entity in `Domain/Entities`:
-113. Updated `AuthResult` DTO to include `RefreshToken`
-114. Created RefreshToken DTOs in `Application/Features/Authentication/DTOs`:
-115. Created `RefreshAccessTokenCommand` in `Application/Features/Authentication/Commands/RefreshToken`:
-116. Created `IRefreshTokenRepository` in `Application/Common/Interfaces`:
-117. Updated `IJwtTokenService` interface:
-118. Updated `JwtTokenService` implementation
-119. Implemented `RefreshTokenRepository` in `Infrastructure/Repositories`:
-120. Updated `LoginCommandHandler` to generate and store refresh token
-121. Added refresh endpoint to `AuthController`
-122. Created database migration `0007_CreateRefreshTokensTable.sql`
-123. Registered `IRefreshTokenRepository` in DI container (`Program.cs`):
-
-124. Migration execution: Started API → DbUp applied migration `0007_CreateRefreshTokensTable.sql` ✅
-
-125. Tested refresh token flow:
-     - Login: Received access token + refresh token ✅
-     - Refresh: Used refresh token → Got new access token + new refresh token ✅
-     - Token rotation: Old refresh token marked as revoked in database, ReplacedByToken set ✅
-     - Security: Old refresh token rejected on reuse attempt ✅
+70. Verified AvailabilityRules table created with correct schema
+71. Tested data insertion successfully
+72. Verified check constraint for time ranges working
+73. Verified check constraint for day of week working
+74. Verified queries return correct filtered results
+75. All components integrated successfully ✅
