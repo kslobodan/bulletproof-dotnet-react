@@ -14,24 +14,55 @@
 ## Audit Logging - Step 3: AuditLoggingBehavior Pipeline
 
 4. Created `AuditLoggingBehavior` in `Application/Common/Behaviors`:
-5. Build verification: `dotnet build` - successful (6.4s) ✅
 
 ## Audit Logging - Step 4: Database Migration
 
-6. Created migration script `0004_CreateAuditLogsTable.sql` in `Infrastructure/Data/Scripts/`
+5. Created migration script `0004_CreateAuditLogsTable.sql` in `Infrastructure/Data/Scripts/`
 
 ## Audit Logging - Step 5: DI Registration
 
-7. Registered `AuditLogRepository` in `Program.cs`:
-8. Registered `AuditLoggingBehavior` in MediatR pipeline in `Program.cs`:
+6. Registered `AuditLogRepository` in `Program.cs`:
+7. Registered `AuditLoggingBehavior` in MediatR pipeline in `Program.cs`:
 
 ## Audit Logging - Step 6: Testing
 
-9. Verified migration 0007 executed successfully
-10. Verified AuditLogs table created with correct
-11. Tested audit logging functionality
-12. Verified audit data in database
-13. All Create/Update/Cancel/Confirm/Delete operations are being tracked
+8. **Verified migration executed successfully**:
+   - Started API: `cd src/BookingSystem.API; dotnet run`
+   - Console output confirmed: "Executing Database Server script '0004_CreateAuditLogsTable.sql'" ✅
+9. **Verified AuditLogs table created with correct schema**:
+
+   ```powershell
+   docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "\d AuditLogs"
+   ```
+
+   - Confirmed 11 columns: Id, TenantId, EntityName, EntityId, Action, OldValues, NewValues, UserId, Timestamp, IpAddress, Reason ✅
+   - Verified indexes: 6 indexes created (TenantId, EntityName_EntityId, UserId, Timestamp, Action, composite) ✅
+   - Verified foreign keys: FK_AuditLogs_Tenants, FK_AuditLogs_Users ✅
+
+10. **Tested audit logging functionality** (see [API_TESTS.md - Day 6: Audit Logging Tests](../API_TESTS.md#day-6-audit-logging-tests)):
+    - Created Resource → Verified audit log created with Action='Create' ✅
+    - Updated Resource → Verified audit log with Action='Update', OldValues and NewValues captured ✅
+    - Created Booking → Verified audit log ✅
+    - Cancelled Booking → Verified audit log with Action='Cancel' ✅
+    - Deleted Resource → Verified audit log with Action='Delete' ✅
+
+11. **Verified audit data in database**:
+
+    ```powershell
+    docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT EntityName, Action, Timestamp FROM AuditLogs ORDER BY Timestamp DESC LIMIT 10;"
+    ```
+
+    - Confirmed all operations logged with correct EntityName, EntityId, Action ✅
+    - Verified UserId populated from JWT claims ✅
+    - Verified NewValues JSON contains entity data ✅
+    - Tested AuditLogsController API endpoint (admin-only access) ✅
+
+12. **Verified all operation types tracked**:
+    ```powershell
+    docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "SELECT Action, COUNT(*) FROM AuditLogs GROUP BY Action;"
+    ```
+
+    - Confirmed Create, Update, Delete, Cancel, Confirm operations all being logged ✅
 
 ## AvailabilityRules - Step 1: Entity & Planning
 
