@@ -67,64 +67,56 @@
 
 ## AvailabilityRules - Step 1: Entity & Planning
 
-14. Created `AvailabilityRule` in `Domain/Entities
+13. Created `AvailabilityRule` in `Domain/Entities
 
 ## AvailabilityRules - Step 2: DTOs (Data Transfer Objects)
 
-15. Created `AvailabilityRuleDto` in `Application/Features/AvailabilityRules/DTOs/AvailabilityRuleDto.cs`
-16. Created `CreateAvailabilityRuleRequest` (7 properties: ResourceId, DayOfWeek, StartTime, EndTime, IsActive, EffectiveFrom?, EffectiveTo?)
-17. Created `CreateAvailabilityRuleResponse`
-18. Created `UpdateAvailabilityRuleRequest` (5 properties: StartTime, EndTime, IsActive, EffectiveFrom?, EffectiveTo? - Note: Cannot change ResourceId or DayOfWeek)
-19. Created `UpdateAvailabilityRuleResponse`
-20. Created `DeleteAvailabilityRuleResponse`
-21. Build verification: `dotnet build` - successful (9.8s) ✅
+14. Created `AvailabilityRuleDto` in `Application/Features/AvailabilityRules/DTOs/AvailabilityRuleDto.cs`
+15. Created `CreateAvailabilityRuleRequest` (7 properties: ResourceId, DayOfWeek, StartTime, EndTime, IsActive, EffectiveFrom?, EffectiveTo?)
+16. Created `CreateAvailabilityRuleResponse`
+17. Created `UpdateAvailabilityRuleRequest` (5 properties: StartTime, EndTime, IsActive, EffectiveFrom?, EffectiveTo? - Note: Cannot change ResourceId or DayOfWeek)
+18. Created `UpdateAvailabilityRuleResponse`
+19. Created `DeleteAvailabilityRuleResponse`
 
 ## AvailabilityRules - Step 3: CQRS Commands
 
-22. Created `CreateAvailabilityRuleCommand` in `Commands/CreateAvailabilityRule`
-23. Created `CreateAvailabilityRuleCommandHandler`
-24. Created `CreateAvailabilityRuleCommandValidator`
-25. Created `UpdateAvailabilityRuleCommand` in `Commands/UpdateAvailabilityRule`
-26. Created `UpdateAvailabilityRuleCommandHandler`
-27. Created `UpdateAvailabilityRuleCommandValidator`
-28. Created `DeleteAvailabilityRuleCommand` in `Commands/DeleteAvailabilityRule`
-29. Created `DeleteAvailabilityRuleCommandHandler`
-30. Created `DeleteAvailabilityRuleCommandValidator`
-31. Created `IAvailabilityRuleRepository` interface in `Application/Common/Interfaces`
-32. Created `DeleteAvailabilityRuleResponse`
+20. Created `IAvailabilityRuleRepository` interface in `Application/Common/Interfaces`
+21. Created `CreateAvailabilityRuleCommand` in `Commands/CreateAvailabilityRule`
+22. Created `CreateAvailabilityRuleCommandHandler`
+23. Created `CreateAvailabilityRuleCommandValidator`
+24. Created `UpdateAvailabilityRuleCommand` in `Commands/UpdateAvailabilityRule`
+25. Created `UpdateAvailabilityRuleCommandHandler`
+26. Created `UpdateAvailabilityRuleCommandValidator`
+27. Created `DeleteAvailabilityRuleCommand` in `Commands/DeleteAvailabilityRule`
+28. Created `DeleteAvailabilityRuleCommandHandler`
+29. Created `DeleteAvailabilityRuleCommandValidator`
 
 ## AvailabilityRules - Step 4: CQRS Queries
 
-33. Created `GetAvailabilityRuleByIdQuery` in `Queries/GetAvailabilityRuleById`
-34. Created `GetAvailabilityRuleByIdQueryHandler`
-35. Created `GetAvailabilityRuleByIdQueryValidator`
-36. Created `GetAllAvailabilityRulesQuery` in `Queries/GetAllAvailabilityRules`
-37. Created `GetAllAvailabilityRulesQueryHandler`
-38. Created `GetAllAvailabilityRulesQueryValidator`
-39. Updated `IAvailabilityRuleRepository` interface - added GetPagedAsync method
+30. Created `GetAvailabilityRuleByIdQuery` in `Application/Features/AvailabilityRules/Queries/GetAvailabilityRuleById`
+31. Created `GetAvailabilityRuleByIdQueryHandler`
+32. Created `GetAvailabilityRuleByIdQueryValidator`
+33. Created `GetAllAvailabilityRulesQuery` in `Application/Features/AvailabilityRules/Queries/GetAllAvailabilityRules`
+34. Created `GetAllAvailabilityRulesQueryHandler`
+35. Created `GetAllAvailabilityRulesQueryValidator`
+36. Updated `IAvailabilityRuleRepository` interface - added GetPagedAsync method
 
 ## AvailabilityRules - Step 5: Repository Implementation
 
-43. Created `AvailabilityRuleRepository.cs` in `Infrastructure/Repositories`
+37. Created `AvailabilityRuleRepository.cs` in `Infrastructure/Repositories`
 
 ## AvailabilityRules - Step 6: Controller
 
-49. Created `AvailabilityRulesController` in `API/Controllers/v1`
+38. Created `AvailabilityRulesController` in `API/Controllers/v1`
 
 ## AvailabilityRules - Step 7: Database Migration
 
-58. Created `0005_CreateAvailabilityRulesTable.sql` in `Infrastructure/Data/Scripts`
+39. Created `0005_CreateAvailabilityRulesTable.sql` in `Infrastructure/Data/Scripts`
 
 ## AvailabilityRules - Step 8: DI Registration
 
-66. Registered `AvailabilityRuleRepository` in `Program.cs`
+40. Registered `AvailabilityRuleRepository` in `Program.cs`
 
 ## AvailabilityRules - Step 9: Testing
 
-69. Verified migration 0005 executed: "Executing Database Server script '0005_CreateAvailabilityRulesTable.sql'" ✅
-70. Verified AvailabilityRules table created with correct schema
-71. Tested data insertion successfully
-72. Verified check constraint for time ranges working
-73. Verified check constraint for day of week working
-74. Verified queries return correct filtered results
-75. All components integrated successfully ✅
+41. Verified migration 0005 executed: "Executing Database Server script '0005_CreateAvailabilityRulesTable.sql'" ✅
