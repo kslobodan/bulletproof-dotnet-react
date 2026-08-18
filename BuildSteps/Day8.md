@@ -4,11 +4,23 @@
 
 ## Backend Testing - Step 1: Set up xUnit test projects
 
-1. Created xUnit test project for unit tests
-2. Created xUnit test project for integration tests
-3. Added test projects to solution
-4. Configured project references for UnitTests
-5. Configured project references for IntegrationTests
+1. Created xUnit test project for unit tests: `dotnet new xunit -n BookingSystem.UnitTests -o BookingSystem.UnitTests`
+2. Created xUnit test project for integration tests: `dotnet new xunit -n BookingSystem.IntegrationTests -o BookingSystem.IntegrationTests`
+3. Added test projects to solution:
+
+   `dotnet sln BookingSystem.sln add BookingSystem.UnitTests/BookingSystem.UnitTests.csproj`,
+   `dotnet sln BookingSystem.sln add BookingSystem.IntegrationTests/BookingSystem.IntegrationTests.csproj`
+
+4. Configured project references for UnitTests:
+
+   `dotnet add BookingSystem.UnitTests reference BookingSystem.Domain/BookingSystem.Domain.csproj`,
+   `dotnet add BookingSystem.UnitTests reference BookingSystem.Application/BookingSystem.Application.csproj`
+
+5. Configured project references for IntegrationTests:
+
+   `dotnet add BookingSystem.IntegrationTests reference BookingSystem.API/BookingSystem.API.csproj`,
+   `dotnet add BookingSystem.IntegrationTests reference BookingSystem.Infrastructure/BookingSystem.Infrastructure.csproj`
+
 6. Deleted default test files:
    - `Remove-Item BookingSystem.UnitTests/UnitTest1.cs -Force`
    - `Remove-Item BookingSystem.IntegrationTests/UnitTest1.cs -Force`
@@ -37,36 +49,60 @@
 12. Created `RefreshTokenTests` with 9 test methods
 13. Created `BookingTests` with 7 test methods
 14. Created `AvailabilityRuleTests`
-15. Executed unit tests
+15. Executed unit tests: `dotnet test BookingSystem.UnitTests/BookingSystem.UnitTests.csproj`
 
 ## Backend Testing - Step 4: Write unit tests for CQRS Command Handlers
 
 16. Created `CreateResourceCommandHandlerTests` in `BookingSystem.UnitTests/Application/Commands`
 17. Created `CreateBookingCommandHandlerTests` in `BookingSystem.UnitTests/Application/Commands`
-18. Executed unit tests
+18. Executed unit tests: `dotnet test BookingSystem.UnitTests/BookingSystem.UnitTests.csproj`
 
 ## Backend Testing - Step 5: Write unit tests for FluentValidation Validators
 
 19. Created `CreateResourceCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
 20. Created `CreateBookingCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
 21. Created `LoginCommandValidatorTests` in `BookingSystem.UnitTests/Application/Validators`
-22. Test run
+22. Executed unit tests: `dotnet test BookingSystem.UnitTests/BookingSystem.UnitTests.csproj`
 
 ## Backend Testing - Step 6: Set up Integration test infrastructure (WebApplicationFactory)
 
-23. Made Program class accessible to integration tests
+23. Made Program class accessible to integration tests by adding at the end of `Program.cs`:
+    `public partial class Program { }`
+    **Why?** In .NET 6+, the `Program` class is implicitly internal. `WebApplicationFactory<T>` needs a public entry point class to bootstrap the application in tests.
+
 24. Created `IntegrationTestWebApplicationFactory` in `BookingSystem.IntegrationTests`
-25. Created `IntegrationTestBase`
-26. Created `InfrastructureSmokeTests`
-27. Executed integration smoke tests
+
+25. Created `IntegrationTestBase` in `BookingSystem.IntegrationTests`
+
+26. Created `InfrastructureSmokeTests` in `BookingSystem.IntegrationTests`
+
+27. Executed integration smoke tests: `dotnet test BookingSystem.IntegrationTests/BookingSystem.IntegrationTests.csproj`
 
 ## Backend Testing - Step 7: Configure Testcontainers for PostgreSQL
 
 28. Created `DatabaseFixture` in `BookingSystem.IntegrationTests/Infrastructure`:
-29. Created `TestWebApplicationFactory` in `BookingSystem.IntegrationTests/Infrastructure`
+    - Manages PostgreSqlContainer lifecycle
+    - Starts container once for all tests
+    - Exposes connection string
+
+29. Created `TestWebApplicationFactory` in `BookingSystem.IntegrationTests/Infrastructure`:
+    - Replaces `IntegrationTestWebApplicationFactory` from Step 6
+    - Injects Testcontainer database connection
+    - Applies migrations automatically
+
 30. Updated `IntegrationTestBase`:
+    - Changed to use `TestWebApplicationFactory` instead of `IntegrationTestWebApplicationFactory`
+    - Added `IClassFixture<DatabaseFixture>` for database lifecycle
+
 31. Updated `InfrastructureSmokeTests`:
-32. Executed integration tests
+    - Now tests against real PostgreSQL database
+32. Executed integration tests:
+
+    ```powershell
+    dotnet test BookingSystem.IntegrationTests/BookingSystem.IntegrationTests.csproj
+    ```
+
+    Result: PostgreSQL Testcontainer started, migrations applied, tests passed ✅
 
 33. Created DatabaseFixture with PostgreSqlContainer lifecycle management
 34. Created TestWebApplicationFactory with database connection injection
@@ -79,7 +115,11 @@
 36. Updated RegisterTenantCommandHandler to generate and store RefreshToken
 37. Updated RegisterUserCommandHandler to generate and store RefreshToken
 38. Fixed IntegrationTestBase helper methods to return full DTO objects (RegisterTenantResponse, LoginResponse)
-39. Test execution
+39. Executed auth integration tests:
+    ```powershell
+    dotnet test BookingSystem.IntegrationTests/BookingSystem.IntegrationTests.csproj --filter "FullyQualifiedName~AuthControllerTests"
+    ```
+    Result: All auth endpoint tests passed (Register, Login, RefreshToken, MultiTenant) ✅
 
 ## Step 9: Resources CRUD Integration Tests
 
@@ -151,16 +191,50 @@
     - Middleware_Should_ResideInAPILayer (API.Middleware namespace)
 
 61. Added project references to UnitTests
-62. Test execution
+62. Executed architecture tests:
+    ```powershell
+    dotnet test BookingSystem.UnitTests/BookingSystem.UnitTests.csproj --filter "FullyQualifiedName~ArchitectureTests"
+    ```
+    Result: All 15 architecture tests passed ✅
 
 ## Step 12: Code Coverage Measurement
 
 **Goal**: Measure code coverage from unit and integration tests, generate reports, and document coverage by layer.
 
-65. Installed coverlet.msbuild for code coverage collection
+65. Installed coverlet.msbuild for code coverage collection:
+
+    ```powershell
+    dotnet add BookingSystem.UnitTests package coverlet.msbuild
+    ```
+
 66. Ran unit tests with coverage collection:
-67. Installed ReportGenerator global tool for HTML coverage reports Version: 5.5.4
-68. Generated HTML coverage report from unit tests
+
+    ```powershell
+    dotnet test BookingSystem.UnitTests/BookingSystem.UnitTests.csproj `
+      /p:CollectCoverage=true `
+      /p:CoverletOutputFormat=cobertura `
+      /p:CoverletOutput=./TestResults/coverage.cobertura.xml
+    ```
+
+67. Installed ReportGenerator global tool for HTML coverage reports:
+
+    ```powershell
+    dotnet tool install -g dotnet-reportgenerator-globaltool
+    ```
+
+    Version: 5.5.4
+
+68. Generated HTML coverage report from unit tests:
+
+    ```powershell
+    reportgenerator `
+      -reports:BookingSystem.UnitTests/TestResults/coverage.cobertura.xml `
+      -targetdir:BookingSystem.UnitTests/TestResults/CoverageReport `
+      -reporttypes:Html
+    ```
+
+    Open report: `BookingSystem.UnitTests/TestResults/CoverageReport/index.html`
+
 69. **Unit Test Coverage Statistics** (by layer):
     - **Domain Layer**: 64% line coverage, 100% branch coverage
       - Booking entity: 100% covered
