@@ -4,6 +4,165 @@
 
 ---
 
+## Q: "How did you implement admin endpoints to view audit logs? Explain the pagination and filtering."
+
+**A:** "I created a dedicated admin-only endpoint to view audit logs with pagination and filtering capabilities:
+
+**Query with Filters:**
+
+```csharp
+public record GetPaginatedAuditLogsQuery : IRequest<PagedResult<AuditLogDto>>
+{
+    public int PageNumber { get; init; } = 1;
+    public int PageSize { get; init; } = 10;
+    public string? EntityName { get; init; }  // Filter by entity type
+    public Guid? EntityId { get; init; }      // Filter by specific entity
+    public string? Action { get; init; }      // Filter by action (Create, Update, Delete)
+    public Guid? UserId { get; init; }        // Filter by user who made the change
+    public DateTime? StartDate { get; init; } // Filter by date range
+    public DateTime? EndDate { get; init; }
+}
+```
+
+**Repository Implementation:**
+
+```csharp
+public async Task<PagedResult<AuditLog>> GetPagedAsync(
+    int pageNumber,
+    int pageSize,
+    string? entityName = null,
+    Guid? entityId = null,
+    string? action = null,
+    Guid? userId = null,
+    DateTime? startDate = null,
+    DateTime? endDate = null,
+    CancellationToken cancellationToken = default)
+{
+    var whereClause = "WHERE TenantId = @TenantId";
+
+    // Dynamic filtering
+    if (!string.IsNullOrEmpty(entityName))
+        whereClause += " AND EntityName = @EntityName";
+
+    if (entityId.HasValue)
+        whereClause += " AND EntityId = @EntityId";
+
+    if (!string.IsNullOrEmpty(action))
+        whereClause += " AND Action = @Action";
+
+    if (userId.HasValue)
+        whereClause += " AND UserId = @UserId";
+
+    if (startDate.HasValue)
+        whereClause += " AND Timestamp >= @StartDate";
+
+    if (endDate.HasValue)
+        whereClause += " AND Timestamp <= @EndDate";
+
+    var sql = $@"
+        SELECT * FROM AuditLogs
+        {whereClause}
+        ORDER BY Timestamp DESC
+        LIMIT @PageSize OFFSET @Offset";
+
+    var parameters = new DynamicParameters();
+    parameters.Add("TenantId", _tenantContext.TenantId);
+    parameters.Add("PageSize", pageSize);
+    parameters.Add("Offset", (pageNumber - 1) * pageSize);
+
+    if (!string.IsNullOrEmpty(entityName)) parameters.Add("EntityName", entityName);
+    if (entityId.HasValue) parameters.Add("EntityId", entityId);
+    if (!string.IsNullOrEmpty(action)) parameters.Add("Action", action);
+    if (userId.HasValue) parameters.Add("UserId", userId);
+    if (startDate.HasValue) parameters.Add("StartDate", startDate);
+    if (endDate.HasValue) parameters.Add("EndDate", endDate);
+
+    var auditLogs = await _connection.QueryAsync<AuditLog>(sql, parameters);
+
+    var countSql = $"SELECT COUNT(*) FROM AuditLogs {whereClause}";
+    var totalCount = await _connection.ExecuteScalarAsync<int>(countSql, parameters);
+
+    return new PagedResult<AuditLog>
+    {
+        Items = auditLogs.ToList(),
+        TotalCount = totalCount,
+        PageNumber = pageNumber,
+        PageSize = pageSize
+    };
+}
+```
+
+**Controller with Admin Authorization:**
+
+```csharp
+[ApiController]
+[Route("api/v1/[controller]")]
+[Authorize(Policy = "RequireTenantAdmin")]  // Admin-only access
+public class AuditLogsController : ControllerBase
+{
+    private readonly IMediator _mediator;
+
+    public AuditLogsController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<PagedResult<AuditLogDto>>> GetAuditLogs(
+        [FromQuery] GetPaginatedAuditLogsQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+}
+```
+
+**FluentValidation:**
+
+```csharp
+public class GetPaginatedAuditLogsQueryValidator : AbstractValidator<GetPaginatedAuditLogsQuery>
+{
+    public GetPaginatedAuditLogsQueryValidator()
+    {
+        RuleFor(x => x.PageNumber)
+            .GreaterThan(0)
+            .WithMessage("PageNumber must be greater than 0");
+
+        RuleFor(x => x.PageSize)
+            .InclusiveBetween(1, 100)
+            .WithMessage("PageSize must be between 1 and 100");
+
+        RuleFor(x => x.Action)
+            .Must(action => string.IsNullOrEmpty(action) ||
+                  new[] { "Create", "Update", "Delete", "Cancel", "Confirm" }.Contains(action))
+            .When(x => !string.IsNullOrEmpty(x.Action))
+            .WithMessage("Action must be one of: Create, Update, Delete, Cancel, Confirm");
+
+        RuleFor(x => x.EndDate)
+            .GreaterThanOrEqualTo(x => x.StartDate)
+            .When(x => x.StartDate.HasValue && x.EndDate.HasValue)
+            .WithMessage("EndDate must be greater than or equal to StartDate");
+    }
+}
+```
+
+**Usage Example:**
+
+```http
+GET /api/v1/auditlogs?pageNumber=1&pageSize=20&entityName=Booking&action=Delete&startDate=2024-01-01
+Authorization: Bearer {admin-jwt-token}
+```
+
+**Why This Approach?**
+
+- **Security**: Admin-only policy ensures sensitive audit data is protected
+- **Flexibility**: Multiple filter combinations for different investigation scenarios
+- **Performance**: Indexed columns (TenantId, EntityName, Timestamp) for fast queries
+- **Compliance**: Provides audit trail visibility for compliance officers
+- **Debugging**: Helps trace data changes and user actions for troubleshooting"
+
+---
+
 ## Q: "Explain your soft delete implementation. Why use soft delete instead of hard delete?"
 
 **A:** "I implemented soft delete to preserve data for audit trails, recovery, and compliance. Here's how it works:
