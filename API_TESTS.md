@@ -91,6 +91,10 @@ $refreshToken = $loginResponse.authResult.refreshToken
 
 ### Refresh Token
 
+**Note**: For comprehensive refresh token testing (token rotation, revocation, security), see **Day 7: Advanced Backend Features Tests** section below.
+
+**Quick test**:
+
 ```powershell
 $refreshResponse = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/refresh" `
   -Method POST `
@@ -99,8 +103,8 @@ $refreshResponse = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/ref
     \"refreshToken\": \"$refreshToken\"
   }"
 
-$token = $refreshResponse.token
-$refreshToken = $refreshResponse.refreshToken
+$token = $refreshResponse.authResult.token
+$refreshToken = $refreshResponse.authResult.refreshToken
 ```
 
 ---
@@ -397,6 +401,295 @@ Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auditlogs?fromDate=$fromDat
     "Authorization" = "Bearer $token"
     "X-Tenant-Id" = $tenantId
   }
+```
+
+---
+
+## Day 7: Advanced Backend Features Tests
+
+### Refresh Token Flow (Token Rotation)
+
+**Step 1: Login and get refresh token**
+
+```powershell
+$loginResponse = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/login" `
+  -Method POST `
+  -ContentType "application/json" `
+  -Body '{
+    "email": "admin@acme.com",
+    "password": "Admin1234"
+  }'
+
+$token = $loginResponse.authResult.token
+$refreshToken = $loginResponse.authResult.refreshToken
+$tenantId = $loginResponse.authResult.tenantId
+```
+
+**Step 2: Use refresh token to get new tokens**
+
+```powershell
+$refreshResponse = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/refresh" `
+  -Method POST `
+  -ContentType "application/json" `
+  -Body "{
+    \"refreshToken\": \"$refreshToken\"
+  }"
+
+$newToken = $refreshResponse.authResult.token
+$newRefreshToken = $refreshResponse.authResult.refreshToken
+
+# Verify tokens are different (token rotation)
+Write-Host "Old token != New token: $($token -ne $newToken)"
+Write-Host "Old refresh != New refresh: $($refreshToken -ne $newRefreshToken)"
+```
+
+**Step 3: Verify old refresh token is revoked (should fail)**
+
+```powershell
+try {
+    Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auth/refresh" `
+      -Method POST `
+      -ContentType "application/json" `
+      -Body "{\"refreshToken\": \"$refreshToken\"}"
+    Write-Host "❌ ERROR: Old token should be rejected!"
+} catch {
+    Write-Host "✅ Old token correctly rejected: $($_.Exception.Response.StatusCode)"
+}
+```
+
+**Step 4: Verify database token rotation**
+
+```powershell
+docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "
+  SELECT
+    LEFT(Token, 20) as TokenPrefix,
+    RevokedAt IS NOT NULL as IsRevoked,
+    LEFT(ReplacedByToken, 20) as ReplacedByPrefix,
+    CreatedAt
+  FROM RefreshTokens
+  ORDER BY CreatedAt DESC
+  LIMIT 5;"
+```
+
+### Soft Delete Pattern
+
+**Create and soft-delete a resource**
+
+```powershell
+# Create resource
+$resource = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/resources" `
+  -Method POST `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  } `
+  -ContentType "application/json" `
+  -Body '{
+    "name": "Soft Delete Test Room",
+    "resourceType": "MeetingRoom",
+    "capacity": 5
+  }'
+
+$resourceId = $resource.id
+
+# Delete resource (soft delete)
+Invoke-RestMethod -Uri "http://localhost:5036/api/v1/resources/$resourceId" `
+  -Method DELETE `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+
+# Verify resource no longer appears in list
+$resources = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/resources" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+
+$deletedResource = $resources.items | Where-Object { $_.id -eq $resourceId }
+Write-Host "Resource in list: $($null -ne $deletedResource) (should be False)"
+```
+
+**Verify soft delete in database**
+
+```powershell
+docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "
+  SELECT
+    Name,
+    IsDeleted,
+    DeletedAt
+  FROM Resources
+  WHERE Id = '$resourceId';"
+
+# Expected: IsDeleted = true, DeletedAt = timestamp
+```
+
+### Advanced Booking Queries (Filtering & Sorting)
+
+**Filter by status**
+
+```powershell
+$bookings = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/bookings?status=Confirmed" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+
+Write-Host "Confirmed bookings: $($bookings.items.Count)"
+```
+
+**Filter by resource**
+
+```powershell
+$bookings = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/bookings?resourceId=$resourceId" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+```
+
+**Filter by date range**
+
+```powershell
+$startDate = "2026-08-01T00:00:00Z"
+$endDate = "2026-08-31T23:59:59Z"
+
+$bookings = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/bookings?startDate=$startDate&endDate=$endDate" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+```
+
+**Sort by different columns**
+
+```powershell
+# Sort by StartTime descending (most recent first)
+$bookings = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/bookings?orderBy=StartTime&descending=true" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+
+# Sort by Title ascending
+$bookings = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/bookings?orderBy=Title&descending=false" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+```
+
+**Combined filters**
+
+```powershell
+$bookings = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/bookings?status=Confirmed&orderBy=StartTime&descending=true&pageSize=20" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+```
+
+### Booking Statistics Endpoint
+
+**Get overall statistics**
+
+```powershell
+$stats = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/bookings/statistics" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+
+Write-Host "Total Bookings: $($stats.totalBookings)"
+Write-Host "Pending: $($stats.pendingBookings)"
+Write-Host "Confirmed: $($stats.confirmedBookings)"
+Write-Host "Completed: $($stats.completedBookings)"
+Write-Host "Cancelled: $($stats.cancelledBookings)"
+```
+
+**Filter statistics by date range**
+
+```powershell
+$startDate = "2026-01-01T00:00:00Z"
+$endDate = "2026-12-31T23:59:59Z"
+
+$stats = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/bookings/statistics?startDate=$startDate&endDate=$endDate" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+
+# View bookings by resource
+$stats.bookingsByResource | ConvertTo-Json
+```
+
+**Verify statistics with database aggregation**
+
+```powershell
+docker exec -it bookingsystem-db psql -U postgres -d BookingSystemDB -c "
+  SELECT
+    Status,
+    COUNT(*) as Count
+  FROM Bookings
+  WHERE TenantId = '$tenantId' AND IsDeleted = false
+  GROUP BY Status;"
+```
+
+### Rate Limiting Tests
+
+**Test rate limit enforcement (60 requests per minute)**
+
+```powershell
+# Make rapid requests to trigger rate limit
+$results = @()
+for ($i = 1; $i -le 65; $i++) {
+    try {
+        $response = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/resources" `
+          -Headers @{
+            "Authorization" = "Bearer $token"
+            "X-Tenant-Id" = $tenantId
+          }
+        $results += "Request $i : Success"
+    } catch {
+        $statusCode = $_.Exception.Response.StatusCode.value__
+        $results += "Request $i : $statusCode (Rate Limited)"
+    }
+}
+
+$results | Select-Object -Last 10
+# Expected: Last few requests should show 429 (Too Many Requests)
+```
+
+**Check rate limit headers**
+
+```powershell
+$response = Invoke-WebRequest -Uri "http://localhost:5036/api/v1/resources" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+
+# View rate limit headers
+$response.Headers.'X-Rate-Limit-Limit'
+$response.Headers.'X-Rate-Limit-Remaining'
+$response.Headers.'X-Rate-Limit-Reset'
+```
+
+### Admin Audit Logs Endpoint
+
+**Note**: See "Day 6: Audit Logging Tests" section above for comprehensive audit log testing.
+
+**Quick test - Get paginated audit logs**
+
+```powershell
+$auditLogs = Invoke-RestMethod -Uri "http://localhost:5036/api/v1/auditlogs?pageNumber=1&pageSize=10" `
+  -Headers @{
+    "Authorization" = "Bearer $token"
+    "X-Tenant-Id" = $tenantId
+  }
+
+$auditLogs.items | Select-Object action, entityName, timestamp | Format-Table
 ```
 
 ---

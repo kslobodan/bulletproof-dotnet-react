@@ -138,7 +138,10 @@
 41. Registered `IRefreshTokenRepository` in DI container (`Program.cs`):
 
 42. Tested refresh token flow:
-    - Login: Received access token + refresh token ✅
-    - Refresh: Used refresh token → Got new access token + new refresh token ✅
-    - Token rotation: Old refresh token marked as revoked in database, `ReplacedByToken` set ✅
-    - Security: Old refresh token rejected on reuse attempt ✅
+    - **Integration Tests** (see `src/BookingSystem.IntegrationTests/Controllers/AuthControllerTests.cs`):
+      - `RefreshToken_WithValidRefreshToken_ShouldReturn200AndNewTokens`: ✅ Login → Refresh → Verify new tokens
+      - `RefreshToken_WithExpiredRefreshToken_ShouldReturn401`: ✅ Token rotation (reusing old token fails)
+      - `RefreshToken_WithInvalidRefreshToken_ShouldReturn401`: ✅ Invalid token rejected
+    - **Manual Testing** (see `API_TESTS.md` - Day 7 section):
+      - PowerShell commands to test login, refresh, and token rotation
+      - SQL query to verify `ReplacedByToken` in database: `SELECT Token, RevokedAt, ReplacedByToken, IsActive FROM RefreshTokens ORDER BY CreatedAt DESC`
