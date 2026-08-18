@@ -17,22 +17,38 @@
    - **Resource.cs**: Added `IsDeleted` (default false) and `DeletedAt` properties
    - **Booking.cs**: Added `IsDeleted` and `DeletedAt` properties
    - **AvailabilityRule.cs**: Added `IsDeleted` and `DeletedAt` properties
-8. Created migration `0006_AddSoftDeleteSupport.sql` in `Infrastructure/Data/Scripts`
+
+8. Created migration `0006_AddSoftDeleteSupport.sql` in `Infrastructure/Data/Scripts`:
+   - Added `IsDeleted BOOLEAN NOT NULL DEFAULT FALSE`
+   - Added `DeletedAt TIMESTAMP NULL`
+   - Added index `IX_{Table}_IsDeleted` for each table
+
 9. Updated `IRepository<T>` interface in `Application/Common/Interfaces`:
-   - Added `Task<bool> SoftDeleteAsync(Guid id, CancellationToken cancellationToken = default);`
+
+- Added `Task<bool> SoftDeleteAsync(Guid id, CancellationToken cancellationToken = default);`
+
 10. Updated `BaseRepository` in `Infrastructure/Repositories/BaseRepository`:
-    - Implemented `SoftDeleteAsync` method with UPDATE query
+
+- Implemented `SoftDeleteAsync` method with UPDATE query
+
 11. Updated `BookingRepository`:
-    - Added `WHERE IsDeleted = FALSE` to all query methods
-    - Ensured soft-deleted bookings are excluded from conflict detection
+
+- Added `WHERE IsDeleted = FALSE` to all query methods
+- Ensured soft-deleted bookings are excluded from conflict detection
+
 12. Updated `AvailabilityRuleRepository`:
-    - Added `WHERE IsDeleted = FALSE` to all query methods
+
+- Added `WHERE IsDeleted = FALSE` to all query methods
+
 13. Updated Delete command handlers to use `SoftDeleteAsync`:
-    - **DeleteResourceCommandHandler**: Changed from `DeleteAsync` to `SoftDeleteAsync`
-    - **DeleteBookingCommandHandler**: Changed from `DeleteAsync` to `SoftDeleteAsync`
-    - **DeleteAvailabilityRuleCommandHandler**: Changed from `DeleteAsync` to `SoftDeleteAsync`
+
+- **DeleteResourceCommandHandler**: Changed from `DeleteAsync` to `SoftDeleteAsync`
+- **DeleteBookingCommandHandler**: Changed from `DeleteAsync` to `SoftDeleteAsync`
+- **DeleteAvailabilityRuleCommandHandler**: Changed from `DeleteAsync` to `SoftDeleteAsync`
+
 14. Updated `TenantRepository`:
-    - Added `WHERE IsDeleted = FALSE` filter to prevent showing deleted records
+
+- Added `WHERE IsDeleted = FALSE` filter to prevent showing deleted records
 
 ## Advanced Queries - Step 3: Add Filtering and Sorting to Booking Queries
 
@@ -64,7 +80,8 @@
 
 ## Statistics Endpoints - Step 4: Create Booking Statistics
 
-20. Created `BookingStatisticsDto` in `Application/Features/Bookings/DTOs/`
+20. Created `BookingStatisticsDto` in `Application/Features/Bookings/DTOs/`:
+    - Properties: `TotalBookings`, `PendingBookings`, `ConfirmedBookings`, `CompletedBookings`, `CancelledBookings`, `MostBookedResourceId`, `MostBookedResourceName`, `BookingsPerDay` (dictionary)
 
 21. Created `GetBookingStatisticsQuery` in `Application/Features/Bookings/Queries/GetBookingStatistics`:
     - Added `DateTime? StartDate` and `DateTime? EndDate` for date range filtering
@@ -79,6 +96,11 @@
     - Called repository method and returned statistics
 
 25. Implemented `GetStatisticsAsync` in `BookingRepository.cs`:
+    - Used PostgreSQL aggregation functions: `COUNT(*) FILTER (WHERE Status = ...)`, `GROUP BY`, `DATE_TRUNC('day', StartTime)`
+    - Counted bookings by status
+    - Found most booked resource with JOIN and COUNT
+    - Calculated bookings per day for trend analysis
+    - Example query:
 
 26. Updated `BookingsController`:
     - Added `[HttpGet("statistics")]` endpoint
@@ -86,62 +108,65 @@
 
 ## Rate Limiting - Step 5: Add Rate Limiting Middleware
 
-29. Installed AspNetCoreRateLimit package in API project:
+27. Installed AspNetCoreRateLimit package in API project - `dotnet add package AspNetCoreRateLimit`
 
-30. Configured rate limiting in `appsettings.json`:
+28. Configured rate limiting in `appsettings.json`:
 
-31. Updated `Program.cs` imports:
+29. Updated `Program.cs` imports:
     - Added `using AspNetCoreRateLimit;`
 
-32. Registered rate limiting services in `Program.cs`:
+30. Registered rate limiting services in `Program.cs`:
 
-33. Added rate limiting middleware to pipeline in `Program.cs`:
+31. Added rate limiting middleware to pipeline in `Program.cs`:
 
 ## Refresh Token Security - Step 6: Implement RefreshToken Mechanism
 
-34. Created `RefreshToken` entity in `Domain/Entities`:
+32. Created `RefreshToken` entity in `Domain/Entities`:
     - Properties: `Id`, `Token`, `UserId`, `TenantId`, `ExpiresAt`, `CreatedAt`, `RevokedAt`, `ReplacedByToken`, `IsExpired`, `IsRevoked`, `IsActive`
 
-35. Updated `AuthResult` DTO to include `RefreshToken` property
+33. Updated `AuthResult` DTO to include `RefreshToken` property
 
-36. Created RefreshToken DTOs in `Application/Features/Authentication/DTOs`:
+34. Created RefreshToken DTOs in `Application/Features/Authentication/DTOs`:
     - `RefreshTokenRequest` (contains `RefreshToken` string)
     - `RefreshTokenResponse` (contains new `Token` and `RefreshToken`)
 
-37. Created `RefreshAccessTokenCommand` in `Application/Features/Authentication/Commands/RefreshToken`:
+35. Created `RefreshAccessTokenCommand` in `Application/Features/Authentication/Commands/RefreshToken`:
     - Command, Handler, Validator (validates token is not empty)
 
-38. Created `IRefreshTokenRepository` in `Application/Common/Interfaces`:
+36. Created `IRefreshTokenRepository` in `Application/Common/Interfaces`:
     - `Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken)`
     - `Task AddAsync(RefreshToken refreshToken, CancellationToken cancellationToken)`
     - `Task RevokeAsync(Guid id, string replacedByToken, CancellationToken cancellationToken)`
 
-39. Updated `IJwtTokenService` interface:
+37. Updated `IJwtTokenService` interface:
     - Added `string GenerateRefreshToken()`
     - Kept existing `string GenerateJwtToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles)`
 
-40. Updated `JwtTokenService` implementation:
+38. Updated `JwtTokenService` implementation:
 
-41. Implemented `RefreshTokenRepository` in `Infrastructure/Repositories`:
+39. Implemented `RefreshTokenRepository` in `Infrastructure/Repositories`:
     - Used Dapper for CRUD operations
     - Implemented token rotation logic (revoke old token when new one is generated)
 
-42. Updated `LoginCommandHandler` to generate and store refresh token:
+40. Updated `LoginCommandHandler` to generate and store refresh token:
 
-43. Implemented `RefreshAccessTokenCommandHandler`:
+41. Implemented `RefreshAccessTokenCommandHandler`:
     - Validate refresh token exists and is active
     - Generate new JWT and refresh token
     - Revoke old refresh token (set `RevokedAt`, `ReplacedByToken`)
     - Store new refresh token
     - Return new tokens
 
-44. Added refresh endpoint to `AuthController`:
+42. Added refresh endpoint to `AuthController`:
 
-45. Created database migration `0007_CreateRefreshTokensTable.sql`
+43. Created database migration `0007_CreateRefreshTokensTable.sql`:
 
-46. Registered `IRefreshTokenRepository` in DI container (`Program.cs`):
+44. Registered `IRefreshTokenRepository` in DI container (`Program.cs`):
 
-47. Tested refresh token flow:
+45. Migration execution:
+    - Started API → DbUp applied migration `0007_CreateRefreshTokensTable.sql` ✅
+
+46. Tested refresh token flow:
     - Login: Received access token + refresh token ✅
     - Refresh: Used refresh token → Got new access token + new refresh token ✅
     - Token rotation: Old refresh token marked as revoked in database, `ReplacedByToken` set ✅
