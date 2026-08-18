@@ -96,8 +96,8 @@ public record GetAllBookingsQuery : IRequest<PagedResult<BookingDto>>
     public Guid? UserId { get; init; }           // Optional filter
     public DateTime? StartDate { get; init; }    // Optional filter
     public DateTime? EndDate { get; init; }      // Optional filter
-    public string? SortBy { get; init; } = "StartTime";
-    public string? SortOrder { get; init; } = "asc";
+    public string? OrderBy { get; init; } = "StartTime";
+    public bool Descending { get; init; } = false;
 }
 ```
 
@@ -112,8 +112,8 @@ public async Task<PagedResult<Booking>> GetPagedAsync(
     Guid? userId = null,
     DateTime? startDate = null,
     DateTime? endDate = null,
-    string sortBy = "StartTime",
-    string sortOrder = "asc",
+    string orderBy = "StartTime",
+    bool descending = false,
     CancellationToken cancellationToken = default)
 {
     // Base WHERE clause (always filter by tenant + soft delete)
@@ -135,16 +135,10 @@ public async Task<PagedResult<Booking>> GetPagedAsync(
     if (endDate.HasValue)
         whereClause += " AND b.EndTime <= @EndDate";
 
-    // Dynamic ORDER BY
-    var orderByColumn = sortBy?.ToLower() switch
-    {
-        "title" => "b.Title",
-        "resource" => "r.Name",
-        "status" => "b.Status",
-        _ => "b.StartTime"
-    };
-
-    var orderDirection = sortOrder?.ToLower() == "desc" ? "DESC" : "ASC";
+    // Dynamic ORDER BY (with column whitelist for security)
+    var validColumns = new[] { "StartTime", "EndTime", "CreatedAt", "Status", "Title" };
+    var sanitizedOrderBy = validColumns.Contains(orderBy) ? orderBy : "StartTime";
+    var orderDirection = descending ? "DESC" : "ASC";
 
     // Build final SQL
     var sql = $@"
@@ -153,7 +147,7 @@ public async Task<PagedResult<Booking>> GetPagedAsync(
         JOIN Resources r ON b.ResourceId = r.Id
         JOIN Users u ON b.UserId = u.Id
         {whereClause}
-        ORDER BY {orderByColumn} {orderDirection}
+        ORDER BY {sanitizedOrderBy} {orderDirection}
         LIMIT @PageSize OFFSET @Offset";
 
     // Dapper parameters (only includes non-null values)
@@ -191,7 +185,7 @@ public async Task<PagedResult<Booking>> GetPagedAsync(
 - **Maintainability**: One query method handles all filter combinations
 - **Performance**: Only adds WHERE conditions when filters are provided
 - **SQL Injection Safe**: Uses parameterized queries with Dapper
-- **Type Safety**: Enum for `sortBy` validation in FluentValidation
+- **Type Safety**: Column whitelist for `OrderBy` validation in FluentValidation
 
 **Validation:**
 
@@ -203,13 +197,9 @@ public class GetAllBookingsQueryValidator : AbstractValidator<GetAllBookingsQuer
         RuleFor(x => x.PageNumber).GreaterThan(0);
         RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
 
-        RuleFor(x => x.SortBy)
-            .Must(sb => sb == null || new[] { "StartTime", "Title", "Resource", "Status" }.Contains(sb))
-            .WithMessage("SortBy must be one of: StartTime, Title, Resource, Status");
-
-        RuleFor(x => x.SortOrder)
-            .Must(so => so == null || new[] { "asc", "desc" }.Contains(so.ToLower()))
-            .WithMessage("SortOrder must be 'asc' or 'desc'");
+        RuleFor(x => x.OrderBy)
+            .Must(ob => string.IsNullOrEmpty(ob) || new[] { "StartTime", "EndTime", "CreatedAt", "Status", "Title" }.Contains(ob))
+            .WithMessage("OrderBy must be one of: StartTime, EndTime, CreatedAt, Status, Title");
 
         RuleFor(x => x)
             .Must(x => !x.StartDate.HasValue || !x.EndDate.HasValue || x.StartDate < x.EndDate)
