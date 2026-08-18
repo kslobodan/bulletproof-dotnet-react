@@ -72,7 +72,7 @@
 18. Updated `GetAllBookingsQueryHandler`:
     - Passed filter parameters to repository (`request.OrderBy ?? "StartTime"`, `request.Descending`)
 
-19. Created `GetAllBookingsQueryValidator.cs`:
+19. Updated `GetAllBookingsQueryValidator.cs`:
     - Validated `PageNumber >= 1`
     - Validated `PageSize >= 1 AND PageSize <= 100`
     - Validated `OrderBy` is one of: "StartTime", "EndTime", "CreatedAt", "Status", "Title"
@@ -80,93 +80,64 @@
 
 ## Statistics Endpoints - Step 4: Create Booking Statistics
 
-20. Created `BookingStatisticsDto` in `Application/Features/Bookings/DTOs/`:
-    - Properties: `TotalBookings`, `PendingBookings`, `ConfirmedBookings`, `CompletedBookings`, `CancelledBookings`, `MostBookedResourceId`, `MostBookedResourceName`, `BookingsPerDay` (dictionary)
+20. Created `GetBookingStatisticsQuery` in `Application/Features/Bookings/Queries/GetBookingStatistics`
 
-21. Created `GetBookingStatisticsQuery` in `Application/Features/Bookings/Queries/GetBookingStatistics`:
-    - Added `DateTime? StartDate` and `DateTime? EndDate` for date range filtering
-
-22. Created `GetBookingStatisticsQueryValidator`:
+21. Created `GetBookingStatisticsQueryValidator`:
     - Validated `StartDate < EndDate` if both provided
 
-23. Updated `IBookingRepository` interface:
+22. Updated `IBookingRepository` interface:
     - Added `Task<BookingStatisticsDto> GetStatisticsAsync(Guid tenantId, DateTime? startDate, DateTime? endDate, CancellationToken cancellationToken);`
 
-24. Created `GetBookingStatisticsQueryHandler`:
-    - Called repository method and returned statistics
+23. Created `GetBookingStatisticsQueryHandler`
 
-25. Implemented `GetStatisticsAsync` in `BookingRepository.cs`:
-    - Used PostgreSQL aggregation functions: `COUNT(*) FILTER (WHERE Status = ...)`, `GROUP BY`, `DATE_TRUNC('day', StartTime)`
-    - Counted bookings by status
-    - Found most booked resource with JOIN and COUNT
-    - Calculated bookings per day for trend analysis
-    - Example query:
+24. Implemented `GetStatisticsAsync` in `BookingRepository.cs`
 
-26. Updated `BookingsController`:
+25. Updated `BookingsController`:
     - Added `[HttpGet("statistics")]` endpoint
     - Authorized with `[Authorize]` (any authenticated user can view their tenant's statistics)
 
 ## Rate Limiting - Step 5: Add Rate Limiting Middleware
 
-27. Installed AspNetCoreRateLimit package in API project - `dotnet add package AspNetCoreRateLimit`
+26. Installed AspNetCoreRateLimit package in API project - `dotnet add package AspNetCoreRateLimit`
 
-28. Configured rate limiting in `appsettings.json`:
+27. Configured rate limiting in `appsettings.json`:
 
-29. Updated `Program.cs` imports:
-    - Added `using AspNetCoreRateLimit;`
-
-30. Registered rate limiting services in `Program.cs`:
-
-31. Added rate limiting middleware to pipeline in `Program.cs`:
+28. Updated `Program.cs` imports:
+    - Registered rate limiting services
+    - Added rate limiting middleware to pipeline
 
 ## Refresh Token Security - Step 6: Implement RefreshToken Mechanism
 
-32. Created `RefreshToken` entity in `Domain/Entities`:
-    - Properties: `Id`, `Token`, `UserId`, `TenantId`, `ExpiresAt`, `CreatedAt`, `RevokedAt`, `ReplacedByToken`, `IsExpired`, `IsRevoked`, `IsActive`
+29. Created `RefreshToken` entity in `Domain/Entities`
 
-33. Updated `AuthResult` DTO to include `RefreshToken` property
+30. Updated `AuthResult` DTO to include `RefreshToken` property
 
-34. Created RefreshToken DTOs in `Application/Features/Authentication/DTOs`:
-    - `RefreshTokenRequest` (contains `RefreshToken` string)
-    - `RefreshTokenResponse` (contains new `Token` and `RefreshToken`)
+31. Created RefreshToken DTOs in `Application/Features/Authentication/DTOs`
 
-35. Created `RefreshAccessTokenCommand` in `Application/Features/Authentication/Commands/RefreshToken`:
-    - Command, Handler, Validator (validates token is not empty)
+32. Created `RefreshAccessTokenCommand` in `Application/Features/Authentication/Commands/RefreshToken`:
+    - Command, Handler, Validator
 
-36. Created `IRefreshTokenRepository` in `Application/Common/Interfaces`:
-    - `Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken)`
-    - `Task AddAsync(RefreshToken refreshToken, CancellationToken cancellationToken)`
-    - `Task RevokeAsync(Guid id, string replacedByToken, CancellationToken cancellationToken)`
+33. Created `IRefreshTokenRepository` in `Application/Common/Interfaces`
 
-37. Updated `IJwtTokenService` interface:
+34. Updated `IJwtTokenService` interface:
     - Added `string GenerateRefreshToken()`
     - Kept existing `string GenerateJwtToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles)`
 
-38. Updated `JwtTokenService` implementation:
+35. Updated `JwtTokenService` implementation
 
-39. Implemented `RefreshTokenRepository` in `Infrastructure/Repositories`:
-    - Used Dapper for CRUD operations
-    - Implemented token rotation logic (revoke old token when new one is generated)
+36. Implemented `RefreshTokenRepository` in `Infrastructure/Repositories`
 
-40. Updated `LoginCommandHandler` to generate and store refresh token:
+37. Updated `LoginCommandHandler` to generate and store refresh token
 
-41. Implemented `RefreshAccessTokenCommandHandler`:
-    - Validate refresh token exists and is active
-    - Generate new JWT and refresh token
-    - Revoke old refresh token (set `RevokedAt`, `ReplacedByToken`)
-    - Store new refresh token
-    - Return new tokens
+38. Implemented `RefreshAccessTokenCommandHandler`
 
-42. Added refresh endpoint to `AuthController`:
+39. Added refresh endpoint to `AuthController`
 
-43. Created database migration `0007_CreateRefreshTokensTable.sql`:
+40. Created database migration `0007_CreateRefreshTokensTable.sql`:
 
-44. Registered `IRefreshTokenRepository` in DI container (`Program.cs`):
+41. Registered `IRefreshTokenRepository` in DI container (`Program.cs`):
 
-45. Migration execution:
-    - Started API → DbUp applied migration `0007_CreateRefreshTokensTable.sql` ✅
-
-46. Tested refresh token flow:
+42. Tested refresh token flow:
     - Login: Received access token + refresh token ✅
     - Refresh: Used refresh token → Got new access token + new refresh token ✅
     - Token rotation: Old refresh token marked as revoked in database, `ReplacedByToken` set ✅

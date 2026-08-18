@@ -864,4 +864,15 @@ localStorage.setItem('refreshToken', refreshToken);
 
 ---
 
+## 🎯 Key Takeaways
+
+1. **Admin Audit Endpoints** enable managers to monitor system activity through paginated, filterable audit logs
+2. **Soft Delete Pattern** preserves data for recovery and compliance while maintaining logical deletion
+3. **Dynamic Filtering** with column whitelisting prevents SQL injection while enabling flexible queries
+4. **Database-Level Aggregation** is orders of magnitude faster than application-level aggregation (167x in tests)
+5. **Rate Limiting** protects APIs from abuse and DoS attacks with minimal performance overhead
+6. **RefreshToken Rotation** combines security (single-use tokens) and UX (automatic token refresh) through stateful validation
+
+---
+
 [← Previous: Day 6](./Day6-Advanced.md) | [Back to Index](./README.md) | [Next: Day 8 →](./Day8-Testing.md)
